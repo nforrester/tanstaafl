@@ -61,9 +61,29 @@
 				(= ry -16)
 				(= rz 8))))))
 
+(deftest test-sub
+	(let
+			((one (make-instance 'vector-3))
+			(two (make-instance 'vector-3)))
+		(with-slots ((ox x) (oy y) (oz z)) one
+		(with-slots ((tx x) (ty y) (tz z)) two
+			(setf ox 4)
+			(setf tx 7)
+			(setf oy 2)
+			(setf ty 6)
+			(setf oz 10)
+			(setf tz -3)
+
+			(with-slots ((rx x) (ry y) (rz z)) (sub one two)
+			(and
+				(= rx -3)
+				(= ry -4)
+				(= rz 13)))))))
+
 (deftest test-vectors
 	(test-add)
-	(test-mult))
+	(test-mult)
+	(test-sub))
 
 (deftest unit-tests
 	(test-vectors))
