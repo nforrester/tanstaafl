@@ -44,7 +44,7 @@
 
 			(with-slots ((rx x) (ry y) (rz z)) (add one two)
 			(and
-				(= rx 1)
+				(= rx 11)
 				(= ry 8)
 				(= rz 7)))))))
 
