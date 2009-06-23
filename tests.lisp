@@ -80,10 +80,19 @@
 				(= ry -4)
 				(= rz 13)))))))
 
+(deftest test-magnitude
+	(let ((vec (make-instance 'vector-3)))
+		(with-slots (x y z) vec
+			(setf x 2)
+			(setf y 8)
+			(setf z -4))
+		(= 916515 (floor (* 100000 (magnitude vec))))))
+
 (deftest test-vectors
 	(test-add)
 	(test-mult)
-	(test-sub))
+	(test-sub)
+	(test-magnitude))
 
 (deftest unit-tests
 	(test-vectors))

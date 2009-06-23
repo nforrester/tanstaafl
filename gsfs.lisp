@@ -36,7 +36,17 @@
 (defmethod sub ((one vector-3) (two vector-3))
 	(add one (mult -1 two)))
 
-(defvar *G* 5.9e-11) ; Gravitational constant
+(defgeneric magnitude (vec)
+	(:documentation "magnitude of a vector"))
+
+(defmethod magnitude ((vec vector-3))
+	(with-slots (x y z) vec
+		(expt (+
+			(expt x 2)
+			(expt y 2)
+			(expt z 2)) 0.5)))
+
+(defvar *G* 6.673e-11 (:documentation "Gravitational constant"))
 
 (defclass space-object ()
 	((mass :documentation "Mass measured in kg.")
@@ -46,3 +56,14 @@
 		"velocity measured in m/s, cartesian, as a vector-3")
 	(acc :documentation
 		"accelleration measured in m/s/s, cartesian, as a vector-3")))
+
+(defgeneric compute-gravity (obj all-objs)
+	(:documentation "compute gravity on obj due to all-objs."))
+
+;(defmethod compute-gravity ((obj space-object) all-objs)
+;	(loop for other-obj in all-objs do
+;		(if (not (eq obj other-obj))
+;			(setf acc (add acc
+;				(/
+;					(* *G* (slot-value other-obj 'mass))
+;					(magnitude 
