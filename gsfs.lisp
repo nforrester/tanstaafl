@@ -60,10 +60,20 @@
 (defgeneric compute-gravity (obj all-objs)
 	(:documentation "compute gravity on obj due to all-objs."))
 
-;(defmethod compute-gravity ((obj space-object) all-objs)
-;	(loop for other-obj in all-objs do
-;		(if (not (eq obj other-obj))
-;			(setf acc (add acc
-;				(/
-;					(* *G* (slot-value other-obj 'mass))
-;					(magnitude 
+(defmethod compute-gravity ((obj space-object) all-objs)
+	(loop for other-obj in all-objs do
+		(unless (eq obj other-obj)
+			(let*
+					((rel-pos (sub
+						(slot-value other-obj 'pos)
+						(slot-value obj 'pos)))
+					(distance (magnitude rel-pos)))
+				(unless (= 0.0 distance)
+					(setf (slot-value obj 'acc) (add (slot-value obj 'acc)
+						(mult
+							(/ ; G * m / r^2
+								(* *G* (slot-value other-obj 'mass))
+								(expt distance 2))
+							(mult ; r hat
+								(/ 1 distance)
+								rel-pos)))))))))

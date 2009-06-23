@@ -94,7 +94,54 @@
 	(test-sub)
 	(test-magnitude))
 
+(deftest test-gravity
+	(let*
+			((ob1 (make-instance 'space-object))
+			(ob2 (make-instance 'space-object))
+			(ob3 (make-instance 'space-object))
+			(all-objs (list ob1 ob2 ob3)))
+		(with-slots (mass pos) ob1
+			(setf mass 50.0)
+			(setf pos (make-instance 'vector-3))
+			(with-slots (x y z) pos
+				(setf x 23.0)
+				(setf y 4.0)
+				(setf z -16.0)))
+		(with-slots (mass pos acc) ob2
+			(setf mass 20.0)
+			(setf pos (make-instance 'vector-3))
+			(with-slots (x y z) pos
+				(setf x 22.0)
+				(setf y 40.0)
+				(setf z 0.0))
+			(setf acc (make-instance 'vector-3))
+			(with-slots (x y z) acc
+				(setf x 0.0)
+				(setf y 0.0)
+				(setf z 0.0)))
+		(with-slots (mass pos) ob3
+			(setf mass 75.0)
+			(setf pos (make-instance 'vector-3))
+			(with-slots (x y z) pos
+				(setf x -10.0)
+				(setf y -5.0)
+				(setf z 12.0)))
+		(compute-gravity ob2 all-objs)
+		(with-slots (acc) ob2
+			(with-slots (x y z) acc
+				(and
+					(= -8331170 (floor (* 1e19 x)))
+					(= -3210857 (floor (* 1e18 y)))
+					(= -5394134 (floor (* 1e19 z))))))))
+
+(deftest test-physics
+	(test-gravity))
+
+(deftest test-all
+	(test-vectors)
+	(test-physics))
+
 (deftest unit-tests
-	(test-vectors))
+	(test-all))
 
 (unit-tests)
