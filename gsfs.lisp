@@ -5,8 +5,8 @@
 	y
 	z))
 
-(defgeneric add (one two))
-;	:documentation "addition")
+(defgeneric add (one two)
+	(:documentation "addition"))
 
 (defmethod add ((one vector-3) (two vector-3))
 	(with-slots ((ox x) (oy y) (oz z)) one
@@ -18,8 +18,8 @@
 					(setf rz (+ oz tz))
 					result)))))
 
-(defgeneric mult (scalar something))
-;	:documentation "scalar multiplication")
+(defgeneric mult (scalar something)
+	(:documentation "scalar multiplication"))
 
 (defmethod mult (scalar (vec vector-3))
 	(with-slots (x y z) vec
@@ -27,10 +27,11 @@
 			(with-slots ((rx x) (ry y) (rz z)) result
 				(setf rx (* scalar x))
 				(setf ry (* scalar y))
-				(setf rz (* scalar z))))))
+				(setf rz (* scalar z))
+				result))))
 
-(defgeneric sub (one two))
-;	:documentation "subtraction")
+(defgeneric sub (one two)
+	(:documentation "subtraction"))
 
 (defmethod sub ((one vector-3) (two vector-3))
 	(add one (mult -1 two)))

@@ -1,5 +1,7 @@
 (defun report-result (result form)
-	(format t "~:[FAIL~;pass~] ... ~a: ~a~%" result *test-name* form)
+	(if result
+		(format t "pass ... ~a~%" *test-name*)
+		(format t "FAIL ... ~a: ~a~%" *test-name* form))
 	result)
 
 (defmacro my-gensymer ((&rest names) &body forms)
@@ -8,7 +10,8 @@
 (defmacro combine-results (&body forms)
 	(my-gensymer (result)
 		`(let ((,result t))
-			,@(loop for f in forms collect `(unless ,f (setf ,result nil)))
+			,@(loop for f in forms collect
+				`(unless ,f (setf ,result nil)))
 			,result)))
 
 (defmacro check (&body forms)
@@ -41,23 +44,28 @@
 
 			(with-slots ((rx x) (ry y) (rz z)) (add one two)
 			(and
-				(= rx 11)
+				(= rx 1)
 				(= ry 8)
 				(= rz 7)))))))
 
-(deftest test-+
-	(= (+ 1 2) 3)
-	(= (+ 1 2 3) 6)
-	(= (+ -1 -3) -4))
+(deftest test-mult
+	(let ((vec (make-instance 'vector-3)))
+		(with-slots (x y z) vec
+			(setf x 2)
+			(setf y 8)
+			(setf z -4)
 
-(deftest test-*
-	(= (* 1 2) 2)
-	(= (* 1 2 3) 6)
-	(= (* -1 -3) 3))
+			(with-slots ((rx x) (ry y) (rz z)) (mult -2 vec)
+			(and
+				(= rx -4)
+				(= ry -16)
+				(= rz 8))))))
 
-(deftest test-arithmetic
-	(test-+)
-	(test-*))
+(deftest test-vectors
+	(test-add)
+	(test-mult))
 
-(deftest test-math
-	(test-arithmetic))
+(deftest unit-tests
+	(test-vectors))
+
+(unit-tests)
