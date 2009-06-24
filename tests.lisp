@@ -32,7 +32,7 @@
 
 ; end unit test framework
 
-(load "gsfs.lisp")
+(load "physics.lisp")
 
 (deftest test-add
 	(let
