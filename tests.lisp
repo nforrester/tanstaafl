@@ -1,7 +1,7 @@
-(defun report-result (result form)
+(defun report-result (result)
 	(if result
 		(format t "pass ... ~a~%" *test-name*)
-		(format t "FAIL ... ~a: ~a~%" *test-name* form))
+		(format t "FAIL ... ~a~%" *test-name*))
 	result)
 
 (defmacro my-gensymer ((&rest names) &body forms)
@@ -14,9 +14,14 @@
 				`(unless ,f (setf ,result nil)))
 			,result)))
 
+;(defmacro check (&body forms)
+;	`(combine-results
+;		,@(loop for f in forms collect `(report-result ,f))))
+;
 (defmacro check (&body forms)
-	`(combine-results
-		,@(loop for f in forms collect `(report-result ,f ',f))))
+	`(report-result
+		(combine-results
+			,@forms)))
 
 (defmacro deftest (name &rest tests)
 	`(defun ,name ()
@@ -134,8 +139,50 @@
 					(= -3210857 (floor (* 1e18 y)))
 					(= -5394134 (floor (* 1e19 z))))))))
 
+(deftest test-integrate-acc-to-vel
+	(let ((ob (make-instance 'space-object)))
+		(with-slots (acc vel) ob
+			(setf acc (make-instance 'vector-3))
+			(with-slots (x y z) acc
+				(setf x 6.0)
+				(setf y 4.0)
+				(setf z 1.5))
+			(setf vel (make-instance 'vector-3))
+			(with-slots (x y z) vel
+				(setf x 2.5)
+				(setf y 1.0)
+				(setf z -8.7))
+			(integrate-acc-to-vel ob 0.1)
+			(with-slots (x y z) vel
+				(and
+					(=  310 (floor (* 100 x)))
+					(=  140 (floor (* 100 y)))
+					(= -855 (floor (* 100 z))))))))
+
+(deftest test-integrate-vel-to-pos
+	(let ((ob (make-instance 'space-object)))
+		(with-slots (vel pos) ob
+			(setf vel (make-instance 'vector-3))
+			(with-slots (x y z) vel
+				(setf x 6.0)
+				(setf y 4.0)
+				(setf z 1.5))
+			(setf pos (make-instance 'vector-3))
+			(with-slots (x y z) pos
+				(setf x 2.5)
+				(setf y 1.0)
+				(setf z -8.7))
+			(integrate-vel-to-pos ob 0.1)
+			(with-slots (x y z) pos
+				(and
+					(=  310 (floor (* 100 x)))
+					(=  140 (floor (* 100 y)))
+					(= -855 (floor (* 100 z))))))))
+
 (deftest test-physics
-	(test-gravity))
+	(test-gravity)
+	(test-integrate-acc-to-vel)
+	(test-integrate-vel-to-pos))
 
 (deftest test-all
 	(test-vectors)

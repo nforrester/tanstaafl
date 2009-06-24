@@ -5,6 +5,13 @@
 	y
 	z))
 
+(defgeneric print-vec (vec)
+	(:documentation "print."))
+
+(defmethod print-vec ((vec vector-3))
+	(with-slots (x y z) vec
+		(format t "(~a ~a ~a)~%" x y z)))
+
 (defgeneric add (one two)
 	(:documentation "addition"))
 
@@ -55,7 +62,7 @@
 	(vel :documentation
 		"velocity measured in m/s, cartesian, as a vector-3")
 	(acc :documentation
-		"accelleration measured in m/s/s, cartesian, as a vector-3")))
+		"acceleration measured in m/s/s, cartesian, as a vector-3")))
 
 (defgeneric compute-gravity (obj all-objs)
 	(:documentation "compute gravity on obj due to all-objs."))
@@ -77,3 +84,17 @@
 							(mult ; r hat
 								(/ 1 distance)
 								rel-pos)))))))))
+
+(defgeneric integrate-acc-to-vel (obj dt)
+	(:documentation "integrate acceleration to get velocity."))
+
+(defmethod integrate-acc-to-vel ((obj space-object) dt)
+	(with-slots (vel acc) obj
+		(setf vel (add vel (mult dt acc)))))
+
+(defgeneric integrate-vel-to-pos (obj dt)
+	(:documentation "integrate velocity to get position."))
+
+(defmethod integrate-vel-to-pos ((obj space-object) dt)
+	(with-slots (pos vel) obj
+		(setf pos (add pos (mult dt vel)))))
