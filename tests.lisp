@@ -1,3 +1,5 @@
+(defvar *test-name* nil)
+
 (defun report-result (result)
 	(if result
 		(format t "pass ... ~a~%" *test-name*)
@@ -14,10 +16,6 @@
 				`(unless ,f (setf ,result nil)))
 			,result)))
 
-;(defmacro check (&body forms)
-;	`(combine-results
-;		,@(loop for f in forms collect `(report-result ,f))))
-;
 (defmacro check (&body forms)
 	`(report-result
 		(combine-results
@@ -27,8 +25,6 @@
 	`(defun ,name ()
 		(let ((*test-name* (append *test-name* (list ',name))))
 			(check ,@tests))))
-
-(defvar *test-name* nil)
 
 ; end unit test framework
 

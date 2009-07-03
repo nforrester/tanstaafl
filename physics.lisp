@@ -1,4 +1,4 @@
-; GNU Space Flight Simulator
+; YINO = YINO it's not Orbiter
 
 (defclass vector-3 ()
 	(x
