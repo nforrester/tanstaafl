@@ -1,11 +1,10 @@
 #include <X11/Xlib.h>
 #include <GL/glx.h>
-#include <GL/glut.h>
+#include <GL/freeglut.h>
+#include <pthread.h>
 #include <iostream>
 
 using namespace std;
-
-#define SIZE_OF_UNIVERSE 2
 
 GLfloat field_of_view = 40.0;
 
@@ -17,6 +16,8 @@ public:
 	GLfloat  shininess;
 	GLfloat* emission;
 	void set(GLenum face);
+	material();
+	~material();
 };
 
 void material::set(GLenum face){
@@ -27,13 +28,65 @@ void material::set(GLenum face){
 	glMaterialfv(face, GL_EMISSION,       emission);
 }
 
+material::material(){
+	shininess = 0.0;
+	ambient = new GLfloat[4];
+	diffuse = new GLfloat[4];
+	specular = new GLfloat[4];
+	emission = new GLfloat[4];
+
+	ambient[0] = 0.2;
+	ambient[1] = 0.2;
+	ambient[2] = 0.2;
+	ambient[3] = 1.0;
+
+	diffuse[0] = 0.8;
+	diffuse[1] = 0.8;
+	diffuse[2] = 0.8;
+	diffuse[3] = 1.0;
+
+	specular[0] = 0.0;
+	specular[1] = 0.0;
+	specular[2] = 0.0;
+	specular[3] = 1.0;
+
+	emission[0] = 0.0;
+	emission[1] = 0.0;
+	emission[2] = 0.0;
+	emission[3] = 1.0;
+}
+
+material::~material(){
+	delete[] ambient;
+	delete[] diffuse;
+	delete[] specular;
+	delete[] emission;
+}
+
 class space_object{
 public:
+	space_object* next; // Arrange them as a singly linked list.
 	GLfloat* pos;
 	GLfloat radius;
 	material mat;
+	space_object();
+	~space_object();
 	void draw();
 };
+
+space_object::space_object(){
+	next = NULL;
+	radius = 1.0;
+	pos = new GLfloat[3];
+	pos[0] = 0.0;
+	pos[1] = 0.0;
+	pos[2] = 0.0;
+}
+
+space_object::~space_object(){
+	delete[] pos;
+	delete next;
+}
 
 void space_object::draw(){
 	glPushMatrix();
@@ -43,7 +96,50 @@ void space_object::draw(){
 	glPopMatrix();
 }
 
-space_object universe[SIZE_OF_UNIVERSE];
+class universe{
+public:
+	universe();
+	~universe();
+
+	universe* next; // a linked list of previous universes, waiting to be garbage collected.
+
+	space_object* first_object; // linked list of the objects in the universe
+
+	pthread_mutex_t mutex;
+	void lock();
+	void unlock();
+	int trylock();
+};
+
+universe::universe(){
+	next = NULL;
+	first_object = NULL;
+	pthread_mutex_init(&mutex, NULL);
+}
+
+universe::~universe(){
+	delete first_object;
+	pthread_mutex_destroy(&mutex);
+}
+
+void universe::lock(){
+cout << "universal lock?\n";
+	pthread_mutex_lock(&mutex);
+cout << "universal lock!\n";
+}
+
+void universe::unlock(){
+cout << "universal unlock?\n";
+	pthread_mutex_unlock(&mutex);
+cout << "universal unlock!\n";
+}
+
+int universe::trylock(){
+	return pthread_mutex_trylock(&mutex);
+}
+
+universe* now; // singly linked list
+pthread_mutex_t now_mutex; // to prevent accidents with garbage collection, makes sure that the definition of now doesn't change at a bad moment.
 
 void initialize_window(int argc, char **argv){
 	glutInitWindowPosition(0, 0);
@@ -62,13 +158,18 @@ void initialize_gl_state(){
 }
 
 void reshape(int width, int height){
+cout << "reshape1\n";
 	glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(field_of_view, ((float) width / (float) height), .1, 1000);
+cout << "reshape2\n";
+	glutPostRedisplay();
+cout << "reshape3\n";
 }
 
 void display(){
+cout << "sup!\n";
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(
@@ -76,9 +177,32 @@ void display(){
 		0.0, 0.0, 0.0,
 		0.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	for(int i = 0; i < SIZE_OF_UNIVERSE; i++){
-		universe[i].draw();
+
+cout << "lock?\n";
+	pthread_mutex_lock(&now_mutex);
+cout << "lock!\n";
+	if(now == NULL){
+cout << "unlocka?\n";
+		pthread_mutex_unlock(&now_mutex);
+cout << "unlocka!\n";
+	}else{
+cout << "...\n";
+		universe* universe_to_draw = now;
+		universe_to_draw->lock();
+cout << "unlocker?\n";
+		pthread_mutex_unlock(&now_mutex);
+cout << "unlocker!\n";
+
+		space_object *obj = universe_to_draw->first_object;
+		while(obj != NULL){
+			obj->draw();
+			obj = obj->next;
+cout << "loopy!\n";
+		}
+		universe_to_draw->unlock();
 	}
+
+cout << "display update!\n";
 
 	glutSwapBuffers();
 }
@@ -87,62 +211,145 @@ void keyboard(unsigned char key, int x, int y){
 }
 
 void mouse(int button, int state, int x, int y){
+/*	static GLdouble real_x = 0.0, real_y = 0.0, real_z = 0.0;
+
+	real_x -= 1.0;
+	real_y -= 1.1;
+	real_z -= 1.2;
+
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
+		space_object* obj;
+		obj = new space_object;
+
+		obj->pos[0] = real_x;
+		obj->pos[1] = real_y;
+		obj->pos[2] = real_z;
+
+		obj->next = universe;
+		universe = obj;
+		glutPostRedisplay();
+	}
+	if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN){
+		space_object* obj;
+		while(universe != NULL){
+			real_x = 0.0;
+			real_y = 0.0;
+			real_z = 0.0;
+			obj = universe;
+			universe = obj->next;
+			delete obj;
+		}
+		glutPostRedisplay();
+	}*/
+}
+
+pthread_cond_t collect_garbage_now;
+pthread_mutex_t collect_garbage_now_mutex;
+
+bool new_timestep;
+
+void *physics_io(void *no_arg){
+	basic_string<char> str;
+
+	universe* next_universe;
+	space_object* new_object;
+
+	/*****************************************************************
+	 * Example timestep:
+	 *
+	 * begin-timestep
+	 * begin-object
+	 * pos 0 1 5.3
+	 * radius 4.1
+	 * end-object
+	 * end-timestep
+	 *****************************************************************/
+
+	while(!cin.eof()){
+		getline(cin, str, '\n');
+		if(str == "begin-timestep"){
+			next_universe = new universe();
+cout << "recognized bt\n";
+			while(str != "end-timestep"){
+				getline(cin, str, '\n');
+				if(str == "begin-object"){
+cout << "recognized bo\n";
+					new_object = new space_object();
+					new_object->next = next_universe->first_object;
+					next_universe->first_object = new_object;
+					while(str != "end-object"){
+						cin >> str;
+						if(str == "pos"){
+cout << "recognized pos\n";
+							cin >> new_object->pos[0];
+cout << new_object->pos[0] << endl;
+							cin >> new_object->pos[1];
+cout << new_object->pos[1] << endl;
+							cin >> new_object->pos[2];
+cout << new_object->pos[2] << endl;
+						}
+						if(str == "radius"){
+cout << "recognized radius\n";
+							cin >> new_object->radius;
+cout << new_object->radius << endl;
+						}
+					}
+cout << "recognized eo\n";
+				}
+			}
+cout << "recognized et\n";
+
+			next_universe->next = now;
+			pthread_mutex_lock(&now_mutex);
+			now = next_universe;
+			pthread_mutex_unlock(&now_mutex);
+
+			new_timestep = 1;
+
+			pthread_mutex_lock(&collect_garbage_now_mutex);
+			pthread_cond_signal(&collect_garbage_now);
+			pthread_mutex_unlock(&collect_garbage_now_mutex);
+		}
+	}
+}
+
+void *garbage_collector(void *no_arg){
+	universe* condemned;
+
+	while(1){
+cout << "it's monday\n";
+		pthread_mutex_lock(&collect_garbage_now_mutex);
+		pthread_cond_wait(&collect_garbage_now, &collect_garbage_now_mutex);
+		pthread_mutex_unlock(&collect_garbage_now_mutex);
+
+cout << "finally\n";
+		while(now->next != NULL){
+cout << "here's the garbage\n";
+			pthread_mutex_lock(&now_mutex);
+			condemned = now->next;
+			condemned->lock();
+			now->next = now->next->next;
+			pthread_mutex_unlock(&now_mutex);
+			delete condemned;
+cout << "got it\n";
+		}
+	}
 }
 
 int main (int argc, char **argv){
-	universe[0].radius = 1.0;
-	universe[0].pos = new GLfloat[3];
-	universe[0].pos[0] = 0.0;
-	universe[0].pos[1] = 0.0;
-	universe[0].pos[2] = 0.0;
-	universe[0].mat.ambient = new GLfloat[4];
-	universe[0].mat.ambient[0] = 0.2;
-	universe[0].mat.ambient[1] = 0.2;
-	universe[0].mat.ambient[2] = 0.2;
-	universe[0].mat.ambient[3] = 1.0;
-	universe[0].mat.diffuse = new GLfloat[4];
-	universe[0].mat.diffuse[0] = 0.8;
-	universe[0].mat.diffuse[1] = 0.8;
-	universe[0].mat.diffuse[2] = 0.8;
-	universe[0].mat.diffuse[3] = 1.0;
-	universe[0].mat.specular = new GLfloat[4];
-	universe[0].mat.specular[0] = 0.0;
-	universe[0].mat.specular[1] = 0.0;
-	universe[0].mat.specular[2] = 0.0;
-	universe[0].mat.specular[3] = 1.0;
-	universe[0].mat.shininess = 0.0;
-	universe[0].mat.emission = new GLfloat[4];
-	universe[0].mat.emission[0] = 0.0;
-	universe[0].mat.emission[1] = 0.0;
-	universe[0].mat.emission[2] = 0.0;
-	universe[0].mat.emission[3] = 1.0;
+	pthread_t physics_io_thread;
+	pthread_t garbage_collector_thread;
 
-	universe[1].radius = 1.0;
-	universe[1].pos = new GLfloat[3];
-	universe[1].pos[0] = 3.0;
-	universe[1].pos[1] = 0.0;
-	universe[1].pos[2] = 0.0;
-	universe[1].mat.ambient = new GLfloat[4];
-	universe[1].mat.ambient[0] = 0.2;
-	universe[1].mat.ambient[1] = 0.2;
-	universe[1].mat.ambient[2] = 0.2;
-	universe[1].mat.ambient[3] = 1.0;
-	universe[1].mat.diffuse = new GLfloat[4];
-	universe[1].mat.diffuse[0] = 0.8;
-	universe[1].mat.diffuse[1] = 0.8;
-	universe[1].mat.diffuse[2] = 0.8;
-	universe[1].mat.diffuse[3] = 1.0;
-	universe[1].mat.specular = new GLfloat[4];
-	universe[1].mat.specular[0] = 0.0;
-	universe[1].mat.specular[1] = 0.0;
-	universe[1].mat.specular[2] = 0.0;
-	universe[1].mat.specular[3] = 1.0;
-	universe[1].mat.shininess = 0.0;
-	universe[1].mat.emission = new GLfloat[4];
-	universe[1].mat.emission[0] = 0.0;
-	universe[1].mat.emission[1] = 0.0;
-	universe[1].mat.emission[2] = 0.0;
-	universe[1].mat.emission[3] = 1.0;
+	now = NULL;
+
+	new_timestep = 0;
+
+	pthread_cond_init(&collect_garbage_now, NULL);
+	pthread_mutex_init(&collect_garbage_now_mutex, NULL);
+	pthread_mutex_init(&now_mutex, NULL);
+
+	pthread_create(&physics_io_thread, NULL, physics_io, NULL);
+	pthread_create(&garbage_collector_thread, NULL, garbage_collector, NULL);
 
 	initialize_window(argc, argv);
 	initialize_gl_state();
@@ -152,7 +359,14 @@ int main (int argc, char **argv){
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouse);
 
-	glutMainLoop();
+	while(1){
+		glutMainLoopEvent();
+
+		if(new_timestep){
+			new_timestep = 0;
+			glutPostRedisplay();
+		}
+	}
 
 	return 0;
 }
