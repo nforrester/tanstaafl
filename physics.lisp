@@ -13,12 +13,12 @@
 			(setf vz z))
 		vec))
 
-(defgeneric print-vec (vec)
+(defgeneric print-vec (vec out-stream)
 	(:documentation "print."))
 
-(defmethod print-vec ((vec vector-3))
+(defmethod print-vec ((vec vector-3) out-stream)
 	(with-slots (x y z) vec
-		(format t "(~a ~a ~a)~%" x y z)))
+		(format out-stream "(~a ~a ~a)~%" x y z)))
 
 (defgeneric add (one two)
 	(:documentation "addition"))
@@ -106,6 +106,13 @@
 								(/ 1 distance)
 								rel-pos)))))))))
 
+(defgeneric compute-acc (obj all-objs)
+	(:documentation "compute the acceleration on obj, and update acc"))
+
+(defmethod compute-acc ((obj space-object) all-objs)
+	(setf (slot-value obj 'acc) (make-vector-3 0 0 0))
+	(compute-gravity obj all-objs))
+
 (defgeneric integrate-acc-to-vel (obj dt)
 	(:documentation "integrate acceleration to get velocity."))
 
@@ -119,3 +126,41 @@
 (defmethod integrate-vel-to-pos ((obj space-object) dt)
 	(with-slots (pos vel) obj
 		(setf pos (add pos (mult dt vel)))))
+
+(defun timestep (all-objs dt)
+	(loop for obj in all-objs do
+		(compute-acc obj all-objs))
+	(loop for obj in all-objs do
+		(integrate-acc-to-vel obj dt)
+		(integrate-vel-to-pos obj dt)))
+
+(defun print-timestep (all-objs)
+	(format t "begin-timestep~%")
+	(dolist (obj all-objs)
+		(format t "begin-object~%")
+		(with-slots (x y z) (slot-value obj 'pos)
+			(format t "pos ~a ~a ~a" x y z))
+		(format t "radius 1~%")
+		(format t "end-object~%"))
+	(format t "end-timestep~%"))
+
+(defun main-loop (time-acceleration all-objs)
+	(let ((current-time (get-internal-real-time)) prev-time)
+		(loop
+			(setf prev-time current-time)
+			(setf current-time (get-internal-real-time))
+			(timestep all-objs (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
+			(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
+			(print-timestep all-objs))))
+
+(main-loop
+	1
+	(list
+		(make-space-object
+			:mass (/ 4 *G*)
+			:pos (make-vector-3 1 0 0)
+			:vel (make-vector-3 0 0 1))
+		(make-space-object
+			:mass (/ 4 *G*)
+			:pos (make-vector-3 -1 0 0)
+			:vel (make-vector-3 0 0 -1))))

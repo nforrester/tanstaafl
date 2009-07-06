@@ -173,9 +173,9 @@ cout << "sup!\n";
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(
-		10.0, 5.0, 5.0,
+		0.0, 10.0, 0.0,
 		0.0, 0.0, 0.0,
-		0.0, 1.0, 0.0);
+		1.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 cout << "lock?\n";
