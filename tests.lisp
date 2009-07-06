@@ -30,103 +30,83 @@
 
 (load "physics.lisp")
 
+(defmacro check-xyz (vec x y z)
+	`(with-slots (x y z) ,vec
+		(and
+			(= x ,x)
+			(= y ,y)
+			(= z ,z))))
+
+(deftest test-make-vector-3
+	(let
+			((one (make-vector-3))
+			(two (make-vector-3 2.0 3.0 4)))
+		(and
+			(check-xyz one 0.0 0.0 0.0)
+			(check-xyz two 2.0 3.0 4))))
+
 (deftest test-add
 	(let
-			((one (make-instance 'vector-3))
-			(two (make-instance 'vector-3)))
-		(with-slots ((ox x) (oy y) (oz z)) one
-		(with-slots ((tx x) (ty y) (tz z)) two
-			(setf ox 4)
-			(setf tx 7)
-			(setf oy 2)
-			(setf ty 6)
-			(setf oz 10)
-			(setf tz -3)
-
-			(with-slots ((rx x) (ry y) (rz z)) (add one two)
-			(and
-				(= rx 11)
-				(= ry 8)
-				(= rz 7)))))))
+			((one (make-vector-3 4 2 10))
+			(two (make-vector-3 7 6 -3)))
+		(check-xyz (add one two) 11 8 7)))
 
 (deftest test-mult
-	(let ((vec (make-instance 'vector-3)))
-		(with-slots (x y z) vec
-			(setf x 2)
-			(setf y 8)
-			(setf z -4)
-
-			(with-slots ((rx x) (ry y) (rz z)) (mult -2 vec)
-			(and
-				(= rx -4)
-				(= ry -16)
-				(= rz 8))))))
+	(let ((vec (make-vector-3 2 8 -4)))
+		(check-xyz (mult -2 vec) -4 -16 8)))
 
 (deftest test-sub
 	(let
-			((one (make-instance 'vector-3))
-			(two (make-instance 'vector-3)))
-		(with-slots ((ox x) (oy y) (oz z)) one
-		(with-slots ((tx x) (ty y) (tz z)) two
-			(setf ox 4)
-			(setf tx 7)
-			(setf oy 2)
-			(setf ty 6)
-			(setf oz 10)
-			(setf tz -3)
-
-			(with-slots ((rx x) (ry y) (rz z)) (sub one two)
-			(and
-				(= rx -3)
-				(= ry -4)
-				(= rz 13)))))))
+			((one (make-vector-3 4 2 10))
+			(two (make-vector-3 7 6 -3)))
+		(check-xyz (sub one two) -3 -4 13)))
 
 (deftest test-magnitude
-	(let ((vec (make-instance 'vector-3)))
-		(with-slots (x y z) vec
-			(setf x 2)
-			(setf y 8)
-			(setf z -4))
+	(let ((vec (make-vector-3 2 8 -4)))
 		(= 916515 (floor (* 100000 (magnitude vec))))))
 
 (deftest test-vectors
+	(test-make-vector-3)
 	(test-add)
 	(test-mult)
 	(test-sub)
 	(test-magnitude))
 
+(deftest test-make-space-object
+	(let
+			((one (make-space-object))
+			(two (make-space-object
+				:mass 4
+				:pos (make-vector-3 4.0 2.0 3)
+				:acc (make-vector-3 14.0 -2 3.3)
+				:vel (make-vector-3 -40.0 29 -3))))
+		(and
+			(with-slots (mass pos acc vel) one
+				(and
+					(= mass 1.0)
+					(check-xyz pos 0.0 0.0 0.0)
+					(check-xyz vel 0.0 0.0 0.0)
+					(check-xyz acc 0.0 0.0 0.0)))
+			(with-slots (mass pos acc vel) two
+				(and
+					(= mass 4)
+					(check-xyz pos 4.0 2.0 3)
+					(check-xyz vel -40.0 29 -3)
+					(check-xyz acc 14.0 -2 3.3))))))
+
 (deftest test-gravity
 	(let*
-			((ob1 (make-instance 'space-object))
-			(ob2 (make-instance 'space-object))
-			(ob3 (make-instance 'space-object))
+			((ob1 (make-space-object
+				:mass 50.0
+				:pos (make-vector-3 23.0 4.0 -16.0)))
+			(ob2 (make-space-object
+				:mass 20.0
+				:pos (make-vector-3 22.0 40.0 0.0)
+				:acc (make-vector-3 0.0 0.0 0.0)))
+			(ob3 (make-space-object
+				:mass 75.0
+				:pos (make-vector-3 -10.0 -5.0 12.0)))
 			(all-objs (list ob1 ob2 ob3)))
-		(with-slots (mass pos) ob1
-			(setf mass 50.0)
-			(setf pos (make-instance 'vector-3))
-			(with-slots (x y z) pos
-				(setf x 23.0)
-				(setf y 4.0)
-				(setf z -16.0)))
-		(with-slots (mass pos acc) ob2
-			(setf mass 20.0)
-			(setf pos (make-instance 'vector-3))
-			(with-slots (x y z) pos
-				(setf x 22.0)
-				(setf y 40.0)
-				(setf z 0.0))
-			(setf acc (make-instance 'vector-3))
-			(with-slots (x y z) acc
-				(setf x 0.0)
-				(setf y 0.0)
-				(setf z 0.0)))
-		(with-slots (mass pos) ob3
-			(setf mass 75.0)
-			(setf pos (make-instance 'vector-3))
-			(with-slots (x y z) pos
-				(setf x -10.0)
-				(setf y -5.0)
-				(setf z 12.0)))
 		(compute-gravity ob2 all-objs)
 		(with-slots (acc) ob2
 			(with-slots (x y z) acc
@@ -136,18 +116,10 @@
 					(= -5394134 (floor (* 1e19 z))))))))
 
 (deftest test-integrate-acc-to-vel
-	(let ((ob (make-instance 'space-object)))
-		(with-slots (acc vel) ob
-			(setf acc (make-instance 'vector-3))
-			(with-slots (x y z) acc
-				(setf x 6.0)
-				(setf y 4.0)
-				(setf z 1.5))
-			(setf vel (make-instance 'vector-3))
-			(with-slots (x y z) vel
-				(setf x 2.5)
-				(setf y 1.0)
-				(setf z -8.7))
+	(let ((ob (make-space-object
+			:acc (make-vector-3 6.0 4.0 1.5)
+			:vel (make-vector-3 2.5 1.0 -8.7))))
+		(with-slots (vel) ob
 			(integrate-acc-to-vel ob 0.1)
 			(with-slots (x y z) vel
 				(and
@@ -156,18 +128,10 @@
 					(= -855 (floor (* 100 z))))))))
 
 (deftest test-integrate-vel-to-pos
-	(let ((ob (make-instance 'space-object)))
-		(with-slots (vel pos) ob
-			(setf vel (make-instance 'vector-3))
-			(with-slots (x y z) vel
-				(setf x 6.0)
-				(setf y 4.0)
-				(setf z 1.5))
-			(setf pos (make-instance 'vector-3))
-			(with-slots (x y z) pos
-				(setf x 2.5)
-				(setf y 1.0)
-				(setf z -8.7))
+	(let ((ob (make-space-object
+			:vel (make-vector-3 6.0 4.0 1.5)
+			:pos (make-vector-3 2.5 1.0 -8.7))))
+		(with-slots (pos) ob
 			(integrate-vel-to-pos ob 0.1)
 			(with-slots (x y z) pos
 				(and
@@ -176,6 +140,7 @@
 					(= -855 (floor (* 100 z))))))))
 
 (deftest test-physics
+	(test-make-space-object)
 	(test-gravity)
 	(test-integrate-acc-to-vel)
 	(test-integrate-vel-to-pos))

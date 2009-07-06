@@ -5,6 +5,14 @@
 	y
 	z))
 
+(defun make-vector-3 (&optional (x 0.0) (y 0.0) (z 0.0))
+	(let ((vec (make-instance 'vector-3)))
+		(with-slots ((vx x) (vy y) (vz z)) vec
+			(setf vx x)
+			(setf vy y)
+			(setf vz z))
+		vec))
+
 (defgeneric print-vec (vec)
 	(:documentation "print."))
 
@@ -63,6 +71,19 @@
 		"velocity measured in m/s, cartesian, as a vector-3")
 	(acc :documentation
 		"acceleration measured in m/s/s, cartesian, as a vector-3")))
+
+(defun make-space-object (&key
+		(mass 1.0)
+		(pos (make-vector-3))
+		(vel (make-vector-3))
+		(acc (make-vector-3)))
+	(let ((obj (make-instance 'space-object)))
+		(with-slots ((omass mass) (opos pos) (ovel vel) (oacc acc)) obj
+			(setf omass mass)
+			(setf opos pos)
+			(setf ovel vel)
+			(setf oacc acc))
+		obj))
 
 (defgeneric compute-gravity (obj all-objs)
 	(:documentation "compute gravity on obj due to all-objs."))
