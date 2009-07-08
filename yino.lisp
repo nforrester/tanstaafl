@@ -1,3 +1,6 @@
+; YINO = YINO it's not orbiter
+; By Neil Forrester
+
 (load "physics.lisp")
 
 (main-loop
