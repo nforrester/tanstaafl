@@ -1,8 +1,6 @@
 ; YINO = YINO it's not Orbiter
 (defclass vector-3 ()
-	(x
-	y
-	z))
+	(x y z))
 
 (defun make-vector-3 (&optional (x 0.0) (y 0.0) (z 0.0))
 	(let ((vec (make-instance 'vector-3)))
@@ -79,7 +77,7 @@
 				(expt z 2)) 0.5)))
 
 (defclass quaternion ()
-	((w) (x) (y) (z)))
+	(w x y z))
 
 (defun make-quaternion (&optional (w 1.0) (x 0.0) (y 0.0) (z 0.0))
 	(let ((quat (make-instance 'quaternion)))
@@ -144,6 +142,51 @@
 					(setf y 0)
 					(setf z 0))))))
 
+(defclass matrix-3-3 ()
+	(m11 m12 m13
+	m21 m22 m23
+	m31 m32 m33))
+
+(defun make-matrix-3-3 (&optional
+		(m11 0) (m12 0) (m13 0)
+		(m21 0) (m22 0) (m23 0)
+		(m31 0) (m32 0) (m33 0))
+	(let ((mat (make-instance 'matrix-3-3)))
+		(with-slots
+				((mm11 m11) (mm12 m12) (mm13 m13)
+				(mm21 m21) (mm22 m22) (mm23 m23)
+				(mm31 m31) (mm32 m32) (mm33 m33)) mat
+			(setf mm11 m11)
+			(setf mm12 m12)
+			(setf mm13 m13)
+			(setf mm21 m21)
+			(setf mm22 m22)
+			(setf mm23 m23)
+			(setf mm31 m31)
+			(setf mm32 m32)
+			(setf mm33 m33))
+		mat))
+
+(defmethod mult ((mat matrix-3-3) (vec vector-3))
+	(with-slots (x y z) vec
+		(with-slots
+				(m11 m12 m13
+				m21 m22 m23
+				m31 m32 m33) mat
+			(make-vector-3
+				(+
+					(* x m11)
+					(* y m12)
+					(* z m13))
+				(+
+					(* x m21)
+					(* y m22)
+					(* z m23))
+				(+
+					(* x m31)
+					(* y m32)
+					(* z m33))))))
+
 (defvar *G* 6.673e-11 (:documentation "Gravitational constant"))
 (defvar *pi* 3.14159265358979323 (:documentation "Tasty pie"))
 
@@ -157,6 +200,8 @@
 	(acc :documentation
 		"acceleration measured in m/s/s, cartesian, as a vector-3")
 
+	(inertia-tensor :documentation
+		"inertia tensor, as a matrix-3-3")
 	(ang-pos :documentation
 		"angular position, as a quaternion")
 	(ang-vel :documentation
@@ -169,19 +214,35 @@
 		(pos (make-vector-3))
 		(vel (make-vector-3))
 		(acc (make-vector-3))
+		(inertia-tensor (compute-inertia-tensor 1 1 1))
 		(ang-pos (make-quaternion))
 		(ang-vel (make-vector-3))
 		(ang-acc (make-vector-3)))
 	(let ((obj (make-instance 'space-object)))
-		(with-slots ((omass mass) (opos pos) (ovel vel) (oacc acc) (oang-pos ang-pos) (oang-vel ang-vel) (oang-acc ang-acc)) obj
+		(with-slots
+				((omass mass)
+				(opos pos)
+				(ovel vel)
+				(oacc acc)
+				(oinertia-tensor inertia-tensor)
+				(oang-pos ang-pos)
+				(oang-vel ang-vel)
+				(oang-acc ang-acc)) obj
 			(setf omass mass)
 			(setf opos pos)
 			(setf ovel vel)
 			(setf oacc acc)
+			(setf oinertia-tensor inertia-tensor)
 			(setf oang-pos ang-pos)
 			(setf oang-vel ang-vel)
 			(setf oang-acc ang-acc))
 		obj))
+
+(defun compute-inertia-tensor (x y z)
+	(make-matrix-3-3
+		x 0 0
+		0 y 0
+		0 0 z))
 
 (defgeneric compute-gravity (obj all-objs)
 	(:documentation "compute gravity on obj due to all-objs."))
