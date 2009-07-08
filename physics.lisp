@@ -90,6 +90,15 @@
 			(setf qz z))
 		quat))
 
+(defmethod add ((one quaternion) (two quaternion))
+	(with-slots ((ow w) (ox x) (oy y) (oz z)) one
+		(with-slots ((tw w) (tx x) (ty y) (tz z)) two
+			(make-quaternion
+				(+ ow tw)
+				(+ ox tx)
+				(+ oy ty)
+				(+ oz tz)))))
+
 (defmethod mult ((one quaternion) (two quaternion))
 	(with-slots ((ow w) (ox x) (oy y) (oz z)) one
 		(with-slots ((tw w) (tx x) (ty y) (tz z)) two
@@ -106,6 +115,34 @@
 			(* scalar x)
 			(* scalar y)
 			(* scalar z))))
+
+(defmethod magnitude ((quat quaternion))
+	(with-slots (w x y z) quat
+		(expt
+			(+
+				(expt w 2)
+				(expt x 2)
+				(expt y 2)
+				(expt z 2))
+			0.5)))
+
+(defgeneric normalize (unnormalized)
+	(:documentation "Normalize something, like a vector, or a quaternion"))
+
+(defmethod normalize ((quat quaternion))
+	(let ((len (magnitude quat)))
+		(with-slots (w x y z) quat
+			(if (/= len 0)
+				(progn
+					(setf w (/ w len))
+					(setf x (/ x len))
+					(setf y (/ y len))
+					(setf z (/ z len)))
+				(progn
+					(setf w 1)
+					(setf x 0)
+					(setf y 0)
+					(setf z 0))))))
 
 (defvar *G* 6.673e-11 (:documentation "Gravitational constant"))
 (defvar *pi* 3.14159265358979323 (:documentation "Tasty pie"))
@@ -204,7 +241,8 @@
 			;(print (list  x y z))
 			;(with-slots (w x y z) (mult 0.5 (mult (make-quaternion 0 x y z) ang-pos))
 			;	(print (list w x y z)))
-			(setf ang-pos (mult dt (mult 0.5 (mult (make-quaternion 0 x y z) ang-pos)))))))
+			(setf ang-pos (add ang-pos (mult dt (mult 0.5 (mult (make-quaternion 0 x y z) ang-pos)))))
+			(normalize ang-pos))))
 
 (defun timestep (all-objs dt)
 	(loop for obj in all-objs do
@@ -223,6 +261,7 @@
 			(format t "pos ~a ~a ~a~%" x y z))
 		(with-slots (w x y z) (slot-value obj 'ang-pos)
 				(let ((len (magnitude (make-vector-3 x y z))))
+					(print (list w x y z len))
 					(if (/= 0 len) ; print in angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
 						(format t "ang-pos ~a ~a ~a ~a~%"
 							(/ (* (* 2 (acos w)) 180) *pi*)
