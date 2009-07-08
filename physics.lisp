@@ -1,5 +1,4 @@
 ; YINO = YINO it's not Orbiter
-
 (defclass vector-3 ()
 	(x
 	y
@@ -26,24 +25,42 @@
 (defmethod add ((one vector-3) (two vector-3))
 	(with-slots ((ox x) (oy y) (oz z)) one
 		(with-slots ((tx x) (ty y) (tz z)) two
-			(let ((result (make-instance 'vector-3)))
-				(with-slots ((rx x) (ry y) (rz z)) result
-					(setf rx (+ ox tx))
-					(setf ry (+ oy ty))
-					(setf rz (+ oz tz))
-					result)))))
+			(make-vector-3
+				(+ ox tx)
+				(+ oy ty)
+				(+ oz tz)))))
 
 (defgeneric mult (scalar something)
 	(:documentation "scalar multiplication"))
 
 (defmethod mult (scalar (vec vector-3))
 	(with-slots (x y z) vec
-		(let ((result (make-instance 'vector-3)))
-			(with-slots ((rx x) (ry y) (rz z)) result
-				(setf rx (* scalar x))
-				(setf ry (* scalar y))
-				(setf rz (* scalar z))
-				result))))
+		(make-vector-3
+			(* scalar x)
+			(* scalar y)
+			(* scalar z))))
+
+(defgeneric dot (one two)
+	(:documentation "dot product"))
+
+(defmethod dot ((one vector-3) (two vector-3))
+	(with-slots ((ox x) (oy y) (oz z)) one
+		(with-slots ((tx x) (ty y) (tz z)) two
+			(+
+				(* ox tx)
+				(* oy ty)
+				(* oz tz)))))
+
+(defgeneric cross (one two)
+	(:documentation "cross product"))
+
+(defmethod cross ((one vector-3) (two vector-3))
+	(with-slots ((ox x) (oy y) (oz z)) one
+		(with-slots ((tx x) (ty y) (tz z)) two
+			(make-vector-3
+				(- (* oy tz) (* oz ty))
+				(- (* oz tx) (* ox tz))
+				(- (* ox ty) (* oy tx))))))
 
 (defgeneric sub (one two)
 	(:documentation "subtraction"))
@@ -55,34 +72,78 @@
 	(:documentation "magnitude of a vector"))
 
 (defmethod magnitude ((vec vector-3))
-	(with-slots (x y z) vec
-		(expt (+
-			(expt x 2)
-			(expt y 2)
-			(expt z 2)) 0.5)))
+		(with-slots (x y z) vec
+			(expt (+
+				(expt x 2)
+				(expt y 2)
+				(expt z 2)) 0.5)))
+
+(defclass quaternion ()
+	((w) (x) (y) (z)))
+
+(defun make-quaternion (&optional (w 1.0) (x 0.0) (y 0.0) (z 0.0))
+	(let ((quat (make-instance 'quaternion)))
+		(with-slots ((qw w) (qx x) (qy y) (qz z)) quat
+			(setf qw w)
+			(setf qx x)
+			(setf qy y)
+			(setf qz z))
+		quat))
+
+(defmethod mult ((one quaternion) (two quaternion))
+	(with-slots ((ow w) (ox x) (oy y) (oz z)) one
+		(with-slots ((tw w) (tx x) (ty y) (tz z)) two
+			(make-quaternion
+				(+ (* ow tw) (* -1 ox tx) (* -1 oy ty) (* -1 oz tz))
+				(+ (* ow tx) (*    ox tw) (*    oy tz) (* -1 oz ty))
+				(+ (* ow ty) (* -1 ox tz) (*    oy tw) (*    oz tx))
+				(+ (* ow tz) (*    ox ty) (* -1 oy tx) (*    oz tw))))))
+
+(defmethod mult (scalar (quat quaternion))
+	(with-slots (w x y z) quat
+		(make-quaternion
+			(* scalar w)
+			(* scalar x)
+			(* scalar y)
+			(* scalar z))))
 
 (defvar *G* 6.673e-11 (:documentation "Gravitational constant"))
+(defvar *pi* 3.14159265358979323 (:documentation "Tasty pie"))
 
 (defclass space-object ()
 	((mass :documentation "Mass measured in kg.")
+
 	(pos :documentation
 		"position measured in m, cartesian, as a vector-3")
 	(vel :documentation
 		"velocity measured in m/s, cartesian, as a vector-3")
 	(acc :documentation
-		"acceleration measured in m/s/s, cartesian, as a vector-3")))
+		"acceleration measured in m/s/s, cartesian, as a vector-3")
+
+	(ang-pos :documentation
+		"angular position, as a quaternion")
+	(ang-vel :documentation
+		"angular velocity in radians/s, as a vector-3")
+	(ang-acc :documentation
+		"angular acceleration in radians/s/s, as a vector-3")))
 
 (defun make-space-object (&key
 		(mass 1.0)
 		(pos (make-vector-3))
 		(vel (make-vector-3))
-		(acc (make-vector-3)))
+		(acc (make-vector-3))
+		(ang-pos (make-quaternion))
+		(ang-vel (make-vector-3))
+		(ang-acc (make-vector-3)))
 	(let ((obj (make-instance 'space-object)))
-		(with-slots ((omass mass) (opos pos) (ovel vel) (oacc acc)) obj
+		(with-slots ((omass mass) (opos pos) (ovel vel) (oacc acc) (oang-pos ang-pos) (oang-vel ang-vel) (oang-acc ang-acc)) obj
 			(setf omass mass)
 			(setf opos pos)
 			(setf ovel vel)
-			(setf oacc acc))
+			(setf oacc acc)
+			(setf oang-pos ang-pos)
+			(setf oang-vel ang-vel)
+			(setf oang-acc ang-acc))
 		obj))
 
 (defgeneric compute-gravity (obj all-objs)
@@ -98,7 +159,7 @@
 					(distance (magnitude rel-pos)))
 				(unless (= 0.0 distance)
 					(setf (slot-value obj 'acc) (add (slot-value obj 'acc)
-						(mult
+						(mult ; gravitational field vector
 							(/ ; G * m / r^2
 								(* *G* (slot-value other-obj 'mass))
 								(expt distance 2))
@@ -120,6 +181,13 @@
 	(with-slots (vel acc) obj
 		(setf vel (add vel (mult dt acc)))))
 
+(defgeneric integrate-ang-acc-to-ang-vel (obj dt)
+	(:documentation "integrate angular acceleration to get angular velocity."))
+
+(defmethod integrate-ang-acc-to-ang-vel ((obj space-object) dt)
+	(with-slots (ang-vel ang-acc) obj
+		(setf ang-vel (add ang-vel (mult dt ang-acc)))))
+
 (defgeneric integrate-vel-to-pos (obj dt)
 	(:documentation "integrate velocity to get position."))
 
@@ -127,40 +195,55 @@
 	(with-slots (pos vel) obj
 		(setf pos (add pos (mult dt vel)))))
 
+(defgeneric integrate-ang-vel-to-ang-pos (obj dt)
+	(:documentation "integrate angular velocity to get angular position."))
+
+(defmethod integrate-ang-vel-to-ang-pos ((obj space-object) dt)
+	(with-slots (ang-pos ang-vel) obj
+		(with-slots (x y z) ang-vel
+			;(print (list  x y z))
+			;(with-slots (w x y z) (mult 0.5 (mult (make-quaternion 0 x y z) ang-pos))
+			;	(print (list w x y z)))
+			(setf ang-pos (mult dt (mult 0.5 (mult (make-quaternion 0 x y z) ang-pos)))))))
+
 (defun timestep (all-objs dt)
 	(loop for obj in all-objs do
 		(compute-acc obj all-objs))
 	(loop for obj in all-objs do
 		(integrate-acc-to-vel obj dt)
-		(integrate-vel-to-pos obj dt)))
+		(integrate-ang-acc-to-ang-vel obj dt)
+		(integrate-vel-to-pos obj dt)
+		(integrate-ang-vel-to-ang-pos obj dt)))
 
 (defun print-timestep (all-objs)
 	(format t "begin-timestep~%")
 	(dolist (obj all-objs)
 		(format t "begin-object~%")
 		(with-slots (x y z) (slot-value obj 'pos)
-			(format t "pos ~a ~a ~a" x y z))
+			(format t "pos ~a ~a ~a~%" x y z))
+		(with-slots (w x y z) (slot-value obj 'ang-pos)
+				(let ((len (magnitude (make-vector-3 x y z))))
+					(if (/= 0 len) ; print in angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
+						(format t "ang-pos ~a ~a ~a ~a~%"
+							(/ (* (* 2 (acos w)) 180) *pi*)
+							(/ x len)
+							(/ y len)
+							(/ z len))
+						(format t "ang-pos ~a ~a ~a ~a~%"
+							0
+							1
+							0
+							0))))
 		(format t "radius 1~%")
 		(format t "end-object~%"))
 	(format t "end-timestep~%"))
 
 (defun main-loop (time-acceleration all-objs)
-	(let ((current-time (get-internal-real-time)) prev-time)
-		(loop
-			(setf prev-time current-time)
-			(setf current-time (get-internal-real-time))
-			(timestep all-objs (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
-			(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
-			(print-timestep all-objs))))
-
-(main-loop
-	1
-	(list
-		(make-space-object
-			:mass (/ 4 *G*)
-			:pos (make-vector-3 1 0 0)
-			:vel (make-vector-3 0 0 1))
-		(make-space-object
-			:mass (/ 4 *G*)
-			:pos (make-vector-3 -1 0 0)
-			:vel (make-vector-3 0 0 -1))))
+	(without-floating-point-underflow
+		(let ((current-time (get-internal-real-time)) prev-time)
+			(loop
+				(setf prev-time current-time)
+				(setf current-time (get-internal-real-time))
+				(timestep all-objs (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
+				(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
+				(print-timestep all-objs)))))

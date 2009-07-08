@@ -37,6 +37,14 @@
 			(= y ,y)
 			(= z ,z))))
 
+(defmacro check-wxyz (quat w x y z)
+	`(with-slots (w x y z) ,quat
+		(and
+			(= w ,w)
+			(= x ,x)
+			(= y ,y)
+			(= z ,z))))
+
 (deftest test-make-vector-3
 	(let
 			((one (make-vector-3))
@@ -71,6 +79,41 @@
 	(test-mult)
 	(test-sub)
 	(test-magnitude))
+
+(deftest test-make-quaternion
+	(check-wxyz (make-quaternion 23 42 68 -5)
+		23
+		42
+		68
+		-5))
+
+(deftest test-qqmult
+	(check-wxyz
+		(mult
+			(make-quaternion 23 42  68 -5)
+			(make-quaternion  9  3 -42  7))
+		 2972
+		  713
+		 -663
+		-1852))
+
+(deftest test-sqmult
+	(check-wxyz
+		(mult
+			42
+			(make-quaternion 9 3 -42 7))
+		  378
+		  126
+		-1764
+		  294))
+
+(deftest test-qmult
+	 (test-qqmult)
+	 (test-sqmult))
+
+(deftest test-quaternions
+	(test-make-quaternion)
+	(test-qmult))
 
 (deftest test-make-space-object
 	(let
@@ -147,6 +190,7 @@
 
 (deftest test-all
 	(test-vectors)
+	(test-quaternions)
 	(test-physics))
 
 (deftest unit-tests

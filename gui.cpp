@@ -67,6 +67,7 @@ class space_object{
 public:
 	space_object* next; // Arrange them as a singly linked list.
 	GLfloat* pos;
+	GLfloat* ang_pos;
 	GLfloat radius;
 	material mat;
 	space_object();
@@ -81,10 +82,16 @@ space_object::space_object(){
 	pos[0] = 0.0;
 	pos[1] = 0.0;
 	pos[2] = 0.0;
+	ang_pos = new GLfloat[4];
+	ang_pos[0] = 0.0;
+	ang_pos[1] = 0.0;
+	ang_pos[2] = 0.0;
+	ang_pos[3] = 0.0;
 }
 
 space_object::~space_object(){
 	delete[] pos;
+	delete[] ang_pos;
 	delete next;
 }
 
@@ -92,7 +99,8 @@ void space_object::draw(){
 	glPushMatrix();
 		mat.set(GL_FRONT_AND_BACK);
 		glTranslatef(pos[0], pos[1], pos[2]);
-		glutSolidSphere(radius, 16, 16);
+		glRotatef(ang_pos[0], ang_pos[1], ang_pos[2], ang_pos[3]);
+		glutSolidTeapot(radius);
 	glPopMatrix();
 }
 
@@ -211,36 +219,6 @@ void keyboard(unsigned char key, int x, int y){
 }
 
 void mouse(int button, int state, int x, int y){
-/*	static GLdouble real_x = 0.0, real_y = 0.0, real_z = 0.0;
-
-	real_x -= 1.0;
-	real_y -= 1.1;
-	real_z -= 1.2;
-
-	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN){
-		space_object* obj;
-		obj = new space_object;
-
-		obj->pos[0] = real_x;
-		obj->pos[1] = real_y;
-		obj->pos[2] = real_z;
-
-		obj->next = universe;
-		universe = obj;
-		glutPostRedisplay();
-	}
-	if(button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN){
-		space_object* obj;
-		while(universe != NULL){
-			real_x = 0.0;
-			real_y = 0.0;
-			real_z = 0.0;
-			obj = universe;
-			universe = obj->next;
-			delete obj;
-		}
-		glutPostRedisplay();
-	}*/
 }
 
 pthread_cond_t collect_garbage_now;
@@ -260,6 +238,7 @@ void *physics_io(void *no_arg){
 	 * begin-timestep
 	 * begin-object
 	 * pos 0 1 5.3
+	 * ang-pos 10 2 3 4.3
 	 * radius 4.1
 	 * end-object
 	 * end-timestep
@@ -287,6 +266,17 @@ cout << new_object->pos[0] << endl;
 cout << new_object->pos[1] << endl;
 							cin >> new_object->pos[2];
 cout << new_object->pos[2] << endl;
+						}
+						if(str == "ang-pos"){
+cout << "recognized ang-pos\n";
+							cin >> new_object->ang_pos[0];
+cout << new_object->ang_pos[0] << endl;
+							cin >> new_object->ang_pos[1];
+cout << new_object->ang_pos[1] << endl;
+							cin >> new_object->ang_pos[2];
+cout << new_object->ang_pos[2] << endl;
+							cin >> new_object->ang_pos[3];
+cout << new_object->ang_pos[3] << endl;
 						}
 						if(str == "radius"){
 cout << "recognized radius\n";
