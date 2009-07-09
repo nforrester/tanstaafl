@@ -150,6 +150,25 @@
 		(format *state-output-stream* "end-object~%"))
 	(format *state-output-stream* "end-timestep~%"))
 
+(let ((char-buffer ""))
+	(defun get-command () ; Non-blocking, returns nil or a whole line from *command-input-stream*
+		(let (found-newline)
+			(loop
+				(let ((single-char (read-char-no-hang *command-input-stream*)))
+					(cond
+						((eq nil single-char)
+							(setf found-newline nil)
+							(return))
+						((eq #\Newline single-char)
+							(setf found-newline t)
+							(return))
+						(t
+							(setf char-buffer (concatenate 'string char-buffer (list single-char)))))))
+			(if (eq t found-newline)
+				(let ((return-value char-buffer))
+					(setf char-buffer "")
+					return-value)))))
+
 (defun main-loop (time-acceleration all-objs)
 	(without-floating-point-underflow
 		(let ((current-time (get-internal-real-time)) prev-time)

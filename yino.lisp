@@ -12,16 +12,16 @@
 	(let (active-arg)
 		(dolist (a *args*)
 			(cond
-				((or (equal a "-i") (equal a "--input")) (setf active-arg :input))
+				((or (string= a "-i") (string= a "--input")) (setf active-arg :input))
 				((eq active-arg :input) (setf *command-input-stream* (open a)) (setf active-arg nil))
 
-				((or (equal a "-o") (equal a "--output")) (setf active-arg :output))
+				((or (string= a "-o") (string= a "--output")) (setf active-arg :output))
 				((eq active-arg :output) (setf *state-output-stream* (open a :direction :output)) (setf active-arg nil))
 
-				((or (equal a "-t") (equal a "--time-acceleration")) (setf active-arg :time-acceleration))
+				((or (string= a "-t") (string= a "--time-acceleration")) (setf active-arg :time-acceleration))
 				((eq active-arg :time-acceleration) (setf *time-acceleration* (read-from-string a)) (setf active-arg nil))
 
-				((or (equal a "-w") (equal a "--wait-for-command")) (setf active-arg :wait-for-command))
+				((or (string= a "-w") (string= a "--wait-for-command")) (setf active-arg :wait-for-command))
 				((eq active-arg :wait-for-command) (setf *wait-for-command* a) (setf active-arg nil))
 
 				(t (format *error-output* "Unrecognized command line option: ~a" a))))))
@@ -29,10 +29,9 @@
 (defun wait-for-command-if-needed ()
 	(if (not (eq nil *wait-for-command*))
 		(loop
-			(if (equal
-					*wait-for-command*
-					(read-line *command-input-stream*))
-				(return)))))
+			(if (equal *wait-for-command* (get-command))
+				(return)
+				(sleep .01)))))
 
 ; and here... we... go!
 
