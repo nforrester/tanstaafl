@@ -183,7 +183,7 @@ cerr << "sup!\n";
 	gluLookAt(
 		0.0, 10.0, 0.0,
 		0.0, 0.0, 0.0,
-		1.0, 0.0, 0.0);
+		0.0, 0.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 cerr << "lock?\n";
@@ -215,7 +215,32 @@ cerr << "display update!\n";
 	glutSwapBuffers();
 }
 
-void keyboard(unsigned char key, int x, int y){
+void print_special_key(int key){
+	switch(key){
+		default:
+			cout << "unknown*" << key << "*";
+			break;
+	}
+}
+
+void special_down(int key, int x, int y){
+	cout << "key ";
+	print_special_key(key);
+	cout << " down\n";
+}
+
+void special_up(int key, int x, int y){
+	cout << "key ";
+	print_special_key(key);
+	cout << " up\n";
+}
+
+void key_down(unsigned char key, int x, int y){
+	cout << "key " << key << " down\n";
+}
+
+void key_up(unsigned char key, int x, int y){
+	cout << "key " << key << " up\n";
 }
 
 void mouse(int button, int state, int x, int y){
@@ -226,7 +251,7 @@ pthread_mutex_t collect_garbage_now_mutex;
 
 bool new_timestep;
 
-void *physics_io(void *no_arg){
+void *state_input(void *no_arg){
 	basic_string<char> str;
 
 	universe* next_universe;
@@ -327,7 +352,7 @@ cerr << "got it\n";
 }
 
 int main (int argc, char **argv){
-	pthread_t physics_io_thread;
+	pthread_t state_input_thread;
 	pthread_t garbage_collector_thread;
 
 	now = NULL;
@@ -338,15 +363,24 @@ int main (int argc, char **argv){
 	pthread_mutex_init(&collect_garbage_now_mutex, NULL);
 	pthread_mutex_init(&now_mutex, NULL);
 
-	pthread_create(&physics_io_thread, NULL, physics_io, NULL);
+	pthread_create(&state_input_thread, NULL, state_input, NULL);
 	pthread_create(&garbage_collector_thread, NULL, garbage_collector, NULL);
 
 	initialize_window(argc, argv);
 	initialize_gl_state();
 
 	glutDisplayFunc(display);
+
 	glutReshapeFunc(reshape);
-	glutKeyboardFunc(keyboard);
+
+	glutSpecialFunc(special_down);
+	glutSpecialUpFunc(special_up);
+
+	glutKeyboardFunc(key_down);
+	glutKeyboardUpFunc(key_up);
+
+	glutIgnoreKeyRepeat(1);
+
 	glutMouseFunc(mouse);
 
 	while(1){

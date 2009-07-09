@@ -84,6 +84,12 @@
 	(setf (slot-value obj 'acc) (make-vector-3 0 0 0))
 	(compute-gravity obj all-objs))
 
+(defgeneric compute-ang-acc (obj all-objs)
+	(:documentation "compute the angular acceleration on obj, and update ang-acc"))
+
+(defmethod compute-ang-acc ((obj space-object) all-objs)
+	(setf (slot-value obj 'ang-acc) (make-vector-3 0 0 0)))
+
 (defgeneric integrate-acc-to-vel (obj dt)
 	(:documentation "integrate acceleration to get velocity."))
 
@@ -111,15 +117,13 @@
 (defmethod integrate-ang-vel-to-ang-pos ((obj space-object) dt)
 	(with-slots (ang-pos ang-vel) obj
 		(with-slots (x y z) ang-vel
-			;(print (list  x y z))
-			;(with-slots (w x y z) (mult 0.5 (mult (make-quaternion 0 x y z) ang-pos))
-			;	(print (list w x y z)))
 			(setf ang-pos (add ang-pos (mult dt (mult 0.5 (mult (make-quaternion 0 x y z) ang-pos)))))
 			(normalize ang-pos))))
 
 (defun timestep (all-objs dt)
 	(loop for obj in all-objs do
-		(compute-acc obj all-objs))
+		(compute-acc obj all-objs)
+		(compute-ang-acc obj all-objs))
 	(loop for obj in all-objs do
 		(integrate-acc-to-vel obj dt)
 		(integrate-ang-acc-to-ang-vel obj dt)
@@ -149,25 +153,6 @@
 		(format *state-output-stream* "radius 1~%")
 		(format *state-output-stream* "end-object~%"))
 	(format *state-output-stream* "end-timestep~%"))
-
-(let ((char-buffer ""))
-	(defun get-command () ; Non-blocking, returns nil or a whole line from *command-input-stream*
-		(let (found-newline)
-			(loop
-				(let ((single-char (read-char-no-hang *command-input-stream*)))
-					(cond
-						((eq nil single-char)
-							(setf found-newline nil)
-							(return))
-						((eq #\Newline single-char)
-							(setf found-newline t)
-							(return))
-						(t
-							(setf char-buffer (concatenate 'string char-buffer (list single-char)))))))
-			(if (eq t found-newline)
-				(let ((return-value char-buffer))
-					(setf char-buffer "")
-					return-value)))))
 
 (defun main-loop (time-acceleration all-objs)
 	(without-floating-point-underflow
