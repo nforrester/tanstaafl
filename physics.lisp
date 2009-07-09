@@ -127,28 +127,28 @@
 		(integrate-ang-vel-to-ang-pos obj dt)))
 
 (defun print-timestep (all-objs)
-	(format t "begin-timestep~%")
+	(format *state-output-stream* "begin-timestep~%")
 	(dolist (obj all-objs)
-		(format t "begin-object~%")
+		(format *state-output-stream* "begin-object~%")
 		(with-slots (x y z) (slot-value obj 'pos)
-			(format t "pos ~a ~a ~a~%" x y z))
+			(format *state-output-stream* "pos ~a ~a ~a~%" x y z))
 		(with-slots (w x y z) (slot-value obj 'ang-pos)
 				(let ((len (magnitude (make-vector-3 x y z))))
 					(print (list w x y z len))
 					(if (/= 0 len) ; print in angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
-						(format t "ang-pos ~a ~a ~a ~a~%"
+						(format *state-output-stream* "ang-pos ~a ~a ~a ~a~%"
 							(/ (* (* 2 (acos w)) 180) *pi*)
 							(/ x len)
 							(/ y len)
 							(/ z len))
-						(format t "ang-pos ~a ~a ~a ~a~%"
+						(format *state-output-stream* "ang-pos ~a ~a ~a ~a~%"
 							0
 							1
 							0
 							0))))
-		(format t "radius 1~%")
-		(format t "end-object~%"))
-	(format t "end-timestep~%"))
+		(format *state-output-stream* "radius 1~%")
+		(format *state-output-stream* "end-object~%"))
+	(format *state-output-stream* "end-timestep~%"))
 
 (defun main-loop (time-acceleration all-objs)
 	(without-floating-point-underflow

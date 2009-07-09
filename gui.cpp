@@ -131,15 +131,15 @@ universe::~universe(){
 }
 
 void universe::lock(){
-cout << "universal lock?\n";
+cerr << "universal lock?\n";
 	pthread_mutex_lock(&mutex);
-cout << "universal lock!\n";
+cerr << "universal lock!\n";
 }
 
 void universe::unlock(){
-cout << "universal unlock?\n";
+cerr << "universal unlock?\n";
 	pthread_mutex_unlock(&mutex);
-cout << "universal unlock!\n";
+cerr << "universal unlock!\n";
 }
 
 int universe::trylock(){
@@ -166,18 +166,18 @@ void initialize_gl_state(){
 }
 
 void reshape(int width, int height){
-cout << "reshape1\n";
+cerr << "reshape1\n";
 	glViewport(0, 0, (GLsizei) width, (GLsizei) height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(field_of_view, ((float) width / (float) height), .1, 1000);
-cout << "reshape2\n";
+cerr << "reshape2\n";
 	glutPostRedisplay();
-cout << "reshape3\n";
+cerr << "reshape3\n";
 }
 
 void display(){
-cout << "sup!\n";
+cerr << "sup!\n";
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	gluLookAt(
@@ -186,31 +186,31 @@ cout << "sup!\n";
 		1.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-cout << "lock?\n";
+cerr << "lock?\n";
 	pthread_mutex_lock(&now_mutex);
-cout << "lock!\n";
+cerr << "lock!\n";
 	if(now == NULL){
-cout << "unlocka?\n";
+cerr << "unlocka?\n";
 		pthread_mutex_unlock(&now_mutex);
-cout << "unlocka!\n";
+cerr << "unlocka!\n";
 	}else{
-cout << "...\n";
+cerr << "...\n";
 		universe* universe_to_draw = now;
 		universe_to_draw->lock();
-cout << "unlocker?\n";
+cerr << "unlocker?\n";
 		pthread_mutex_unlock(&now_mutex);
-cout << "unlocker!\n";
+cerr << "unlocker!\n";
 
 		space_object *obj = universe_to_draw->first_object;
 		while(obj != NULL){
 			obj->draw();
 			obj = obj->next;
-cout << "loopy!\n";
+cerr << "loopy!\n";
 		}
 		universe_to_draw->unlock();
 	}
 
-cout << "display update!\n";
+cerr << "display update!\n";
 
 	glutSwapBuffers();
 }
@@ -248,46 +248,46 @@ void *physics_io(void *no_arg){
 		getline(cin, str, '\n');
 		if(str == "begin-timestep"){
 			next_universe = new universe();
-cout << "recognized bt\n";
+cerr << "recognized bt\n";
 			while(str != "end-timestep"){
 				getline(cin, str, '\n');
 				if(str == "begin-object"){
-cout << "recognized bo\n";
+cerr << "recognized bo\n";
 					new_object = new space_object();
 					new_object->next = next_universe->first_object;
 					next_universe->first_object = new_object;
 					while(str != "end-object"){
 						cin >> str;
 						if(str == "pos"){
-cout << "recognized pos\n";
+cerr << "recognized pos\n";
 							cin >> new_object->pos[0];
-cout << new_object->pos[0] << endl;
+cerr << new_object->pos[0] << endl;
 							cin >> new_object->pos[1];
-cout << new_object->pos[1] << endl;
+cerr << new_object->pos[1] << endl;
 							cin >> new_object->pos[2];
-cout << new_object->pos[2] << endl;
+cerr << new_object->pos[2] << endl;
 						}
 						if(str == "ang-pos"){
-cout << "recognized ang-pos\n";
+cerr << "recognized ang-pos\n";
 							cin >> new_object->ang_pos[0];
-cout << new_object->ang_pos[0] << endl;
+cerr << new_object->ang_pos[0] << endl;
 							cin >> new_object->ang_pos[1];
-cout << new_object->ang_pos[1] << endl;
+cerr << new_object->ang_pos[1] << endl;
 							cin >> new_object->ang_pos[2];
-cout << new_object->ang_pos[2] << endl;
+cerr << new_object->ang_pos[2] << endl;
 							cin >> new_object->ang_pos[3];
-cout << new_object->ang_pos[3] << endl;
+cerr << new_object->ang_pos[3] << endl;
 						}
 						if(str == "radius"){
-cout << "recognized radius\n";
+cerr << "recognized radius\n";
 							cin >> new_object->radius;
-cout << new_object->radius << endl;
+cerr << new_object->radius << endl;
 						}
 					}
-cout << "recognized eo\n";
+cerr << "recognized eo\n";
 				}
 			}
-cout << "recognized et\n";
+cerr << "recognized et\n";
 
 			next_universe->next = now;
 			pthread_mutex_lock(&now_mutex);
@@ -307,21 +307,21 @@ void *garbage_collector(void *no_arg){
 	universe* condemned;
 
 	while(1){
-cout << "it's monday\n";
+cerr << "it's monday\n";
 		pthread_mutex_lock(&collect_garbage_now_mutex);
 		pthread_cond_wait(&collect_garbage_now, &collect_garbage_now_mutex);
 		pthread_mutex_unlock(&collect_garbage_now_mutex);
 
-cout << "finally\n";
+cerr << "finally\n";
 		while(now->next != NULL){
-cout << "here's the garbage\n";
+cerr << "here's the garbage\n";
 			pthread_mutex_lock(&now_mutex);
 			condemned = now->next;
 			condemned->lock();
 			now->next = now->next->next;
 			pthread_mutex_unlock(&now_mutex);
 			delete condemned;
-cout << "got it\n";
+cerr << "got it\n";
 		}
 	}
 }
