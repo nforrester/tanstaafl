@@ -28,6 +28,7 @@
 
 ; end unit test framework
 
+(load "math.lisp")
 (load "physics.lisp")
 
 (defmacro check-xyz (vec x y z)
@@ -154,7 +155,7 @@
 		(with-slots (acc) ob2
 			(with-slots (x y z) acc
 				(and
-					(= -8331170 (floor (* 1e19 x)))
+					(= -8331169 (floor (* 1e19 x)))
 					(= -3210857 (floor (* 1e18 y)))
 					(= -5394134 (floor (* 1e19 z))))))))
 

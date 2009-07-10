@@ -1,5 +1,10 @@
 (defvar *pi* 3.14159265358979323 (:documentation "Tasty pie"))
 
+; I would do vectors and matrices in a more general way, accounting for
+; different possible sizes, but I only need a limited selection of sizes,
+; so this is simpler. This is math for an engineer, not math for a
+; mathematician.
+
 (defclass vector-3 ()
 	(x y z))
 
@@ -11,10 +16,10 @@
 			(setf vz z))
 		vec))
 
-(defgeneric print-vec (vec out-stream)
+(defgeneric print-math (out-stream vec)
 	(:documentation "print."))
 
-(defmethod print-vec ((vec vector-3) out-stream)
+(defmethod print-math (out-stream (vec vector-3))
 	(with-slots (x y z) vec
 		(format out-stream "(~a ~a ~a)~%" x y z)))
 
@@ -89,6 +94,10 @@
 			(setf qz z))
 		quat))
 
+(defmethod print-math (out-stream (quat quaternion))
+	(with-slots (w x y z) quat
+		(format out-stream "(~a ~a ~a ~a)~%" w x y z)))
+
 (defmethod add ((one quaternion) (two quaternion))
 	(with-slots ((ow w) (ox x) (oy y) (oz z)) one
 		(with-slots ((tw w) (tx x) (ty y) (tz z)) two
@@ -143,6 +152,26 @@
 					(setf y 0)
 					(setf z 0))))))
 
+(defgeneric inverse (thing)
+	(:documentation "compute the inverse of something"))
+
+(defmethod inverse ((quat quaternion))
+	(let ((mag-squared (expt (magnitude quat) 2)))
+		(with-slots (w x y z) quat
+			(make-quaternion
+				(/       w  mag-squared)
+				(/ (* -1 x) mag-squared)
+				(/ (* -1 y) mag-squared)
+				(/ (* -1 z) mag-squared)))))
+
+(defgeneric rotate (thing-to-rotate thing-to-rotate-by)
+	(:documentation "rotates one thing by another"))
+
+(defmethod rotate ((vec vector-3) (quat quaternion))
+	(with-slots (x y z) vec
+		(with-slots (x y z) (mult quat (mult (make-quaternion 0 x y z) (inverse quat)))
+			(make-vector-3 x y z))))
+
 (defclass matrix-3-3 ()
 	(m11 m12 m13
 	m21 m22 m23
@@ -168,6 +197,32 @@
 			(setf mm33 m33))
 		mat))
 
+(defmethod print-math (out-stream (mat matrix-3-3))
+	(with-slots
+			(m11 m12 m13
+			m21 m22 m23
+			m31 m32 m33) mat
+		(format out-stream "((~a ~a ~a)~% (~a ~a ~a)~% (~a ~a ~a))~%"
+			m11 m12 m13
+			m21 m22 m23
+			m31 m32 m33)))
+
+(defmethod mult (scalar (mat matrix-3-3))
+	(with-slots
+			(m11 m12 m13
+			m21 m22 m23
+			m31 m32 m33) mat
+		(make-matrix-3-3
+			(* scalar m11)
+			(* scalar m12)
+			(* scalar m13)
+			(* scalar m21)
+			(* scalar m22)
+			(* scalar m23)
+			(* scalar m31)
+			(* scalar m32)
+			(* scalar m33))))
+
 (defmethod mult ((mat matrix-3-3) (vec vector-3))
 	(with-slots (x y z) vec
 		(with-slots
@@ -187,3 +242,55 @@
 					(* x m31)
 					(* y m32)
 					(* z m33))))))
+
+(defgeneric determinant (mat)
+	(:documentation "compute the determinant of a matrix"))
+
+(defmethod determinant ((mat matrix-3-3))
+	(with-slots
+			(m11 m12 m13
+			m21 m22 m23
+			m31 m32 m33) mat
+		(-
+			(+
+				(* m11 m22 m33)
+				(* m12 m23 m31)
+				(* m13 m21 m32))
+			(+
+				(* m13 m22 m31)
+				(* m12 m21 m33)
+				(* m11 m23 m32)))))
+
+(defmacro det-2-2 (a b c d)
+	`(- (* ,a ,d) (* ,c ,b)))
+
+(defgeneric transpose (mat)
+	(:documentation "transpose a matrix"))
+
+(defmethod transpose ((mat matrix-3-3))
+	(with-slots
+			(m11 m12 m13
+			m21 m22 m23
+			m31 m32 m33) mat
+		(make-matrix-3-3
+			m11 m21 m31
+			m12 m22 m32
+			m13 m23 m33)))
+
+(defmethod inverse ((mat matrix-3-3))
+	(with-slots
+			(m11 m12 m13
+			m21 m22 m23
+			m31 m32 m33) mat
+		(mult
+			(/ 1 (determinant mat))
+			(transpose (make-matrix-3-3
+				      (det-2-2 m22 m23 m32 m33)
+				(* -1 (det-2-2 m21 m23 m31 m33))
+				      (det-2-2 m21 m22 m31 m32)
+				(* -1 (det-2-2 m12 m13 m32 m33))
+				      (det-2-2 m11 m13 m31 m33)
+				(* -1 (det-2-2 m11 m12 m31 m32))
+				      (det-2-2 m12 m13 m22 m23)
+				(* -1 (det-2-2 m11 m13 m21 m23))
+				      (det-2-2 m11 m12 m21 m22))))))

@@ -24,7 +24,10 @@
 		collect (subseq str i j)
 		while j))
 
-(defvar depressed-keys ())
+(defvar *depressed-keys* ())
+
+(defun check-depressed-keys (str)
+	(< 0 (loop for key in *depressed-keys* counting (string= str key))))
 
 (defun process-commands ()
 	(loop
@@ -32,10 +35,11 @@
 			(if (eq nil command)
 				(return)
 				(let ((command-list (split-string command)))
+					(format *error-output* "command-list: ~a~%" command-list)
 					(cond
 						((string= "key" (first command-list))
 							(if (string= "down" (third command-list))
-								(if (not (find (second command-list) *depressed-keys*))
+								(if (not (check-depressed-keys (second command-list)))
 									(push (second command-list) *depressed-keys*)))
 							(if (string= "up" (third command-list))
-								(setf *depressed-keys* (delete (second command-list) *depressed-keys*))))))))))
+								(setf *depressed-keys* (mapcan #'(lambda (x) (if (string= x (second command-list)) nil (list x))) *depressed-keys*))))))))))

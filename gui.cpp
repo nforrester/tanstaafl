@@ -100,6 +100,7 @@ void space_object::draw(){
 		mat.set(GL_FRONT_AND_BACK);
 		glTranslatef(pos[0], pos[1], pos[2]);
 		glRotatef(ang_pos[0], ang_pos[1], ang_pos[2], ang_pos[3]);
+		glRotatef(90, 0, 1, 0); // because I want the teapot to face spout forwards.
 		glutSolidTeapot(radius);
 	glPopMatrix();
 }
@@ -183,7 +184,7 @@ cerr << "sup!\n";
 	gluLookAt(
 		0.0, 10.0, 0.0,
 		0.0, 0.0, 0.0,
-		0.0, 0.0, 1.0);
+		0.0, 0.0, -1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 cerr << "lock?\n";

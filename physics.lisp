@@ -1,5 +1,3 @@
-(load "math.lisp")
-
 (defvar *G* 6.673e-11 (:documentation "Gravitational constant"))
 
 (defclass space-object ()
@@ -68,14 +66,32 @@
 						(slot-value obj 'pos)))
 					(distance (magnitude rel-pos)))
 				(unless (= 0.0 distance)
-					(setf (slot-value obj 'acc) (add (slot-value obj 'acc)
-						(mult ; gravitational field vector
+					(add-force obj
+						(mult ; gravitational force vector
 							(/ ; G * m / r^2
-								(* *G* (slot-value other-obj 'mass))
+								(* *G* (slot-value obj 'mass) (slot-value other-obj 'mass))
 								(expt distance 2))
 							(mult ; r hat
 								(/ 1 distance)
-								rel-pos)))))))))
+								rel-pos))))))))
+
+(defgeneric add-force (obj force)
+	(:documentation "apply a force to obj, and update acc"))
+
+(defmethod add-force ((obj space-object) (force vector-3))
+	(with-slots (mass acc) obj
+		(setf acc (add acc (mult (/ 1 mass) force)))))
+
+(defgeneric add-torque (obj torque &key)
+	(:documentation "apply a torque to obj, and update acc"))
+
+(defmethod add-torque ((obj space-object) (torque vector-3) &key (frame :local))
+	(format *error-output* "add-torque!~%")
+	(with-slots (inertia-tensor ang-acc) obj
+		(setf ang-acc (add ang-acc (mult (inverse inertia-tensor)
+			(if (eq frame :global)
+				torque
+				(rotate torque (slot-value obj 'ang-pos))))))))
 
 (defgeneric compute-acc (obj all-objs)
 	(:documentation "compute the acceleration on obj, and update acc"))
@@ -160,6 +176,7 @@
 			(loop
 				(setf prev-time current-time)
 				(setf current-time (get-internal-real-time))
+				(process-commands)
 				(timestep all-objs (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
 				(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
 				(print-timestep all-objs)))))
