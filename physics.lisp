@@ -96,6 +96,13 @@
 				torque
 				(rotate torque (slot-value obj 'ang-pos))))))))
 
+(defgeneric add-force-off-center (obj force pos &key)
+	(:documentation "apply a force to obj, compute the associated torque, and update acc and ang-acc accordingly"))
+
+(defmethod add-force-off-center ((obj space-object) (force vector-3) (pos vector-3) &key (frame :local))
+	(add-force obj force frame)
+	(add-torque obj (cross pos force) frame))
+
 (defgeneric compute-acc (obj all-objs)
 	(:documentation "compute the acceleration on obj, and update acc"))
 
