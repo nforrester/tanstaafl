@@ -6,15 +6,12 @@
 ; mathematician.
 
 (defclass vector-3 ()
-	(x y z))
+	((x :initarg :x :initform 0)
+	(y :initarg :y :initform 0)
+	(z :initarg :z :initform 0)))
 
 (defun make-vector-3 (&optional (x 0.0) (y 0.0) (z 0.0))
-	(let ((vec (make-instance 'vector-3)))
-		(with-slots ((vx x) (vy y) (vz z)) vec
-			(setf vx x)
-			(setf vy y)
-			(setf vz z))
-		vec))
+	(make-instance 'vector-3 :x x :y y :z z))
 
 (defgeneric print-math (out-stream vec)
 	(:documentation "print."))
@@ -83,16 +80,29 @@
 				(expt z 2)) 0.5)))
 
 (defclass quaternion ()
-	(w x y z))
+	((w :initarg :w :initform 1)
+	(x :initarg :x :initform 0)
+	(y :initarg :y :initform 0)
+	(z :initarg :z :initform 0)))
+
+(defgeneric normalize (unnormalized)
+	(:documentation "Normalize something, like a vector, or a quaternion"))
+
+(defmethod normalize ((vec vector-3))
+	(let ((len (magnitude vec)))
+		(with-slots (x y z) vec
+			(if (/= len 0)
+				(progn
+					(setf x (/ x len))
+					(setf y (/ y len))
+					(setf z (/ z len)))
+				(progn
+					(setf x 0)
+					(setf y 0)
+					(setf z 0))))))
 
 (defun make-quaternion (&optional (w 1.0) (x 0.0) (y 0.0) (z 0.0))
-	(let ((quat (make-instance 'quaternion)))
-		(with-slots ((qw w) (qx x) (qy y) (qz z)) quat
-			(setf qw w)
-			(setf qx x)
-			(setf qy y)
-			(setf qz z))
-		quat))
+	(make-instance 'quaternion :w w :x x :y y :z z))
 
 (defmethod print-math (out-stream (quat quaternion))
 	(with-slots (w x y z) quat
@@ -134,9 +144,6 @@
 				(expt z 2))
 			0.5)))
 
-(defgeneric normalize (unnormalized)
-	(:documentation "Normalize something, like a vector, or a quaternion"))
-
 (defmethod normalize ((quat quaternion))
 	(let ((len (magnitude quat)))
 		(with-slots (w x y z) quat
@@ -173,29 +180,24 @@
 			(make-vector-3 x y z))))
 
 (defclass matrix-3-3 ()
-	(m11 m12 m13
-	m21 m22 m23
-	m31 m32 m33))
+	((m11 :initarg :m11 :initform 1)
+	(m12 :initarg :m12 :initform 0)
+	(m13 :initarg :m13 :initform 0)
+	(m21 :initarg :m21 :initform 0)
+	(m22 :initarg :m22 :initform 1)
+	(m23 :initarg :m23 :initform 0)
+	(m31 :initarg :m31 :initform 0)
+	(m32 :initarg :m32 :initform 0)
+	(m33 :initarg :m33 :initform 1)))
 
 (defun make-matrix-3-3 (&optional
-		(m11 0) (m12 0) (m13 0)
-		(m21 0) (m22 0) (m23 0)
-		(m31 0) (m32 0) (m33 0))
-	(let ((mat (make-instance 'matrix-3-3)))
-		(with-slots
-				((mm11 m11) (mm12 m12) (mm13 m13)
-				(mm21 m21) (mm22 m22) (mm23 m23)
-				(mm31 m31) (mm32 m32) (mm33 m33)) mat
-			(setf mm11 m11)
-			(setf mm12 m12)
-			(setf mm13 m13)
-			(setf mm21 m21)
-			(setf mm22 m22)
-			(setf mm23 m23)
-			(setf mm31 m31)
-			(setf mm32 m32)
-			(setf mm33 m33))
-		mat))
+		(m11 1) (m12 0) (m13 0)
+		(m21 0) (m22 1) (m23 0)
+		(m31 0) (m32 0) (m33 1))
+	(make-instance 'matrix-3-3
+		:m11 m11 :m12 m12 :m13 m13
+		:m21 m21 :m22 m22 :m23 m23
+		:m31 m31 :m32 m32 :m33 m33))
 
 (defmethod print-math (out-stream (mat matrix-3-3))
 	(with-slots

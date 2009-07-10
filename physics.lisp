@@ -1,52 +1,40 @@
 (defvar *G* 6.673e-11 (:documentation "Gravitational constant"))
 
 (defclass space-object ()
-	((mass :documentation "Mass measured in kg.")
+	((mass
+		:initarg :mass
+		:initform 1.0
+		:documentation "Mass measured in kg.")
 
-	(pos :documentation
-		"position measured in m, cartesian, as a vector-3")
-	(vel :documentation
-		"velocity measured in m/s, cartesian, as a vector-3")
-	(acc :documentation
-		"acceleration measured in m/s/s, cartesian, as a vector-3")
+	(pos
+		:initarg :pos
+		:initform (make-vector-3)
+		:documentation "position measured in m, cartesian, as a vector-3")
+	(vel
+		:initarg :vel
+		:initform (make-vector-3)
+		:documentation "velocity measured in m/s, cartesian, as a vector-3")
+	(acc
+		:initarg :acc
+		:initform (make-vector-3)
+		:documentation "acceleration measured in m/s/s, cartesian, as a vector-3")
 
-	(inertia-tensor :documentation
-		"inertia tensor, as a matrix-3-3")
-	(ang-pos :documentation
-		"angular position, as a quaternion")
-	(ang-vel :documentation
-		"angular velocity in radians/s, as a vector-3")
-	(ang-acc :documentation
-		"angular acceleration in radians/s/s, as a vector-3")))
-
-(defun make-space-object (&key
-		(mass 1.0)
-		(pos (make-vector-3))
-		(vel (make-vector-3))
-		(acc (make-vector-3))
-		(inertia-tensor (compute-inertia-tensor 1 1 1))
-		(ang-pos (make-quaternion))
-		(ang-vel (make-vector-3))
-		(ang-acc (make-vector-3)))
-	(let ((obj (make-instance 'space-object)))
-		(with-slots
-				((omass mass)
-				(opos pos)
-				(ovel vel)
-				(oacc acc)
-				(oinertia-tensor inertia-tensor)
-				(oang-pos ang-pos)
-				(oang-vel ang-vel)
-				(oang-acc ang-acc)) obj
-			(setf omass mass)
-			(setf opos pos)
-			(setf ovel vel)
-			(setf oacc acc)
-			(setf oinertia-tensor inertia-tensor)
-			(setf oang-pos ang-pos)
-			(setf oang-vel ang-vel)
-			(setf oang-acc ang-acc))
-		obj))
+	(inertia-tensor
+		:initarg :inertia-tensor
+		:initform (compute-inertia-tensor 1 1 1)
+		:documentation "inertia tensor, as a matrix-3-3")
+	(ang-pos
+		:initarg :ang-pos
+		:initform (make-quaternion)
+		:documentation "angular position, as a quaternion")
+	(ang-vel
+		:initarg :ang-vel
+		:initform (make-vector-3)
+		:documentation "angular velocity in radians/s, as a vector-3")
+	(ang-acc
+		:initarg :ang-acc
+		:initform (make-vector-3)
+		:documentation "angular acceleration in radians/s/s, as a vector-3")))
 
 (defun compute-inertia-tensor (x y z)
 	(make-matrix-3-3

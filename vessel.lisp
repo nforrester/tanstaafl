@@ -1,38 +1,8 @@
 (defclass vessel (space-object)
 	((max-torque
+		:initarg :max-torque
+		:initform (make-vector-3)
 		:documentation "The maximum torque that the vessels attitude controls can exert along the three axes (a vector-3)")))
-
-(defun make-vessel (&key
-		(mass 1.0)
-		(pos (make-vector-3))
-		(vel (make-vector-3))
-		(acc (make-vector-3))
-		(inertia-tensor (compute-inertia-tensor 1 1 1))
-		(ang-pos (make-quaternion))
-		(ang-vel (make-vector-3))
-		(ang-acc (make-vector-3))
-		(max-torque (make-vector-3)))
-	(let ((obj (make-instance 'vessel)))
-		(with-slots
-				((omass mass)
-				(opos pos)
-				(ovel vel)
-				(oacc acc)
-				(oinertia-tensor inertia-tensor)
-				(oang-pos ang-pos)
-				(oang-vel ang-vel)
-				(oang-acc ang-acc)
-				(omax-torque max-torque)) obj
-			(setf omass mass)
-			(setf opos pos)
-			(setf ovel vel)
-			(setf oacc acc)
-			(setf oinertia-tensor inertia-tensor)
-			(setf oang-pos ang-pos)
-			(setf oang-vel ang-vel)
-			(setf oang-acc ang-acc)
-			(setf omax-torque max-torque))
-		obj))
 
 (defmethod compute-acc ((obj vessel) all-objs)
 	(call-next-method))

@@ -46,20 +46,20 @@
 	*time-acceleration*
 	(cond
 		(nil
-			(list (make-vessel
+			(list (make-instance 'vessel
 					:pos (make-vector-3 0 0 0)
 					:inertia-tensor (compute-inertia-tensor 1 1 1)
 					:max-torque (make-vector-3 1 1 1)
 					:ang-vel (make-vector-3 0 0 0))))
 		(t
 			(list
-				(make-vessel
+				(make-instance 'vessel
 					:mass (/ 4.0 *G*)
 					:pos (make-vector-3 1.0 0.0 0.0)
 					:inertia-tensor (compute-inertia-tensor 1 1 1)
 					:max-torque (make-vector-3 1 1 1)
 					:vel (make-vector-3 0.0 0.0 1.0))
-				(make-space-object
+				(make-instance 'space-object
 					:mass (/ 4.0 *G*)
 					:pos (make-vector-3 -1.0 0.0 0.0)
 					:vel (make-vector-3 0.0 0.0 -1.0))))))

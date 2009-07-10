@@ -118,8 +118,8 @@
 
 (deftest test-make-space-object
 	(let
-			((one (make-space-object))
-			(two (make-space-object
+			((one (make-instance 'space-object))
+			(two (make-instance 'space-object
 				:mass 4
 				:pos (make-vector-3 4.0 2.0 3)
 				:acc (make-vector-3 14.0 -2 3.3)
@@ -140,14 +140,14 @@
 
 (deftest test-gravity
 	(let*
-			((ob1 (make-space-object
+			((ob1 (make-instance 'space-object
 				:mass 50.0
 				:pos (make-vector-3 23.0 4.0 -16.0)))
-			(ob2 (make-space-object
+			(ob2 (make-instance 'space-object
 				:mass 20.0
 				:pos (make-vector-3 22.0 40.0 0.0)
 				:acc (make-vector-3 0.0 0.0 0.0)))
-			(ob3 (make-space-object
+			(ob3 (make-instance 'space-object
 				:mass 75.0
 				:pos (make-vector-3 -10.0 -5.0 12.0)))
 			(all-objs (list ob1 ob2 ob3)))
@@ -160,7 +160,7 @@
 					(= -5394134 (floor (* 1e19 z))))))))
 
 (deftest test-integrate-acc-to-vel
-	(let ((ob (make-space-object
+	(let ((ob (make-instance 'space-object
 			:acc (make-vector-3 6.0 4.0 1.5)
 			:vel (make-vector-3 2.5 1.0 -8.7))))
 		(with-slots (vel) ob
@@ -172,7 +172,7 @@
 					(= -855 (floor (* 100 z))))))))
 
 (deftest test-integrate-vel-to-pos
-	(let ((ob (make-space-object
+	(let ((ob (make-instance 'space-object
 			:vel (make-vector-3 6.0 4.0 1.5)
 			:pos (make-vector-3 2.5 1.0 -8.7))))
 		(with-slots (pos) ob
