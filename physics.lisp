@@ -73,14 +73,17 @@
 								(expt distance 2))
 							(mult ; r hat
 								(/ 1 distance)
-								rel-pos))))))))
+								rel-pos)) :frame :global))))))
 
-(defgeneric add-force (obj force)
+(defgeneric add-force (obj force &key)
 	(:documentation "apply a force to obj, and update acc"))
 
-(defmethod add-force ((obj space-object) (force vector-3))
+(defmethod add-force ((obj space-object) (force vector-3) &key (frame :local))
 	(with-slots (mass acc) obj
-		(setf acc (add acc (mult (/ 1 mass) force)))))
+		(setf acc (add acc (mult (/ 1 mass)
+			(if (eq frame :global)
+				force
+				(rotate force (slot-value obj 'ang-pos))))))))
 
 (defgeneric add-torque (obj torque &key)
 	(:documentation "apply a torque to obj, and update acc"))
