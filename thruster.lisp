@@ -5,11 +5,11 @@
 		:documentation "The vessel the thruster is attached to.")
 	(max-thrust
 		:initarg :max-thrust
-		:initform (0.0 0.0 1.0)
+		:initform (list 0.0 0.0 1.0)
 		:documentation "The maximum thrust the thruster can produce (vector-3).")
 	(pos
 		:initarg :pos
-		:initform (0.0 0.0 0.0)
+		:initform (list 0.0 0.0 0.0)
 		:documentation "The position of the thruster relative to the vessel (vector-3).")))
 
 (defgeneric burn (thruster power-level)
@@ -17,7 +17,7 @@
 
 (defmethod burn ((thruster thruster) power-level)
 	(with-slots (vessel max-thrust pos) thruster
-		(add-force-off-center vessel (* power-level max-thrust) pos :frame :local)))
+		(add-force-off-center vessel (mult power-level max-thrust) pos :frame :local)))
 
 (defclass thruster-group ()
 	((thrusters

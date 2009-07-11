@@ -88,21 +88,18 @@
 	(:documentation "apply a force to obj, compute the associated torque, and update acc and ang-acc accordingly"))
 
 (defmethod add-force-off-center ((obj space-object) (force vector-3) (pos vector-3) &key (frame :local))
-	(add-force obj force frame)
-	(add-torque obj (cross pos force) frame))
+	(add-force obj force :frame frame)
+	(add-torque obj (cross pos force) :frame frame))
 
-(defgeneric compute-acc (obj all-objs)
-	(:documentation "compute the acceleration on obj, and update acc"))
+(defgeneric compute-forces (obj all-objs)
+	(:documentation "compute the forces on obj, and update acc and ang-acc"))
 
-(defmethod compute-acc ((obj space-object) all-objs)
-	(setf (slot-value obj 'acc) (make-vector-3 0 0 0))
-	(compute-gravity obj all-objs))
-
-(defgeneric compute-ang-acc (obj all-objs)
-	(:documentation "compute the angular acceleration on obj, and update ang-acc"))
-
-(defmethod compute-ang-acc ((obj space-object) all-objs)
+(defmethod compute-forces :before ((obj space-object) all-objs)
+	(setf (slot-value obj     'acc) (make-vector-3 0 0 0))
 	(setf (slot-value obj 'ang-acc) (make-vector-3 0 0 0)))
+
+(defmethod compute-forces ((obj space-object) all-objs)
+	(compute-gravity obj all-objs))
 
 (defgeneric integrate-acc-to-vel (obj dt)
 	(:documentation "integrate acceleration to get velocity."))
@@ -136,8 +133,7 @@
 
 (defun timestep (all-objs dt)
 	(loop for obj in all-objs do
-		(compute-acc obj all-objs)
-		(compute-ang-acc obj all-objs))
+		(compute-forces obj all-objs))
 	(loop for obj in all-objs do
 		(integrate-acc-to-vel obj dt)
 		(integrate-ang-acc-to-ang-vel obj dt)

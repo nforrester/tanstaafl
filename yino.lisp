@@ -5,6 +5,7 @@
 (load "physics.lisp")
 (load "commands.lisp")
 (load "vessel.lisp")
+(load "thruster.lisp")
 
 (defvar *state-output-stream* t)
 (defvar *command-input-stream* t)
@@ -42,16 +43,15 @@
 
 (wait-for-command-if-needed)
 
-(main-loop
-	*time-acceleration*
+(defvar *all-objs*
 	(cond
-		(nil
+		(t
 			(list (make-instance 'vessel
 					:pos (make-vector-3 0 0 0)
 					:inertia-tensor (compute-inertia-tensor 1 1 1)
 					:max-torque (make-vector-3 1 1 1)
 					:ang-vel (make-vector-3 0 0 0))))
-		(t
+		(nil
 			(list
 				(make-instance 'vessel
 					:mass (/ 4.0 *G*)
@@ -63,3 +63,9 @@
 					:mass (/ 4.0 *G*)
 					:pos (make-vector-3 -1.0 0.0 0.0)
 					:vel (make-vector-3 0.0 0.0 -1.0))))))
+
+(make-simple-thruster-setup (first *all-objs*))
+
+(main-loop
+	*time-acceleration*
+	*all-objs*)
