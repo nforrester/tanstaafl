@@ -62,25 +62,25 @@
 	(with-slots (thruster-groups) vessel
 		(let
 				; all the RCS thrusters are named by position-direction
-				((fore-up       (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
-				(fore-down      (make-instance 'thruster :max-thrust (make-vector-3 0 -1 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
-				(aft-up         (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
-				(aft-down       (make-instance 'thruster :max-thrust (make-vector-3 0 -1 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
+				((fore-up       (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
+				(fore-down      (make-instance 'thruster :max-thrust (make-vector-3 0 -1 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
+				(aft-up         (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
+				(aft-down       (make-instance 'thruster :max-thrust (make-vector-3 0 -1 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
 
-				(fore-starboard (make-instance 'thruster :max-thrust (make-vector-3  1 0 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
-				(fore-port      (make-instance 'thruster :max-thrust (make-vector-3 -1 0 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
-				(aft-starboard  (make-instance 'thruster :max-thrust (make-vector-3  1 0 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
-				(aft-port       (make-instance 'thruster :max-thrust (make-vector-3 -1 0 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
+				(fore-starboard (make-instance 'thruster :max-thrust (make-vector-3  1 0 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
+				(fore-port      (make-instance 'thruster :max-thrust (make-vector-3 -1 0 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
+				(aft-starboard  (make-instance 'thruster :max-thrust (make-vector-3  1 0 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
+				(aft-port       (make-instance 'thruster :max-thrust (make-vector-3 -1 0 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
 
 				(starboard-up   (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3  .5 0 0) :vessel vessel))
 				(starboard-down (make-instance 'thruster :max-thrust (make-vector-3 0 -1 0) :pos (make-vector-3  .5 0 0) :vessel vessel))
 				(port-up        (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3 -.5 0 0) :vessel vessel))
 				(port-down      (make-instance 'thruster :max-thrust (make-vector-3 0 -1 0) :pos (make-vector-3 -.5 0 0) :vessel vessel))
 
-				(starboard-fore (make-instance 'thruster :max-thrust (make-vector-3 0 0  1) :pos (make-vector-3  .5 0 0) :vessel vessel))
-				(starboard-aft  (make-instance 'thruster :max-thrust (make-vector-3 0 0 -1) :pos (make-vector-3  .5 0 0) :vessel vessel))
-				(port-fore      (make-instance 'thruster :max-thrust (make-vector-3 0 0  1) :pos (make-vector-3 -.5 0 0) :vessel vessel))
-				(port-aft       (make-instance 'thruster :max-thrust (make-vector-3 0 0 -1) :pos (make-vector-3 -.5 0 0) :vessel vessel))
+				(starboard-fore (make-instance 'thruster :max-thrust (make-vector-3 0 0 -1) :pos (make-vector-3  .5 0 0) :vessel vessel))
+				(starboard-aft  (make-instance 'thruster :max-thrust (make-vector-3 0 0  1) :pos (make-vector-3  .5 0 0) :vessel vessel))
+				(port-fore      (make-instance 'thruster :max-thrust (make-vector-3 0 0 -1) :pos (make-vector-3 -.5 0 0) :vessel vessel))
+				(port-aft       (make-instance 'thruster :max-thrust (make-vector-3 0 0  1) :pos (make-vector-3 -.5 0 0) :vessel vessel))
 
 				(main (make-instance 'thruster :max-thrust (make-vector-3 0 0 5) :pos (make-vector-3 0 0 -.5) :vessel vessel))
 				(retro (make-instance 'thruster :max-thrust (make-vector-3 0 0 -5) :pos (make-vector-3 0 0 .5) :vessel vessel)))
