@@ -6,6 +6,8 @@
 (load "physics.lisp")
 (load "gl-bindings.lisp")
 (load "gui.lisp")
+(load "mfd.lisp")
+(load "test-mfd.lisp")
 (load "vessel.lisp")
 (load "thruster.lisp")
 
@@ -66,6 +68,19 @@
 				;	:mass (/ 8.0 *G*)
 					:pos (make-vector-3 0.0 0.0 0.0)
 					:vel (make-vector-3 0.0 0.0 0.0))))))
+
+(defvar *all-mfds*
+	(list
+		(make-instance 'test-mfd
+			:ap-x 0.5
+			:ap-y 0.5
+			:x 0.5
+			:y 0.5
+			:max-width .3
+			:max-height .3
+			:red 1
+			:green 0
+			:blue 0)))
 
 (setf *focused-object* (first *all-objs*))
 

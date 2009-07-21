@@ -60,9 +60,11 @@
 							for arg in arguments
 							collecting
 								(cond
-									((eq 'ffi:single-float (second arg))
+									((eq (second arg) 'ffi:int)
+										`(round ,external-arg))
+									((eq (second arg) 'ffi:single-float)
 										`(coerce ,external-arg 'single-float))
-									((eq 'ffi:double-float (second arg))
+									((eq (second arg) 'ffi:double-float)
 										`(coerce ,external-arg 'double-float))
 									(t
 										external-arg)))))
@@ -88,10 +90,11 @@
 
 ; And finally we define the bindings:
 
-(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
+(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
 	(gl-clear-color (r ffi:double-float) (g ffi:double-float) (b ffi:double-float) (a ffi:double-float))
 	(gl-shade-model (model ffi:uint))
 	(gl-enable (option ffi:uint))
+	(gl-disable (option ffi:uint))
 	(gl-load-identity)
 	(gl-matrix-mode (mode ffi:uint))
 	(gl-viewport
@@ -103,6 +106,15 @@
 	(gl-cull-face (mode ffi:uint))
 	(gl-push-matrix)
 	(gl-pop-matrix)
+	(gl-begin (mode ffi:uint))
+	(gl-end)
+	(gl-color3f
+		(red ffi:single-float)
+		(green ffi:single-float)
+		(blue ffi:single-float))
+	(gl-vertex2d
+		(x ffi:double-float)
+		(y ffi:double-float))
 	(gl-translated
 		(x ffi:double-float)
 		(y ffi:double-float)
@@ -114,6 +126,11 @@
 		(z ffi:double-float)))
 
 (gl-style-callouts-single-library "/usr/lib64/libGLU.so"
+	(glu-ortho2-d
+		(left   ffi:double-float)
+		(right  ffi:double-float)
+		(bottom ffi:double-float)
+		(top    ffi:double-float))
 	(glu-perspective
 		(fov          ffi:double-float)
 		(aspect-ratio ffi:double-float)
@@ -166,6 +183,7 @@
 	*gl-depth-test*
 	*gl-lighting*
 	*gl-light0*
+	*gl-lines*
 	*gl-cull-face*
 	*gl-front*
 	*gl-back*
@@ -194,3 +212,9 @@
 					(/ x len)
 					(/ y len)
 					(/ z len))))))
+
+(defmacro gl-begin-end (mode &rest forms)
+	`(progn
+		(gl-begin ,mode)
+		,@forms
+		(gl-end)))
