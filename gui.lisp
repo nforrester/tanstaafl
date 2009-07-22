@@ -1,3 +1,6 @@
+(defvar *last-modelview-matrix* nil)
+(defvar *last-projection-matrix* nil)
+
 (let ((screen-size (make-vector-2 100 100))) ; These functions should share screen-size. I like closures.
 	(defun display ()
 		(with-slots (x y) screen-size
@@ -17,6 +20,9 @@
 		; from the viewpoint of the selected object. That's why they rotate everything backwards.
 		(gl-rotate-quaternion-reverse (slot-value *focused-object* 'ang-pos))
 		(gl-translate-vector-3 (mult -1 (slot-value *focused-object* 'pos)))
+
+		(setf *last-modelview-matrix* (gl-get-doublev *gl-modelview-matrix*))
+		(setf *last-projection-matrix* (gl-get-doublev *gl-projection-matrix*))
 
 		(gl-clear (logior
 			*gl-color-buffer-bit*
@@ -72,9 +78,6 @@
 
 	(gl-translate-vector-3 (slot-value obj 'pos))
 	(gl-rotate-quaternion (slot-value obj 'ang-pos))
-
-	(setf (slot-value obj 'model-matrix) (gl-get-doublev *gl-modelview-matrix*))
-	(setf (slot-value obj 'proj-matrix) (gl-get-doublev *gl-projection-matrix*))
 
 	(call-next-method)
 	(gl-pop-matrix))

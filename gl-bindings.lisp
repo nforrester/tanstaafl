@@ -71,7 +71,6 @@
 				(ffi:def-call-out ,internal-name
 					(:library ,library)
 					(:arguments ,@arguments)
-					;,(if (not (eq nil arguments)) `(:arguments ,@arguments))
 					(:name
 						,(list-strings-to-string
 							(loop
@@ -90,7 +89,7 @@
 
 ; And finally we define the bindings:
 
-(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
+(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
 	(gl-clear-color (r ffi:double-float) (g ffi:double-float) (b ffi:double-float) (a ffi:double-float))
 	(gl-shade-model (model ffi:uint))
 	(gl-enable (option ffi:uint))
@@ -209,7 +208,6 @@
 	(glut-ignore-key-repeat (setting ffi:int))
 	(glut-main-loop-event)
 	(glut-main-loop)
-;	(glut-bitmap-character (font ffi:c-pointer) (chr ffi:character))
 	(glut-solid-teapot (size ffi:double-float)))
 
 (fetch-constants "GL/freeglut.h"
@@ -238,11 +236,6 @@
 	*gl-front-and-back*
 	*glut-down*
 	*glut-up*)
-
-;(ffi:def-c-var *glut-bitmap-9-by-15-font* (:name "glutBitmap9By15") (:library "/usr/lib64/libglut.so") (:type ffi:c-pointer))
-;(defvar *glut-bitmap-9-by-15* (ffi:foreign-address *glut-bitmap-9-by-15-font*))
-;(gl-style-callouts-single-library "/home/neil/yino/text.so"
-;	(char-placer (c ffi:character)))
 
 (defun gl-vertex-vector-2 (vec)
 	(with-slots (x y) vec
@@ -292,6 +285,9 @@
 	(with-slots (red green blue alpha) color
 		(gl-color4f red green blue alpha)))
 
+;;; Multiple return values. First is a vector-2 of window coordinates,
+;;; second is t or nil, indicating whether the
+;;; projected point is in front of or behind the camera.
 (defun glu-project-vector-3-2 (pos model-matrix proj-matrix screen-size)
 	(with-slots (x y z) pos
 		(with-slots ((screen-width x) (screen-height y)) screen-size
@@ -301,24 +297,22 @@
 						model-matrix
 						proj-matrix
 						(vector 0 0 screen-width screen-height))
-				(make-vector-2 win-x win-y)))))
+				(values (make-vector-2 win-x win-y) (> 1 win-z))))))
 
 (defmacro gl-place-char-maker (str)
 	`(defun gl-place-char (c)
-		(print "hello")
 		(cond
 			,@(loop for i upto (- (length str) 1) collecting
 				`((equal c ,(elt str i))
-					(print c)
-					(print (elt *char-set* ,i))
 					(gl-bitmap 8 17 0 0 8 0 (elt *char-set* ,i))))
 			(t (gl-bitmap 8 17 0 0 8 0 (elt *char-set* 94))))))
 
 (gl-place-char-maker "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
 
-(defun gl-place-string (str x y)
+(defun gl-place-string (str pos)
 	(gl-disable *gl-depth-test*)
-	(gl-raster-pos2d x y)
+	(with-slots (x y) pos
+		(gl-raster-pos2d x y))
 	(loop for i upto (- (length str) 1) do
 		(gl-place-char (elt str i)))
 	(gl-enable *gl-depth-test*))
