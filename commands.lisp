@@ -17,24 +17,17 @@
 					(setf char-buffer "")
 					return-value)))))
 
-(defun split-string (str)
-	(loop
-		for i = 0 then (1+ j)
-		as j = (position #\Space str :start i)
-		collect (subseq str i j)
-		while j))
-
 (defvar *depressed-keys* ())
 
 (defun check-depressed-keys (str)
-	(< 0 (loop for key in *depressed-keys* counting (string= str key))))
+	(< 0 (loop for key in *depressed-keys* counting (equal str key))))
 
 (defun process-commands ()
 	(loop
 		(let ((command (get-command)))
 			(if (eq nil command)
 				(return)
-				(let ((command-list (split-string command)))
+				(let ((command-list (split-string #\Space command)))
 					(format *error-output* "command-list: ~a~%" command-list)
 					(cond
 						((string= "key" (first command-list))

@@ -170,7 +170,8 @@
 			(loop
 				(setf prev-time current-time)
 				(setf current-time (get-internal-real-time))
-				(process-commands)
 				(timestep all-objs (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
 				(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
+				(glut-post-redisplay)
+				(glut-main-loop-event)
 				(print-timestep all-objs)))))

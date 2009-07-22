@@ -1,9 +1,10 @@
 ; YINO = YINO it's not orbiter
 ; By Neil Forrester
 
+(load "util.lisp")
 (load "math.lisp")
 (load "physics.lisp")
-(load "commands.lisp")
+(load "gui.lisp")
 (load "vessel.lisp")
 (load "thruster.lisp")
 
