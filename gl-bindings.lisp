@@ -100,6 +100,7 @@
 		(x2 ffi:int)
 		(y2 ffi:int))
 	(gl-clear (buffer ffi:uint))
+	(gl-cull-face (mode ffi:uint))
 	(gl-push-matrix)
 	(gl-pop-matrix)
 	(gl-translated
@@ -164,7 +165,11 @@
 	*gl-smooth*
 	*gl-depth-test*
 	*gl-lighting*
-	*gl-light0*)
+	*gl-light0*
+	*gl-cull-face*
+	*gl-front*
+	*gl-back*
+	*gl-front-and-back*)
 
 (defun gl-translate-vector-3 (vec)
 	(with-slots (x y z) vec
@@ -180,3 +185,12 @@
 					(/ y len)
 					(/ z len))))))
 
+(defun gl-rotate-quaternion-reverse (quat)
+	(with-slots (w x y z) quat
+		(let ((len (magnitude (make-vector-3 x y z))))
+			(if (/= 0 len) ; compute angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
+				(gl-rotated
+					(* -1 (/ (* (* 2 (acos w)) 180) *pi*))
+					(/ x len)
+					(/ y len)
+					(/ z len))))))

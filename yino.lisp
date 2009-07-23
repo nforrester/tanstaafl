@@ -57,12 +57,13 @@
 			(list
 				(make-instance 'vessel
 					:mass 1
-					:pos (make-vector-3 2.0 0.0 0.0)
+					:pos (make-vector-3 0.0 0.0 -10.0)
 					:inertia-tensor (compute-inertia-tensor 1 1 1)
 					:max-torque (make-vector-3 1 1 1)
-					:vel (make-vector-3 0.0 0.0 2.0))
+					:vel (make-vector-3 0.0 0.0 0.0))
 				(make-instance 'space-object
-					:mass (/ 8.0 *G*)
+					:mass 1
+				;	:mass (/ 8.0 *G*)
 					:pos (make-vector-3 0.0 0.0 0.0)
 					:vel (make-vector-3 0.0 0.0 0.0))))))
 

@@ -1,10 +1,19 @@
 (defun display ()
 	(gl-matrix-mode *gl-modelview*)
 	(gl-load-identity)
-	(glu-look-at
-		0 10  0
-		0  0  0
-		0  0 -1)
+;	(glu-look-at
+;		0 10  0
+;		0  0  0
+;		0  0 -1)
+
+	; What I'm really achieving with these two calls is making everything look as though it was
+	; from the selected viewpoint.
+;	(gl-rotated 90 1 0 0)
+;	(gl-translated 0 -10 0)
+
+	(gl-rotate-quaternion-reverse (slot-value *focused-object* 'ang-pos))
+	(gl-translate-vector-3 (mult -1 (slot-value *focused-object* 'pos)))
+
 	(gl-clear (logior
 		*gl-color-buffer-bit*
 		*gl-depth-buffer-bit*))
@@ -15,7 +24,9 @@
 (defgeneric draw (obj)
 	(:documentation "Render an object."))
 
-(defmethod draw :around ((obj space-object)) ; to push a matrix on the stack and apply appropriate transformations to put it in the right place, and then pop the matrix again afterwords.
+(defmethod draw :around ((obj space-object)) ; to push a matrix on the stack and apply appropriate
+                                             ; transformations to put the object in the right place,
+					     ; and then pop the matrix off again afterwords.
 	(gl-push-matrix)
 	(gl-translate-vector-3 (slot-value obj 'pos))
 	(gl-rotate-quaternion (slot-value obj 'ang-pos))
@@ -65,6 +76,9 @@
 (gl-enable *gl-depth-test*)
 (gl-enable *gl-lighting*)
 (gl-enable *gl-light0*)
+
+(gl-enable *gl-cull-face*)
+(gl-cull-face *gl-front*)
 
 (glut-ignore-key-repeat 1)
 
