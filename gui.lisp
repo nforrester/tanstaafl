@@ -1,16 +1,9 @@
 (defun display ()
 	(gl-matrix-mode *gl-modelview*)
 	(gl-load-identity)
-;	(glu-look-at
-;		0 10  0
-;		0  0  0
-;		0  0 -1)
 
 	; What I'm really achieving with these two calls is making everything look as though it was
-	; from the selected viewpoint.
-;	(gl-rotated 90 1 0 0)
-;	(gl-translated 0 -10 0)
-
+	; from the viewpoint of the selected object. That's why they rotate everything backwards.
 	(gl-rotate-quaternion-reverse (slot-value *focused-object* 'ang-pos))
 	(gl-translate-vector-3 (mult -1 (slot-value *focused-object* 'pos)))
 
