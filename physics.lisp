@@ -77,7 +77,6 @@
 	(:documentation "apply a torque to obj, and update acc"))
 
 (defmethod add-torque ((obj space-object) (torque vector-3) &key (frame :local))
-	(format *error-output* "add-torque!~%")
 	(with-slots (inertia-tensor ang-acc) obj
 		(setf ang-acc (add ang-acc (mult (inverse inertia-tensor)
 			(if (eq frame :global)
@@ -141,6 +140,7 @@
 		(integrate-ang-vel-to-ang-pos obj dt)))
 
 (defun print-timestep (all-objs)
+;	(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
 	(format *state-output-stream* "begin-timestep~%")
 	(dolist (obj all-objs)
 		(format *state-output-stream* "begin-object~%")
@@ -171,7 +171,5 @@
 				(setf prev-time current-time)
 				(setf current-time (get-internal-real-time))
 				(timestep all-objs (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
-				(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
 				(glut-post-redisplay)
-				(glut-main-loop-event)
-				(print-timestep all-objs)))))
+				(glut-main-loop-event)))))

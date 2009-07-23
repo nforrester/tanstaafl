@@ -4,6 +4,7 @@
 (load "util.lisp")
 (load "math.lisp")
 (load "physics.lisp")
+(load "gl-bindings.lisp")
 (load "gui.lisp")
 (load "vessel.lisp")
 (load "thruster.lisp")
@@ -46,24 +47,26 @@
 
 (defvar *all-objs*
 	(cond
-		(t
+		(nil
 			(list (make-instance 'vessel
 					:pos (make-vector-3 0 0 0)
 					:inertia-tensor (compute-inertia-tensor 1 1 1)
 					:max-torque (make-vector-3 1 1 1)
 					:ang-vel (make-vector-3 0 0 0))))
-		(nil
+		(t
 			(list
 				(make-instance 'vessel
-					:mass (/ 4.0 *G*)
-					:pos (make-vector-3 1.0 0.0 0.0)
+					:mass 1
+					:pos (make-vector-3 2.0 0.0 0.0)
 					:inertia-tensor (compute-inertia-tensor 1 1 1)
 					:max-torque (make-vector-3 1 1 1)
-					:vel (make-vector-3 0.0 0.0 1.0))
+					:vel (make-vector-3 0.0 0.0 2.0))
 				(make-instance 'space-object
-					:mass (/ 4.0 *G*)
-					:pos (make-vector-3 -1.0 0.0 0.0)
-					:vel (make-vector-3 0.0 0.0 -1.0))))))
+					:mass (/ 8.0 *G*)
+					:pos (make-vector-3 0.0 0.0 0.0)
+					:vel (make-vector-3 0.0 0.0 0.0))))))
+
+(setf *focused-object* (first *all-objs*))
 
 (make-simple-thruster-setup (first *all-objs*))
 

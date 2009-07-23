@@ -60,6 +60,8 @@
 							for arg in arguments
 							collecting
 								(cond
+									((eq 'ffi:single-float (second arg))
+										`(coerce ,external-arg 'single-float))
 									((eq 'ffi:double-float (second arg))
 										`(coerce ,external-arg 'double-float))
 									(t
@@ -100,11 +102,11 @@
 	(gl-clear (buffer ffi:uint))
 	(gl-push-matrix)
 	(gl-pop-matrix)
-	(gl-translatef
+	(gl-translated
 		(x ffi:double-float)
 		(y ffi:double-float)
 		(z ffi:double-float))
-	(gl-rotatef
+	(gl-rotated
 		(a ffi:double-float)
 		(x ffi:double-float)
 		(y ffi:double-float)
@@ -166,20 +168,15 @@
 
 (defun gl-translate-vector-3 (vec)
 	(with-slots (x y z) vec
-		(gl-translatef x y z)))
+		(gl-translated x y z)))
 
 (defun gl-rotate-quaternion (quat)
 	(with-slots (w x y z) quat
 		(let ((len (magnitude (make-vector-3 x y z))))
 			(if (/= 0 len) ; compute angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
-				(gl-rotatef
+				(gl-rotated
 					(/ (* (* 2 (acos w)) 180) *pi*)
 					(/ x len)
 					(/ y len)
-					(/ z len))
-				(gl-rotatef
-					0
-					1
-					0
-					0)))))
+					(/ z len))))))
 

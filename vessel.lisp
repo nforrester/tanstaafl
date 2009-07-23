@@ -1,3 +1,5 @@
+(defvar *focused-object* nil)
+
 (defclass vessel (space-object)
 	((max-torque
 		:initarg :max-torque

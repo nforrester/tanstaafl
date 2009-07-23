@@ -1,6 +1,3 @@
-(load "util.lisp")
-(load "gl-bindings.lisp")
-
 (defun display ()
 	(gl-matrix-mode *gl-modelview*)
 	(gl-load-identity)
@@ -18,16 +15,15 @@
 (defgeneric draw (obj)
 	(:documentation "Render an object."))
 
-(defmethod draw :before ((obj space-object)) ; to push a matrix on the stack and apply appropriate transformations to put it in the right place
+(defmethod draw :around ((obj space-object)) ; to push a matrix on the stack and apply appropriate transformations to put it in the right place, and then pop the matrix again afterwords.
 	(gl-push-matrix)
 	(gl-translate-vector-3 (slot-value obj 'pos))
-	(gl-rotate-quaternion (slot-value obj 'ang-pos)))
-
-(defmethod draw :after ((obj space-object)) ; to pop the matrix off the stack and apply appropriate transformations to put it in the right place
+	(gl-rotate-quaternion (slot-value obj 'ang-pos))
+	(call-next-method)
 	(gl-pop-matrix))
 
 (defmethod draw ((obj space-object))
-	(gl-rotatef 90 0 1 0)
+	(gl-rotated 90 0 1 0)
 	(glut-solid-teapot 1))
 
 (defun reshape (width height)
@@ -55,12 +51,6 @@
 (defun keyboard-up (key x y)
 	(remove-from-depressed-keys key))
 
-(defun special-down (key x y)
-	(add-to-depressed-keys key))
-
-(defun special-up (key x y)
-	(remove-from-depressed-keys key))
-
 (defun mouse (button state x y)
 	(print (list button state x y)))
 
@@ -85,7 +75,7 @@
 (glut-keyboard-func #'keyboard-down)
 (glut-keyboard-up-func #'keyboard-up)
 
-(glut-special-func #'special-down)
-(glut-special-up-func #'special-up)
+(glut-special-func #'keyboard-down)
+(glut-special-up-func #'keyboard-up)
 
 (glut-mouse-func #'mouse)
