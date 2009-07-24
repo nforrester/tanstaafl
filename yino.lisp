@@ -2,12 +2,20 @@
 ; By Neil Forrester
 
 (load "util.lisp")
+
 (load "math.lisp")
 (load "physics.lisp")
+
 (load "gl-bindings.lisp")
+
 (load "gui.lisp")
+
 (load "mfd.lisp")
 (load "test-mfd.lisp")
+
+(load "button.lisp")
+(load "test-button.lisp")
+
 (load "vessel.lisp")
 (load "thruster.lisp")
 
@@ -72,15 +80,31 @@
 (defvar *all-mfds*
 	(list
 		(make-instance 'test-mfd
-			:ap-x 0.5
-			:ap-y 0.5
+			:ap-x 0.2
+			:ap-y 0.2
 			:x 0.5
 			:y 0.5
-			:max-width .3
+			:max-width  .3
 			:max-height .3
-			:red 1
+			:red   1
 			:green 0
-			:blue 0)))
+			:blue  0
+			:alpha 0.3)))
+
+(defvar *all-buttons*
+	(list
+		(make-instance 'test-button
+			:ap-x 0
+			:ap-y 0
+			:x 0.9
+			:y 0.9
+			:width  40
+			:height 40
+			:red   0
+			:green 1
+			:blue  0
+			:alpha 0.5
+			:click-function #'(lambda () (print "click")))))
 
 (setf *focused-object* (first *all-objs*))
 

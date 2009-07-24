@@ -1,4 +1,4 @@
-(defclass test-mfd (mfd)
+(defclass test-button (button)
 	((red
 		:initarg :red
 		:initform 1)
@@ -12,8 +12,8 @@
 		:initarg :alpha
 		:initform 1)))
 
-(defmethod draw-2d (mfd screen-width screen-height)
-	(with-slots (red green blue alpha) mfd
+(defmethod draw-2d ((button test-button) screen-width screen-height)
+	(with-slots (red green blue alpha) button
 		(gl-matrix-mode *gl-projection*)
 		(gl-load-identity)
 		(glu-ortho2-d 0 1 0 1)

@@ -90,7 +90,7 @@
 
 ; And finally we define the bindings:
 
-(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
+(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
 	(gl-clear-color (r ffi:double-float) (g ffi:double-float) (b ffi:double-float) (a ffi:double-float))
 	(gl-shade-model (model ffi:uint))
 	(gl-enable (option ffi:uint))
@@ -108,10 +108,16 @@
 	(gl-pop-matrix)
 	(gl-begin (mode ffi:uint))
 	(gl-end)
+	(gl-blend-func (srcfactor ffi:uint) (dstfactor ffi:uint))
 	(gl-color3f
 		(red ffi:single-float)
 		(green ffi:single-float)
 		(blue ffi:single-float))
+	(gl-color4f
+		(red ffi:single-float)
+		(green ffi:single-float)
+		(blue ffi:single-float)
+		(alpha ffi:single-float))
 	(gl-vertex2d
 		(x ffi:double-float)
 		(y ffi:double-float))
@@ -148,13 +154,15 @@
 		(uz ffi:double-float)))
 
 (gl-style-callouts-single-library "/usr/lib64/libglut.so"
-	(glut-display-func     (func (ffi:c-function)))
-	(glut-keyboard-func    (func (ffi:c-function (:arguments (key ffi:character) (x ffi:int) (y ffi:int)))))
-	(glut-keyboard-up-func (func (ffi:c-function (:arguments (key ffi:character) (x ffi:int) (y ffi:int)))))
-	(glut-special-func     (func (ffi:c-function (:arguments (key ffi:int) (x ffi:int) (y ffi:int)))))
-	(glut-special-up-func  (func (ffi:c-function (:arguments (key ffi:int) (x ffi:int) (y ffi:int)))))
-	(glut-mouse-func       (func (ffi:c-function (:arguments (button ffi:int) (state ffi:int) (x ffi:int) (y ffi:int)))))
-	(glut-reshape-func     (func (ffi:c-function (:arguments (width ffi:int) (height ffi:int)))))
+	(glut-display-func        (func (ffi:c-function)))
+	(glut-reshape-func        (func (ffi:c-function (:arguments (width ffi:int) (height ffi:int)))))
+	(glut-keyboard-func       (func (ffi:c-function (:arguments (key ffi:character) (x ffi:int) (y ffi:int)))))
+	(glut-keyboard-up-func    (func (ffi:c-function (:arguments (key ffi:character) (x ffi:int) (y ffi:int)))))
+	(glut-special-func        (func (ffi:c-function (:arguments (key ffi:int) (x ffi:int) (y ffi:int)))))
+	(glut-special-up-func     (func (ffi:c-function (:arguments (key ffi:int) (x ffi:int) (y ffi:int)))))
+	(glut-mouse-func          (func (ffi:c-function (:arguments (button ffi:int) (state ffi:int) (x ffi:int) (y ffi:int)))))
+	(glut-motion-func         (func (ffi:c-function (:arguments (x ffi:int) (y ffi:int)))))
+	(glut-passive-motion-func (func (ffi:c-function (:arguments (x ffi:int) (y ffi:int)))))
 	(glut-init-window-position
 		(x ffi:int)
 		(y ffi:int))
@@ -184,10 +192,16 @@
 	*gl-lighting*
 	*gl-light0*
 	*gl-lines*
+	*gl-quads*
+	*gl-blend*
+	*gl-src-alpha*
+	*gl-one-minus-src-alpha*
 	*gl-cull-face*
 	*gl-front*
 	*gl-back*
-	*gl-front-and-back*)
+	*gl-front-and-back*
+	*glut-down*
+	*glut-up*)
 
 (defun gl-translate-vector-3 (vec)
 	(with-slots (x y z) vec
@@ -218,3 +232,9 @@
 		(gl-begin ,mode)
 		,@forms
 		(gl-end)))
+
+(defmacro gl-enable-disable (mode &rest forms)
+	`(progn
+		(gl-enable ,mode)
+		,@forms
+		(gl-disable ,mode)))
