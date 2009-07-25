@@ -1,4 +1,6 @@
 (defvar *pi* 3.14159265358979323 (:documentation "Tasty pie"))
+(defvar *radians-to-degrees* (/ 360 (* 2 *pi*))
+	(:documentation "All civilized people use radians. Unfortunately, OpenGL was designed by savages."))
 
 ; I would do vectors and matrices in a more general way, accounting for
 ; different possible sizes, but I only need a limited selection of sizes,
@@ -32,7 +34,7 @@
 				(+ oz tz)))))
 
 (defgeneric mult (scalar something)
-	(:documentation "scalar multiplication"))
+	(:documentation "scalar multiplication. If scalar is actually the same thing as something, then element-wise multiplication is performed, like .* in MATLAB."))
 
 (defmethod mult (scalar (vec vector-3))
 	(with-slots (x y z) vec
@@ -40,6 +42,14 @@
 			(* scalar x)
 			(* scalar y)
 			(* scalar z))))
+
+(defmethod mult ((v1 vector-3) (v2 vector-3))
+	(with-slots ((x1 x) (y1 y) (z1 z)) v1
+		(with-slots ((x2 x) (y2 y) (z2 z)) v2
+			(make-vector-3
+				(* x1 x2)
+				(* y1 y2)
+				(* z1 z2)))))
 
 (defgeneric dot (one two)
 	(:documentation "dot product"))
@@ -78,6 +88,58 @@
 				(expt x 2)
 				(expt y 2)
 				(expt z 2)) 0.5)))
+
+(defclass vector-2 ()
+	((x :initarg :x :initform 0)
+	(y :initarg :y :initform 0)))
+
+(defun make-vector-2 (&optional (x 0.0) (y 0.0))
+	(make-instance 'vector-2 :x x :y y))
+
+(defmethod print-math (out-stream (vec vector-2))
+	(with-slots (x y) vec
+		(format out-stream "(~a ~a)~%" x y)))
+
+(defmethod add ((one vector-2) (two vector-2))
+	(with-slots ((ox x) (oy y)) one
+		(with-slots ((tx x) (ty y)) two
+			(make-vector-2
+				(+ ox tx)
+				(+ oy ty)))))
+
+(defmethod mult (scalar (vec vector-2))
+	(with-slots (x y) vec
+		(make-vector-2
+			(* scalar x)
+			(* scalar y))))
+
+(defmethod mult ((v1 vector-2) (v2 vector-2))
+	(with-slots ((x1 x) (y1 y)) v1
+		(with-slots ((x2 x) (y2 y)) v2
+			(make-vector-2
+				(* x1 x2)
+				(* y1 y2)))))
+
+(defmethod dot ((one vector-2) (two vector-2))
+	(with-slots ((ox x) (oy y)) one
+		(with-slots ((tx x) (ty y)) two
+			(+
+				(* ox tx)
+				(* oy ty)))))
+
+(defmethod cross ((one vector-2) (two vector-2))
+	(with-slots ((ox x) (oy y)) one
+		(with-slots ((tx x) (ty y)) two
+			(- (* ox ty) (* oy tx)))))
+
+(defmethod sub ((one vector-2) (two vector-2))
+	(add one (mult -1 two)))
+
+(defmethod magnitude ((vec vector-2))
+		(with-slots (x y) vec
+			(expt (+
+				(expt x 2)
+				(expt y 2)) 0.5)))
 
 (defclass quaternion ()
 	((w :initarg :w :initform 1)

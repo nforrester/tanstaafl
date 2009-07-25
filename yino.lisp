@@ -16,6 +16,9 @@
 (load "button.lisp")
 (load "test-button.lisp")
 
+(load "hud-layer.lisp")
+(load "test-hud.lisp")
+
 (load "vessel.lisp")
 (load "thruster.lisp")
 
@@ -80,31 +83,26 @@
 (defvar *all-mfds*
 	(list
 		(make-instance 'test-mfd
-			:ap-x 0.2
-			:ap-y 0.2
-			:x 0.5
-			:y 0.5
-			:max-width  .3
-			:max-height .3
-			:red   1
-			:green 0
-			:blue  0
-			:alpha 0.3)))
+			:anchor-point (make-vector-2 .2 .2)
+			:pos (make-vector-2 .5 .5)
+			:max-size (make-vector-2 .3 .3)
+			:color (make-color 1 0 0 0.3))))
 
 (defvar *all-buttons*
 	(list
 		(make-instance 'test-button
-			:ap-x 0
-			:ap-y 0
-			:x 0.9
-			:y 0.9
-			:width  40
-			:height 40
-			:red   0
-			:green 1
-			:blue  0
-			:alpha 0.5
+			:anchor-point (make-vector-2 0 0)
+			:pos (make-vector-2 .9 .9)
+			:size (make-vector-2 40 40)
+			:color (make-color 0 1 0 0.5)
 			:click-function #'(lambda () (print "click")))))
+
+(defvar *all-hud-layers*
+	(list
+		(make-instance 'test-hud
+			:color (make-color 0 0 1 0.8)
+			:origin (first *all-objs*)
+			:target (second *all-objs*))))
 
 (setf *focused-object* (first *all-objs*))
 

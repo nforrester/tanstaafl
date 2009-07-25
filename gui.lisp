@@ -1,9 +1,10 @@
-(let ((width 100) (height 100)) ; These functions should share width and height. I like closures.
+(let ((screen-size (make-vector-2 100 100))) ; These functions should share screen-size. I like closures.
 	(defun display ()
-		(gl-viewport 0 0 width height) ; Draw the main scene
-		(gl-matrix-mode *gl-projection*)
-		(gl-load-identity)
-		(glu-perspective 40 (/ width height) .1 1000)
+		(with-slots (x y) screen-size
+			(gl-viewport 0 0 x y) ; Draw the main scene
+			(gl-matrix-mode *gl-projection*)
+			(gl-load-identity)
+			(glu-perspective 40 (/ x y) .1 1000))
 
 		(gl-matrix-mode *gl-modelview*)
 		(gl-load-identity)
@@ -28,16 +29,20 @@
 		(gl-disable *gl-cull-face*)
 
 		(loop for mfd in *all-mfds* do
-			(draw-2d mfd width height))
+			(draw-2d mfd screen-size))
 
 		(loop for button in *all-buttons* do
-			(draw-2d button width height))
+			(draw-2d button screen-size))
+
+		(loop for hud-layer in *all-hud-layers* do
+			(draw-2d hud-layer screen-size))
 
 		(glut-swap-buffers))
 
 	(defun reshape (window-width window-height)
-		(setf width window-width)
-		(setf height window-height)
+		(with-slots (x y) screen-size
+			(setf x window-width)
+			(setf y window-height))
 		(glut-post-redisplay))
 
 	(defun keyboard-down (key x y)
@@ -46,9 +51,10 @@
 	(defun keyboard-up (key x y)
 		(remove-from-depressed-keys key))
 
-	(defun mouse-click (mouse-button state x y)
-		(loop for button in *all-buttons* do
-			(check-and-handle-click button mouse-button state x (- height y) width height)))
+	(defun mouse-click (mouse-button state click-x click-y)
+		(with-slots (x y) screen-size
+			(loop for button in *all-buttons* do
+				(check-and-handle-click button mouse-button state (make-vector-2 click-x (- y click-y)) (make-vector-2 x y)))))
 
 	(defun mouse-motion-down (x y)
 		)
@@ -73,33 +79,42 @@
 	(glut-solid-teapot 1))
 
 (defclass box-2d ()
-	((ap-x
-		:initarg :ap-x
-		:initform 0
-		:documentation "X coordinate of the anchor point of the box, in box coordinates, expressed as a fraction of the box width")
-	(ap-y
-		:initarg :ap-y
-		:initform 0
-		:documentation "Y coordinate of the anchor point of the box, in box coordinates, expressed as a fraction of the box height")
-	(x
-		:initarg :x
-		:initform .25
-		:documentation "The x coordinate of the anchor point of the box, in window coordinates, expressed as a fraction of the screen width")
-	(y
-		:initarg :y
-		:initform .25
-		:documentation "The y coordinate of the anchor point of the box, in window coordinates, expressed as a fraction of the screen height")))
+	((anchor-point
+		:initarg :anchor-point
+		:initform (make-vector-2 0 0)
+		:documentation "The anchor point of the box, in box coordinates, expressed as a fraction of the box height, as a vector-2")
+	(pos
+		:initarg :pos
+		:initform (make-vector-2 .25 .25)
+		:documentation "The position of the anchor point of the box, in window coordinates, expressed as a fraction of the screen width, as a vector-2")))
 
-(defgeneric draw-2d (box screen-width screen-height)
+(defgeneric draw-2d (box screen-size)
 	(:documentation "Draw something on the 2d overlay"))
 
-(defgeneric check-and-handle-click (object mouse-button state click-x click-y screen-width screen-height)
-        (:documentation "Given that a click (down or up) occurred at (click-x, click-y),
+(defgeneric check-and-handle-click (object mouse-button state click-pos screen-size)
+        (:documentation "Given that a click (down or up) occurred at click-pos,
 	test if object was affected and act accordingly.
 	mouse-button shall be a number, state shall be t or nil for down or up"))
 
-(defgeneric compute-sw-corner (object screen-width screen-height)
-	(:documentation "Compute the lower left corner of object, and return a list (x y) in pixels."))
+(defgeneric compute-sw-corner (object screen-size)
+	(:documentation "Compute the lower left corner of object, and return a vector-2 in pixels."))
+
+(defclass color ()
+	((red
+		:initarg :red
+		:initform 1)
+	(green
+		:initarg :green
+		:initform 1)
+	(blue
+		:initarg :blue
+		:initform 1)
+	(alpha
+		:initarg :alpha
+		:initform 1)))
+
+(defun make-color (red green blue alpha)
+	(make-instance 'color :red red :green green :blue blue :alpha alpha))
 
 (defvar *depressed-keys* ())
 

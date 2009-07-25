@@ -121,6 +121,10 @@
 	(gl-vertex2d
 		(x ffi:double-float)
 		(y ffi:double-float))
+	(gl-vertex3d
+		(x ffi:double-float)
+		(y ffi:double-float)
+		(z ffi:double-float))
 	(gl-translated
 		(x ffi:double-float)
 		(y ffi:double-float)
@@ -192,6 +196,7 @@
 	*gl-lighting*
 	*gl-light0*
 	*gl-lines*
+	*gl-line-loop*
 	*gl-quads*
 	*gl-blend*
 	*gl-src-alpha*
@@ -202,6 +207,14 @@
 	*gl-front-and-back*
 	*glut-down*
 	*glut-up*)
+
+(defun gl-vertex-vector-2 (vec)
+	(with-slots (x y) vec
+		(gl-vertex2d x y)))
+
+(defun gl-vertex-vector-3 (vec)
+	(with-slots (x y z) vec
+		(gl-vertex3d x y z)))
 
 (defun gl-translate-vector-3 (vec)
 	(with-slots (x y z) vec
@@ -238,3 +251,7 @@
 		(gl-enable ,mode)
 		,@forms
 		(gl-disable ,mode)))
+
+(defun gl-color (color)
+	(with-slots (red green blue alpha) color
+		(gl-color4f red green blue alpha)))
