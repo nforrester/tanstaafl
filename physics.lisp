@@ -34,7 +34,13 @@
 	(ang-acc
 		:initarg :ang-acc
 		:initform (make-vector-3)
-		:documentation "angular acceleration in radians/s/s, as a vector-3")))
+		:documentation "angular acceleration in radians/s/s, as a vector-3")
+	(model-matrix
+		:initform nil
+		:documentation "Stores the last modelview matrix used to draw this object")
+	(proj-matrix
+		:initform nil
+		:documentation "Stores the last projection matrix used to draw this object")))
 
 (defun compute-inertia-tensor (x y z)
 	(make-matrix-3-3

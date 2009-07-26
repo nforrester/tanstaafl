@@ -51,7 +51,7 @@
 ; without explicit coersion/casting.
 (defmacro gl-style-callout (name library &rest arguments)
 	(let ((name name) (library library) (arguments arguments) (internal-name (gensym)))
-		(let ((external-args (loop for i from 1 upto (list-length arguments) collecting (gensym))))
+		(let ((external-args (loop for i from 1 upto (list-length (mapcan #'(lambda (x) (if (eq :out (third x)) nil (list x))) arguments)) collecting (gensym))))
 			`(progn
 				(defun ,name ,external-args
 					(,internal-name
@@ -125,6 +125,13 @@
 		(x ffi:double-float)
 		(y ffi:double-float)
 		(z ffi:double-float))
+	(gl-raster-pos2d
+		(x ffi:double-float)
+		(y ffi:double-float))
+	(gl-raster-pos3d
+		(x ffi:double-float)
+		(y ffi:double-float)
+		(z ffi:double-float))
 	(gl-translated
 		(x ffi:double-float)
 		(y ffi:double-float)
@@ -133,7 +140,10 @@
 		(a ffi:double-float)
 		(x ffi:double-float)
 		(y ffi:double-float)
-		(z ffi:double-float)))
+		(z ffi:double-float))
+	(gl-get-doublev
+		(pname ffi:uint)
+		(params  (ffi:c-ptr (ffi:c-array ffi:double-float 16)) :out)))
 
 (gl-style-callouts-single-library "/usr/lib64/libGLU.so"
 	(glu-ortho2-d
@@ -155,7 +165,17 @@
 		(tz ffi:double-float)
 		(ux ffi:double-float)
 		(uy ffi:double-float)
-		(uz ffi:double-float)))
+		(uz ffi:double-float))
+	(glu-project
+		(obj-x ffi:double-float)
+		(obj-y ffi:double-float)
+		(obj-z ffi:double-float)
+		(model-matrix (ffi:c-array-ptr ffi:double-float))
+		(proj-matrix  (ffi:c-array-ptr ffi:double-float))
+		(viewport     (ffi:c-array-ptr ffi:int))
+		(win-x (ffi:c-ptr ffi:double-float) :out)
+		(win-y (ffi:c-ptr ffi:double-float) :out)
+		(win-z (ffi:c-ptr ffi:double-float) :out)))
 
 (gl-style-callouts-single-library "/usr/lib64/libglut.so"
 	(glut-display-func        (func (ffi:c-function)))
@@ -181,11 +201,14 @@
 	(glut-ignore-key-repeat (setting ffi:int))
 	(glut-main-loop-event)
 	(glut-main-loop)
+	(glut-bitmap-character (font ffi:c-pointer) (chr ffi:character))
 	(glut-solid-teapot (size ffi:double-float)))
 
 (fetch-constants "GL/freeglut.h"
 	*gl-projection*
 	*gl-modelview*
+	*gl-projection-matrix*
+	*gl-modelview-matrix*
 	*gl-color-buffer-bit*
 	*gl-depth-buffer-bit*
 	*glut-double*
@@ -207,6 +230,9 @@
 	*gl-front-and-back*
 	*glut-down*
 	*glut-up*)
+
+(ffi:def-c-var *glut-bitmap-9-by-15-font* (:name "glutBitmap9By15") (:library "/usr/lib64/libglut.so") (:type ffi:c-pointer))
+(defvar *glut-bitmap-9-by-15* (ffi:foreign-address *glut-bitmap-9-by-15-font*))
 
 (defun gl-vertex-vector-2 (vec)
 	(with-slots (x y) vec
@@ -255,3 +281,14 @@
 (defun gl-color (color)
 	(with-slots (red green blue alpha) color
 		(gl-color4f red green blue alpha)))
+
+(defun glu-project-vector-3-2 (pos model-matrix proj-matrix screen-size)
+	(with-slots (x y z) pos
+		(with-slots ((screen-width x) (screen-height y)) screen-size
+			(multiple-value-bind (win-x win-y win-z)
+					(glu-project
+						x y z
+						model-matrix
+						proj-matrix
+						(vector 0 0 screen-width screen-height))
+				(make-vector-2 win-x win-y)))))

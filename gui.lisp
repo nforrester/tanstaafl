@@ -69,8 +69,13 @@
                                              ; transformations to put the object in the right place,
 					     ; and then pop the matrix off again afterwords.
 	(gl-push-matrix)
+
 	(gl-translate-vector-3 (slot-value obj 'pos))
 	(gl-rotate-quaternion (slot-value obj 'ang-pos))
+
+	(setf (slot-value obj 'model-matrix) (gl-get-doublev *gl-modelview-matrix*))
+	(setf (slot-value obj 'proj-matrix) (gl-get-doublev *gl-projection-matrix*))
+
 	(call-next-method)
 	(gl-pop-matrix))
 
