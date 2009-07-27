@@ -109,6 +109,14 @@
 	(gl-begin (mode ffi:uint))
 	(gl-end)
 	(gl-blend-func (srcfactor ffi:uint) (dstfactor ffi:uint))
+	(gl-bitmap
+		(width  ffi:int)
+		(height ffi:int)
+		(xbo ffi:single-float)
+		(ybo ffi:single-float)
+		(xbi ffi:single-float)
+		(ybi ffi:single-float)
+		(bitmap (ffi:c-array-ptr ffi:int)))
 	(gl-color3f
 		(red ffi:single-float)
 		(green ffi:single-float)
@@ -201,7 +209,7 @@
 	(glut-ignore-key-repeat (setting ffi:int))
 	(glut-main-loop-event)
 	(glut-main-loop)
-	(glut-bitmap-character (font ffi:c-pointer) (chr ffi:character))
+;	(glut-bitmap-character (font ffi:c-pointer) (chr ffi:character))
 	(glut-solid-teapot (size ffi:double-float)))
 
 (fetch-constants "GL/freeglut.h"
@@ -231,8 +239,10 @@
 	*glut-down*
 	*glut-up*)
 
-(ffi:def-c-var *glut-bitmap-9-by-15-font* (:name "glutBitmap9By15") (:library "/usr/lib64/libglut.so") (:type ffi:c-pointer))
-(defvar *glut-bitmap-9-by-15* (ffi:foreign-address *glut-bitmap-9-by-15-font*))
+;(ffi:def-c-var *glut-bitmap-9-by-15-font* (:name "glutBitmap9By15") (:library "/usr/lib64/libglut.so") (:type ffi:c-pointer))
+;(defvar *glut-bitmap-9-by-15* (ffi:foreign-address *glut-bitmap-9-by-15-font*))
+;(gl-style-callouts-single-library "/home/neil/yino/text.so"
+;	(char-placer (c ffi:character)))
 
 (defun gl-vertex-vector-2 (vec)
 	(with-slots (x y) vec
@@ -292,3 +302,23 @@
 						proj-matrix
 						(vector 0 0 screen-width screen-height))
 				(make-vector-2 win-x win-y)))))
+
+(defmacro gl-place-char-maker (str)
+	`(defun gl-place-char (c)
+		(print "hello")
+		(cond
+			,@(loop for i upto (- (length str) 1) collecting
+				`((equal c ,(elt str i))
+					(print c)
+					(print (elt *char-set* ,i))
+					(gl-bitmap 8 17 0 0 8 0 (elt *char-set* ,i))))
+			(t (gl-bitmap 8 17 0 0 8 0 (elt *char-set* 94))))))
+
+(gl-place-char-maker "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
+
+(defun gl-place-string (str x y)
+	(gl-disable *gl-depth-test*)
+	(gl-raster-pos2d x y)
+	(loop for i upto (- (length str) 1) do
+		(gl-place-char (elt str i)))
+	(gl-enable *gl-depth-test*))

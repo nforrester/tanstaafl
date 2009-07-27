@@ -6,17 +6,17 @@
 (load "math.lisp")
 (load "physics.lisp")
 
+(load "char-set.lisp")
 (load "gl-bindings.lisp")
 
 (load "gui.lisp")
 
 (load "mfd.lisp")
-(load "test-mfd.lisp")
-
 (load "button.lisp")
-(load "test-button.lisp")
-
 (load "hud-layer.lisp")
+
+(load "test-mfd.lisp")
+(load "test-button.lisp")
 (load "test-hud.lisp")
 
 (load "vessel.lisp")
