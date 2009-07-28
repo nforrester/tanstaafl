@@ -89,7 +89,7 @@
 
 ; And finally we define the bindings:
 
-(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
+(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
 	(gl-clear-color (r ffi:double-float) (g ffi:double-float) (b ffi:double-float) (a ffi:double-float))
 	(gl-shade-model (model ffi:uint))
 	(gl-enable (option ffi:uint))
@@ -304,8 +304,8 @@
 		(cond
 			,@(loop for i upto (- (length str) 1) collecting
 				`((equal c ,(elt str i))
-					(gl-bitmap 8 17 0 0 8 0 (elt *char-set* ,i))))
-			(t (gl-bitmap 8 17 0 0 8 0 (elt *char-set* 94))))))
+					(gl-bitmap (slot-value *char-size* 'x) (slot-value *char-size* 'y) 0 0 (slot-value *char-size* 'x) 0 (elt *char-set* ,i))))
+			(t (gl-bitmap (slot-value *char-size* 'x) (slot-value *char-size* 'y) 0 0 (slot-value *char-size* 'x) 0 (elt *char-set* *char-non-print*))))))
 
 (gl-place-char-maker "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
 
@@ -313,6 +313,16 @@
 	(gl-disable *gl-depth-test*)
 	(with-slots (x y) pos
 		(gl-raster-pos2d x y))
-	(loop for i upto (- (length str) 1) do
-		(gl-place-char (elt str i)))
+	(loop for line-length for i upto (- (length str) 1) do
+		(if (not (eq #\Newline (elt str i)))
+			(gl-place-char (elt str i))
+			(progn (gl-bitmap
+				(slot-value *char-size* 'x)
+				(slot-value *char-size* 'y)
+				0
+				0
+				(* -1 line-length (slot-value *char-size* 'x))
+				(* -1 (slot-value *char-size* 'y))
+				(elt *char-set* *char-non-print*))
+				(setf line-length -1))))
 	(gl-enable *gl-depth-test*))

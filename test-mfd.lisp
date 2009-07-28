@@ -17,5 +17,5 @@
 		(gl-vertex2d 1 1)
 		(gl-vertex2d 1 0))
 	(gl-color (make-color 1 1 1 1))
-	(gl-place-string "JELLO WORLD" (make-vector-2 .5 .5))
+	(gl-place-string (concatenate 'string `(,@(concatenate 'list "JELLO WORLD") #\Newline ,@(concatenate 'list "helo"))) (make-vector-2 .5 .5))
 	(gl-place-string "jello world" (make-vector-2 .5 .6)))

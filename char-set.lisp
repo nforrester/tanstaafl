@@ -1,3 +1,6 @@
+(defvar *char-size* (make-vector-2 8 17))
+(defvar *char-non-print* 94)
+
 (defvar *char-set* (vector
 	(vector #x00 #x00 #x00 #x00 #x18 #x18 #x00 #x18 #x18 #x18 #x3C #x3C #x3C #x18 #x00 #x00 #x00)
 	(vector #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x24 #x66 #x66 #x66 #x00 #x00)
@@ -93,5 +96,4 @@
 	(vector #x00 #x00 #x00 #x00 #x18 #x18 #x18 #x18 #x18 #x18 #x18 #x18 #x18 #x18 #x00 #x00 #x00)
 	(vector #x00 #x00 #x00 #x00 #x70 #x18 #x18 #x18 #x18 #x0E #x18 #x18 #x18 #x70 #x00 #x00 #x00)
 	(vector #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #xDC #x76 #x00 #x00)
-	(vector #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00)
-))
+	(vector #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00 #x00)))

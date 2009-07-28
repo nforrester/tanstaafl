@@ -16,8 +16,7 @@
 (load "hud-layer.lisp")
 
 (load "test-mfd.lisp")
-(load "test-button.lisp")
-(load "test-hud.lisp")
+(load "relative-hud.lisp")
 
 (load "vessel.lisp")
 (load "thruster.lisp")
@@ -90,16 +89,17 @@
 
 (defvar *all-buttons*
 	(list
-		(make-instance 'test-button
-			:anchor-point (make-vector-2 0 0)
-			:pos (make-vector-2 .9 .9)
-			:size (make-vector-2 40 40)
-			:color (make-color 0 1 0 0.5)
+		(make-instance 'text-bg-button
+			:anchor-point (make-vector-2 0 1)
+			:text (format nil "Hello Fucking World!")
+			:pos (make-vector-2 .2 .9)
+			:background-color (make-color 0 1 0 0.5)
+			:text-color       (make-color 1 0 0 1)
 			:click-function #'(lambda () (print "click")))))
 
 (defvar *all-hud-layers*
 	(list
-		(make-instance 'test-hud
+		(make-instance 'relative-hud
 			:color (make-color 0 0 1 0.8)
 			:origin (first *all-objs*)
 			:target (second *all-objs*))))
