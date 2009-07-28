@@ -1,7 +1,11 @@
 (defvar *G* 6.673e-11 (:documentation "Gravitational constant"))
 
 (defclass space-object ()
-	((mass
+	((name
+		:initarg :name
+		:initform ""
+		:documentation "The name of the object.")
+	(mass
 		:initarg :mass
 		:initform 1.0
 		:documentation "Mass measured in kg.")

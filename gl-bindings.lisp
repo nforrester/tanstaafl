@@ -208,7 +208,8 @@
 	(glut-ignore-key-repeat (setting ffi:int))
 	(glut-main-loop-event)
 	(glut-main-loop)
-	(glut-solid-teapot (size ffi:double-float)))
+	(glut-solid-teapot (size ffi:double-float))
+	(glut-solid-sphere (radius ffi:double-float) (slices ffi:int) (stacks ffi:int)))
 
 (fetch-constants "GL/freeglut.h"
 	*gl-projection*

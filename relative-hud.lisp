@@ -10,8 +10,11 @@
 	(with-slots (origin target) hud
 		(multiple-value-bind (pos visible) (glu-project-vector-3-2 (slot-value target 'pos) *last-modelview-matrix* *last-projection-matrix* screen-size)
 			(gl-place-string
+				(format nil "~aP ~a" (if visible "+" "-") (slot-value target 'name))
+				(add pos (make-vector-2 -40 50)))
+			(gl-place-string
 				(format nil "~3$" (magnitude (sub (slot-value target 'pos) (slot-value origin 'pos))))
-				(add pos (make-vector-2  -40  50)))
+				(add pos (make-vector-2 -40 -55)))
 			(gl-begin-end *gl-line-loop*
 				(gl-vertex-vector-2 (add pos (make-vector-2  40  40)))
 				(gl-vertex-vector-2 (add pos (make-vector-2 -40  40)))
@@ -23,8 +26,11 @@
 					(gl-vertex-vector-2 (add pos (make-vector-2  40 0))))))
 		(multiple-value-bind (pos visible) (glu-project-vector-3-2 (add (slot-value origin 'pos) (sub (slot-value target 'vel) (slot-value origin 'vel))) *last-modelview-matrix* *last-projection-matrix* screen-size)
 			(gl-place-string
+				(format nil "~aV ~a" (if visible "+" "-") (slot-value target 'name))
+				(add pos (make-vector-2 -40 50)))
+			(gl-place-string
 				(format nil "~3$" (magnitude (sub (slot-value target 'vel) (slot-value origin 'vel))))
-				(add pos (make-vector-2  -40  50)))
+				(add pos (make-vector-2 -40 -55)))
 			(gl-begin-end *gl-lines*
 				(gl-vertex-vector-2 (add pos (make-vector-2   0  40)))
 				(gl-vertex-vector-2 (add pos (make-vector-2   0 -40)))

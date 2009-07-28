@@ -21,6 +21,8 @@
 (load "vessel.lisp")
 (load "thruster.lisp")
 
+(load "planets.lisp")
+
 (defvar *state-output-stream* t)
 (defvar *command-input-stream* t)
 (defvar *time-acceleration* 1)
@@ -68,14 +70,16 @@
 		(t
 			(list
 				(make-instance 'vessel
+					:name "Test Vessel"
 					:mass 1
 					:pos (make-vector-3 0.0 0.0 -10.0)
 					:inertia-tensor (compute-inertia-tensor 1 1 1)
 					:max-torque (make-vector-3 1 1 1)
-					:vel (make-vector-3 0.0 0.0 0.0))
-				(make-instance 'space-object
-					:mass 1
-				;	:mass (/ 8.0 *G*)
+					:vel (make-vector-3 0.0 1.0 0.0))
+				(make-instance 'spherical-body
+					:name "Test Planet"
+					:mass (/ 8.0 *G*)
+					:radius 5
 					:pos (make-vector-3 0.0 0.0 0.0)
 					:vel (make-vector-3 0.0 0.0 0.0))))))
 
