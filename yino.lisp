@@ -74,18 +74,26 @@
 			(list
 				(make-instance 'vessel
 					:name "Teapot"
-					:mass 1
-					:pos (make-vector-3 0.0 0.0 6400000)
-					:inertia-tensor (compute-inertia-tensor 1 1 1)
-					:radius 2
-					:max-torque (make-vector-3 1 1 1)
-					:vel (make-vector-3 0.0 8000 0.0))
+					:mass 1d0
+					:pos (make-vector-3 0.0d0 0.0d0 6400000d0)
+					:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
+					:radius 2d0
+					:max-torque (make-vector-3 1d0 1d0 1d0)
+					:vel (make-vector-3 0.0d0 8000d0 0.0d0))
+				(make-instance 'vessel
+					:name "Teapot-2"
+					:mass 1d0
+					:pos (make-vector-3 0.0d0 10.0d0 6400000d0)
+					:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
+					:radius 2d0
+					:max-torque (make-vector-3 1d0 1d0 1d0)
+					:vel (make-vector-3 0.0d0 8000d0 0.0d0))
 				(make-instance 'spherical-body
 					:name "Earth"
-					:mass 5.9742e24
-					:radius 6.3781e6
-					:pos (make-vector-3 0.0 0.0 0.0)
-					:vel (make-vector-3 0.0 0.0 0.0))))))
+					:mass 5.9742d24
+					:radius 6.3781d6
+					:pos (make-vector-3 0.0d0 0.0d0 0.0d0)
+					:vel (make-vector-3 0.0d0 0.0d0 0.0d0))))))
 
 (defvar *all-mfds*
 	(list
@@ -110,7 +118,11 @@
 		(make-instance 'relative-hud
 			:color (make-color 0 0 1 0.8)
 			:origin (first *all-objs*)
-			:target (second *all-objs*))))
+			:target (second *all-objs*))
+		(make-instance 'relative-hud
+			:color (make-color 1 0.5 0 0.8)
+			:origin (first *all-objs*)
+			:target (third *all-objs*))))
 
 (setf *focused-object* (first *all-objs*))
 
