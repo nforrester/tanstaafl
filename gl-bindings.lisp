@@ -255,7 +255,7 @@
 		(let ((len (magnitude (make-vector-3 x y z))))
 			(if (/= 0 len) ; compute angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
 				(gl-rotated
-					(/ (* (* 2 (acos w)) 180) *pi*)
+					(/ (* (* 2 (acos w)) 180) pi)
 					(/ x len)
 					(/ y len)
 					(/ z len))))))
@@ -265,7 +265,7 @@
 		(let ((len (magnitude (make-vector-3 x y z))))
 			(if (/= 0 len) ; compute angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
 				(gl-rotated
-					(* -1 (/ (* (* 2 (acos w)) 180) *pi*))
+					(* -1 (/ (* (* 2 (acos w)) 180) pi))
 					(/ x len)
 					(/ y len)
 					(/ z len))))))

@@ -1,3 +1,4 @@
+(defvar *focused-object* nil)
 (defvar *last-modelview-matrix* nil)
 (defvar *last-projection-matrix* nil)
 
@@ -7,7 +8,7 @@
 			(gl-viewport 0 0 x y) ; Draw the main scene
 			(gl-matrix-mode *gl-projection*)
 			(gl-load-identity)
-			(glu-perspective 40 (/ x y) .1 1000))
+			(glu-perspective 40 (/ x y) 1 100000000))
 
 		(gl-matrix-mode *gl-modelview*)
 		(gl-load-identity)
@@ -16,10 +17,12 @@
 		(gl-enable *gl-light0*)
 		(gl-enable *gl-cull-face*)
 
-		; What I'm really achieving with these two calls is making everything look as though it was
-		; from the viewpoint of the selected object. That's why they rotate everything backwards.
+		; What I'm really achieving with this call is making everything look as though it was
+		; from the viewpoint of the selected object. That's why it rotates everything backwards.
+		; The translation component is handled seperately (in an around method on draw) to give
+		; the full precision of floats close to the camera, and let parts of the scene that are
+		; further away have lower precision
 		(gl-rotate-quaternion-reverse (slot-value *focused-object* 'ang-pos))
-		(gl-translate-vector-3 (mult -1 (slot-value *focused-object* 'pos)))
 
 		(setf *last-modelview-matrix* (gl-get-doublev *gl-modelview-matrix*))
 		(setf *last-projection-matrix* (gl-get-doublev *gl-projection-matrix*))
@@ -76,7 +79,7 @@
 					     ; and then pop the matrix off again afterwords.
 	(gl-push-matrix)
 
-	(gl-translate-vector-3 (slot-value obj 'pos))
+	(gl-translate-vector-3 (sub (slot-value obj 'pos) (slot-value *focused-object* 'pos)))
 	(gl-rotate-quaternion (slot-value obj 'ang-pos))
 
 	(call-next-method)
@@ -84,7 +87,7 @@
 
 (defmethod draw ((obj space-object))
 	(gl-rotated 90 0 1 0)
-	(glut-solid-teapot 1))
+	(glut-solid-teapot (/ (slot-value obj 'radius) 2)))
 
 (defclass box-2d ()
 	((anchor-point

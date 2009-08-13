@@ -1,6 +1,9 @@
 ; YINO = YINO it's not orbiter
 ; By Neil Forrester
 
+(setf custom:*floating-point-contagion-ansi* t)
+(setf (ext:long-float-digits) 4096)
+
 (load "util.lisp")
 
 (load "math.lisp")
@@ -70,16 +73,17 @@
 		(t
 			(list
 				(make-instance 'vessel
-					:name "Test Vessel"
+					:name "Teapot"
 					:mass 1
-					:pos (make-vector-3 0.0 0.0 -10.0)
+					:pos (make-vector-3 0.0 0.0 6400000)
 					:inertia-tensor (compute-inertia-tensor 1 1 1)
+					:radius 2
 					:max-torque (make-vector-3 1 1 1)
-					:vel (make-vector-3 0.0 1.0 0.0))
+					:vel (make-vector-3 0.0 8000 0.0))
 				(make-instance 'spherical-body
-					:name "Test Planet"
-					:mass (/ 8.0 *G*)
-					:radius 5
+					:name "Earth"
+					:mass 5.9742e24
+					:radius 6.3781e6
 					:pos (make-vector-3 0.0 0.0 0.0)
 					:vel (make-vector-3 0.0 0.0 0.0))))))
 

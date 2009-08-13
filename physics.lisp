@@ -38,7 +38,11 @@
 	(ang-acc
 		:initarg :ang-acc
 		:initform (make-vector-3)
-		:documentation "angular acceleration in radians/s/s, as a vector-3")))
+		:documentation "angular acceleration in radians/s/s, as a vector-3")
+	(radius
+		:initarg :radius
+		:initform 1
+		:documentation "The radius of the space object, used for determining whether objects overlap in depth, and thus need to be in the same depth layer for drawing. spherical-bodies also use this as their literal radius.")))
 
 (defun compute-inertia-tensor (x y z)
 	(make-matrix-3-3
@@ -155,7 +159,7 @@
 					(print (list w x y z len))
 					(if (/= 0 len) ; print in angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
 						(format *state-output-stream* "ang-pos ~a ~a ~a ~a~%"
-							(/ (* (* 2 (acos w)) 180) *pi*)
+							(/ (* (* 2 (acos w)) 180) pi)
 							(/ x len)
 							(/ y len)
 							(/ z len))

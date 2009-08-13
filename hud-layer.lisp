@@ -19,25 +19,8 @@
 	(gl-color (slot-value hud-layer 'color))
 	(call-next-method))
 
-(defun project-position-to-hud (point-to-project view-point view-orientation screen-size field-of-view)
-	(let
-			((relative-point-to-project
-				(sub point-to-project view-point))
-			(center-of-projection-rectangle
-				(rotate
-					(make-vector-3
-						0
-						0
-						(/ (slot-value screen-size 'y) (* 2 (tan (/ field-of-view 2)))))
-					view-orientation)))
-;		(add
-;			(mult 0.5 screen-size)
-			(with-slots (x y)
-					(sub
-						(mult
-							(/
-								(dot center-of-projection-rectangle center-of-projection-rectangle)
-								(dot relative-point-to-project      center-of-projection-rectangle))
-							relative-point-to-project)
-						center-of-projection-rectangle)
-				(make-vector-2 x y))));)
+;;; Multiple return values. First is a vector-2 of window coordinates,
+;;; second is t or nil, indicating whether the
+;;; projected point is in front of or behind the camera.
+(defun project-position-to-hud (pos model-matrix proj-matrix screen-size)
+	(glu-project-vector-3-2 (sub pos (slot-value *focused-object* 'pos)) model-matrix proj-matrix screen-size))

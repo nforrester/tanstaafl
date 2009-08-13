@@ -1,6 +1,5 @@
-(defvar *pi* 3.14159265358979323 (:documentation "Tasty pie"))
-(defvar *radians-to-degrees* (/ 360 (* 2 *pi*))
-	(:documentation "All civilized people use radians. Unfortunately, OpenGL was designed by savages."))
+(defvar *radians-to-degrees* (/ 360 (* 2 pi))
+	(:documentation "All civilized people use radians. Unfortunately, most people are savages."))
 
 ; I would do vectors and matrices in a more general way, accounting for
 ; different possible sizes, but I only need a limited selection of sizes,
