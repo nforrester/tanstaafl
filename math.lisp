@@ -1,4 +1,5 @@
-(defvar *radians-to-degrees* (/ 360 (* 2 pi))
+(setf pi (coerce pi 'double-float)) ; Because pi doesn't need to be a long-float
+(defvar *degrees-per-radian* (/ 360 (* 2 pi))
 	(:documentation "All civilized people use radians. Unfortunately, most people are savages."))
 
 ; I would do vectors and matrices in a more general way, accounting for

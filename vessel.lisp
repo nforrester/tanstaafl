@@ -99,6 +99,6 @@
 			(setf (slot-value (getf thruster-groups :main)               'thrusters) (list main))
 			(setf (slot-value (getf thruster-groups :retro)              'thrusters) (list retro)))))
 
-(defmethod compute-forces ((obj vessel) all-objs)
+(defmethod compute-forces ((obj vessel) dt)
 	(call-next-method)
 	(handle-key-presses obj))

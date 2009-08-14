@@ -24,7 +24,9 @@
 (load "vessel.lisp")
 (load "thruster.lisp")
 
-(load "planets.lisp")
+(load "vsop87.lisp")
+(load "vsop87-data.lisp")
+(load "astronomical-bodies.lisp")
 
 (defvar *state-output-stream* t)
 (defvar *command-input-stream* t)
@@ -62,38 +64,34 @@
 
 (wait-for-command-if-needed)
 
-(defvar *all-objs*
-	(cond
-		(nil
-			(list (make-instance 'vessel
-					:pos (make-vector-3 0 0 0)
-					:inertia-tensor (compute-inertia-tensor 1 1 1)
-					:max-torque (make-vector-3 1 1 1)
-					:ang-vel (make-vector-3 0 0 0))))
-		(t
-			(list
-				(make-instance 'vessel
-					:name "Teapot"
-					:mass 1d0
-					:pos (make-vector-3 0.0d0 0.0d0 6400000d0)
-					:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
-					:radius 2d0
-					:max-torque (make-vector-3 1d0 1d0 1d0)
-					:vel (make-vector-3 0.0d0 8000d0 0.0d0))
-				(make-instance 'vessel
-					:name "Teapot-2"
-					:mass 1d0
-					:pos (make-vector-3 0.0d0 10.0d0 6400000d0)
-					:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
-					:radius 2d0
-					:max-torque (make-vector-3 1d0 1d0 1d0)
-					:vel (make-vector-3 0.0d0 8000d0 0.0d0))
-				(make-instance 'spherical-body
-					:name "Earth"
-					:mass 5.9742d24
-					:radius 6.3781d6
-					:pos (make-vector-3 0.0d0 0.0d0 0.0d0)
-					:vel (make-vector-3 0.0d0 0.0d0 0.0d0))))))
+(defvar *epoch-time* 0d0)
+
+(setf *earth* (make-instance 'vsop-planet
+	:name "Earth"
+	:mass 5.9742d24
+	:radius 6.3781d6
+	:vsop-interval 1d-5
+	:longitude-series-set *vsop-series-set-earth-long*
+	:latitude-series-set *vsop-series-set-earth-lat*
+	:radius-series-set *vsop-series-set-earth-rad*))
+(setf *tp1* (make-instance 'vessel
+	:name "Teapot"
+	:mass 1d0
+	:pos (make-vector-3 0.0d0 0.0d0 6400000d0)
+	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
+	:radius 2d0
+	:max-torque (make-vector-3 1d0 1d0 1d0)
+	:vel (make-vector-3 0.0d0 8000d0 0.0d0)))
+(setf *tp2* (make-instance 'vessel
+	:name "Teapot-2"
+	:mass 1d0
+	:pos (make-vector-3 0.0d0 10.0d0 6400000d0)
+	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
+	:radius 2d0
+	:max-torque (make-vector-3 1d0 1d0 1d0)
+	:vel (make-vector-3 0.0d0 8000d0 0.0d0)))
+
+(defvar *all-objs* (list *tp1* *tp2* *earth*))
 
 (defvar *all-mfds*
 	(list
@@ -107,7 +105,7 @@
 	(list
 		(make-instance 'text-bg-button
 			:anchor-point (make-vector-2 0 1)
-			:text (format nil "Hello Fucking World!")
+			:text (format nil "Hello World!")
 			:pos (make-vector-2 .2 .9)
 			:background-color (make-color 0 1 0 0.5)
 			:text-color       (make-color 1 0 0 1)

@@ -89,7 +89,8 @@
 
 ; And finally we define the bindings:
 
-(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
+;(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
+(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
 	(gl-clear-color (r ffi:double-float) (g ffi:double-float) (b ffi:double-float) (a ffi:double-float))
 	(gl-shade-model (model ffi:uint))
 	(gl-enable (option ffi:uint))
@@ -255,7 +256,7 @@
 		(let ((len (magnitude (make-vector-3 x y z))))
 			(if (/= 0 len) ; compute angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
 				(gl-rotated
-					(/ (* (* 2 (acos w)) 180) pi)
+					(* 2 (acos w) *degrees-per-radian*)
 					(/ x len)
 					(/ y len)
 					(/ z len))))))
@@ -265,7 +266,7 @@
 		(let ((len (magnitude (make-vector-3 x y z))))
 			(if (/= 0 len) ; compute angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
 				(gl-rotated
-					(* -1 (/ (* (* 2 (acos w)) 180) pi))
+					(* -1 2 (acos w) *degrees-per-radian*)
 					(/ x len)
 					(/ y len)
 					(/ z len))))))

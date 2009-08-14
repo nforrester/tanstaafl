@@ -1,4 +1,5 @@
-(defvar *G* 6.673e-11 (:documentation "Gravitational constant"))
+(defvar *G* 6.673d-11 (:documentation "Gravitational constant"))
+(defvar *m-per-au* 149598000000d0)
 
 (defclass space-object ()
 	((name
@@ -50,11 +51,11 @@
 		0 y 0
 		0 0 z))
 
-(defgeneric compute-gravity (obj all-objs)
-	(:documentation "compute gravity on obj due to all-objs."))
+(defgeneric compute-gravity (obj)
+	(:documentation "compute gravity on obj due to *all-objs*."))
 
-(defmethod compute-gravity ((obj space-object) all-objs)
-	(loop for other-obj in all-objs do
+(defmethod compute-gravity ((obj space-object))
+	(loop for other-obj in *all-objs* do
 		(unless (eq obj other-obj)
 			(let*
 					((rel-pos (sub
@@ -98,15 +99,15 @@
 	(add-force obj force :frame frame)
 	(add-torque obj (cross pos force) :frame frame))
 
-(defgeneric compute-forces (obj all-objs)
+(defgeneric compute-forces (obj dt)
 	(:documentation "compute the forces on obj, and update acc and ang-acc"))
 
-(defmethod compute-forces :before ((obj space-object) all-objs)
+(defmethod compute-forces :before ((obj space-object) dt)
 	(setf (slot-value obj     'acc) (make-vector-3 0 0 0))
 	(setf (slot-value obj 'ang-acc) (make-vector-3 0 0 0)))
 
-(defmethod compute-forces ((obj space-object) all-objs)
-	(compute-gravity obj all-objs))
+(defmethod compute-forces ((obj space-object) dt)
+	(compute-gravity obj))
 
 (defgeneric integrate-acc-to-vel (obj dt)
 	(:documentation "integrate acceleration to get velocity."))
@@ -138,19 +139,20 @@
 			(setf ang-pos (add ang-pos (mult dt (mult 0.5 (mult (make-quaternion 0 x y z) ang-pos)))))
 			(normalize ang-pos))))
 
-(defun timestep (all-objs dt)
-	(loop for obj in all-objs do
-		(compute-forces obj all-objs))
-	(loop for obj in all-objs do
+(defun timestep (dt)
+	(setf *epoch-time* (+ dt *epoch-time*))
+	(loop for obj in *all-objs* do
+		(compute-forces obj dt))
+	(loop for obj in *all-objs* do
 		(integrate-acc-to-vel obj dt)
 		(integrate-ang-acc-to-ang-vel obj dt)
 		(integrate-vel-to-pos obj dt)
 		(integrate-ang-vel-to-ang-pos obj dt)))
 
-(defun print-timestep (all-objs)
+(defun print-timestep ()
 ;	(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
-	(format *state-output-stream* "begin-timestep~%")
-	(dolist (obj all-objs)
+	(format *state-output-stream* "begin-timestep ~a~%" *epoch-time*)
+	(dolist (obj *all-objs*)
 		(format *state-output-stream* "begin-object~%")
 		(with-slots (x y z) (slot-value obj 'pos)
 			(format *state-output-stream* "pos ~a ~a ~a~%" x y z))
@@ -178,6 +180,6 @@
 			(loop
 				(setf prev-time current-time)
 				(setf current-time (get-internal-real-time))
-				(timestep all-objs (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
+				(timestep (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
 				(glut-post-redisplay)
 				(glut-main-loop-event)))))
