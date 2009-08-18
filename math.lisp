@@ -20,7 +20,8 @@
 
 (defmethod print-math (out-stream (vec vector-3))
 	(with-slots (x y z) vec
-		(format out-stream "(~a ~a ~a)~%" x y z)))
+		(format out-stream "(~a ~a ~a)~%" x y z))
+	vec)
 
 (defgeneric add (one two)
 	(:documentation "addition"))
@@ -98,7 +99,8 @@
 
 (defmethod print-math (out-stream (vec vector-2))
 	(with-slots (x y) vec
-		(format out-stream "(~a ~a)~%" x y)))
+		(format out-stream "(~a ~a)~%" x y))
+	vec)
 
 (defmethod add ((one vector-2) (two vector-2))
 	(with-slots ((ox x) (oy y)) one
@@ -141,12 +143,6 @@
 				(expt x 2)
 				(expt y 2)) 0.5)))
 
-(defclass quaternion ()
-	((w :initarg :w :initform 1)
-	(x :initarg :x :initform 0)
-	(y :initarg :y :initform 0)
-	(z :initarg :z :initform 0)))
-
 (defgeneric normalize (unnormalized)
 	(:documentation "Normalize something, like a vector, or a quaternion"))
 
@@ -163,12 +159,19 @@
 					(setf y 0)
 					(setf z 0))))))
 
+(defclass quaternion ()
+	((w :initarg :w :initform 1)
+	(x :initarg :x :initform 0)
+	(y :initarg :y :initform 0)
+	(z :initarg :z :initform 0)))
+
 (defun make-quaternion (&optional (w 1.0) (x 0.0) (y 0.0) (z 0.0))
 	(make-instance 'quaternion :w w :x x :y y :z z))
 
 (defmethod print-math (out-stream (quat quaternion))
 	(with-slots (w x y z) quat
-		(format out-stream "(~a ~a ~a ~a)~%" w x y z)))
+		(format out-stream "(~a ~a ~a ~a)~%" w x y z))
+	quat)
 
 (defmethod add ((one quaternion) (two quaternion))
 	(with-slots ((ow w) (ox x) (oy y) (oz z)) one
@@ -269,7 +272,8 @@
 		(format out-stream "((~a ~a ~a)~% (~a ~a ~a)~% (~a ~a ~a))~%"
 			m11 m12 m13
 			m21 m22 m23
-			m31 m32 m33)))
+			m31 m32 m33))
+	mat)
 
 (defmethod mult (scalar (mat matrix-3-3))
 	(with-slots
@@ -358,3 +362,52 @@
 				      (det-2-2 m12 m13 m22 m23)
 				(* -1 (det-2-2 m11 m13 m21 m23))
 				      (det-2-2 m11 m12 m21 m22))))))
+
+(defclass vector-3-spherical ()
+	((longitude :initarg :longitude :initform 0)
+	(latitude :initarg :latitude :initform 0)
+	(radius :initarg :radius :initform 0)))
+
+(defun make-vector-3-spherical (&optional (longitude 0.0) (latitude 0.0) (radius 0.0))
+	(make-instance 'vector-3-spherical :longitude longitude :latitude latitude :radius radius))
+
+(defmethod print-math (out-stream (vec vector-3-spherical))
+	(with-slots (longitude latitude radius) vec
+		(format out-stream "(~a ~a ~a)~%" longitude latitude radius))
+	vec)
+
+(defgeneric convert (target-type argument)
+	(:documentation "Return an object of class that is equivalent to argument, or nil if the conversion is impossible (or not implemented ;-) )."))
+
+(defmethod convert (target-type (argument vector-3-spherical))
+	(with-slots (longitude latitude radius) argument
+		(cond
+			((eq target-type 'vector-3)
+				(make-vector-3
+					(* radius (cos longitude) (cos latitude))
+					(* radius (cos longitude) (sin latitude))
+					(* radius (sin longitude))))
+			(t nil))))
+
+(defun sign(x)
+	(cond
+		((> x 0)  1)
+		((= x 0)  0)
+		((< x 0) -1)))
+
+(defun atan2 (x y)
+	(let ((angle (if (not (= x 0)) (atan (abs (/ y x))))))
+		(cond
+			((> x 0) (* (sign y) angle))
+			((< x 0) (* (sign y) (- pi angle)))
+			((= x 0) (* (sign y) (/ pi 2))))))
+
+(defmethod convert (target-type (argument vector-3))
+	(with-slots (x y z) argument
+		(cond
+			((eq target-type 'vector-3-spherical)
+				(make-vector-3-spherical
+					(if (= x y z 0) 0 (* -1 (- (acos (/ z (expt (+ (expt x 2) (expt y 2) (expt z 2)) 0.5))) (/ pi 2))))
+					(atan2 x y)
+					(expt (+ (expt x 2) (expt y 2) (expt z 2)) 0.5)))
+			(t nil))))

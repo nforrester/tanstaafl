@@ -43,15 +43,15 @@
 		:initform (make-instance 'vsop-reference-point :epoch -1)
 		:initarg :vsop-ref-2
 		:documentation "A vsop-reference-point")
-	(longitude-series-set
+	(x-series-set
 		:initform ()
-		:initarg :longitude-series-set)
-	(latitude-series-set
+		:initarg :x-series-set)
+	(y-series-set
 		:initform ()
-		:initarg :latitude-series-set)
-	(radius-series-set
+		:initarg :y-series-set)
+	(z-series-set
 		:initform ()
-		:initarg :radius-series-set)))
+		:initarg :z-series-set)))
 
 ;;; This function hijacks the inherited behavior completely. See above.
 (defmethod compute-forces :around ((obj vsop-body) dt)
@@ -64,15 +64,15 @@
 			pos
 			vel
 			acc
-			latitude-series-set
-			longitude-series-set
-			radius-series-set)
+			x-series-set
+			y-series-set
+			z-series-set)
 				obj
 		(multiple-value-setq (vsop-pos vsop-ref-1 vsop-ref-2) (vsop-compute-position
 			*epoch-time*
-			latitude-series-set
-			longitude-series-set
-			radius-series-set vsop-interval vsop-ref-1 vsop-ref-2))
+			x-series-set
+			y-series-set
+			z-series-set vsop-interval vsop-ref-1 vsop-ref-2))
 		(setf vsop-vel (mult (/ 1 dt) (sub vsop-pos pos)))
 		(setf acc      (mult (/ 1 dt) (sub vsop-vel vel)))))
 

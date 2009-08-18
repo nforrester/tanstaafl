@@ -2,7 +2,6 @@
 ; By Neil Forrester
 
 (setf custom:*floating-point-contagion-ansi* t)
-(setf (ext:long-float-digits) 4096)
 
 (load "util.lisp")
 
@@ -25,7 +24,6 @@
 (load "thruster.lisp")
 
 (load "vsop87.lisp")
-(load "vsop87-data.lisp")
 (load "astronomical-bodies.lisp")
 
 (defvar *state-output-stream* t)
@@ -70,26 +68,26 @@
 	:name "Earth"
 	:mass 5.9742d24
 	:radius 6.3781d6
-	:vsop-interval 1d-5
-	:longitude-series-set *vsop-series-set-earth-long*
-	:latitude-series-set *vsop-series-set-earth-lat*
-	:radius-series-set *vsop-series-set-earth-rad*))
+	:vsop-interval 1
+	:x-series-set *vsop-series-set-earth-x*
+	:y-series-set *vsop-series-set-earth-y*
+	:z-series-set *vsop-series-set-earth-z*))
 (setf *tp1* (make-instance 'vessel
 	:name "Teapot"
 	:mass 1d0
-	:pos (make-vector-3 0.0d0 0.0d0 6400000d0)
+	:pos (make-vector-3 1.4518590493763995d11 -3.4205701569802784d10 (+ 64000000d0 -2.2211526053121796d9))
 	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
 	:radius 2d0
 	:max-torque (make-vector-3 1d0 1d0 1d0)
-	:vel (make-vector-3 0.0d0 8000d0 0.0d0)))
+	:vel (make-vector-3 0.0d0 0d0 -30000.0d0)))
 (setf *tp2* (make-instance 'vessel
 	:name "Teapot-2"
 	:mass 1d0
-	:pos (make-vector-3 0.0d0 10.0d0 6400000d0)
+	:pos (make-vector-3 1.4518590493763995d11 (+ 10d0 -3.4205701569802784d10) (+ 64000000d0 -2.2211526053121796d9))
 	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
 	:radius 2d0
 	:max-torque (make-vector-3 1d0 1d0 1d0)
-	:vel (make-vector-3 0.0d0 8000d0 0.0d0)))
+	:vel (make-vector-3 0.0d0 0d0 -30000.0d0)))
 
 (defvar *all-objs* (list *tp1* *tp2* *earth*))
 
