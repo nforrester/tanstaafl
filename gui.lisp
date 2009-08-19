@@ -34,6 +34,11 @@
 		; further away have lower precision
 		(gl-rotate-quaternion-reverse (slot-value *focused-object* 'ang-pos))
 
+		(gl-push-matrix)
+		(gl-translate-vector-3 (sub (slot-value *sun* 'pos) (slot-value *focused-object* 'pos)))
+		(gl-lightfv *gl-light0* *gl-position* (vector 0e0 0e0 0e0 1e0))
+		(gl-pop-matrix)
+
 		(setf *current-modelview-matrix* (gl-get-doublev *gl-modelview-matrix*))
 		(setf *current-projection-matricies* ())
 

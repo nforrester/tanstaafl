@@ -64,10 +64,19 @@
 
 (defvar *epoch-time* 0d0)
 
+(setf *sun* (make-instance 'vsop-planet
+	:name "Sun"
+	:mass 1.9891d30
+	:radius 6.96d8
+	:vsop-interval 149
+	:x-series-set *vsop-series-set-sun-x*
+	:y-series-set *vsop-series-set-sun-y*
+	:z-series-set *vsop-series-set-sun-z*))
+
 (setf *mercury* (make-instance 'vsop-planet
 	:name "Mercury"
-	:mass 5.9742d24
-	:radius 6.3781d6
+	:mass 3.3022d23
+	:radius 2439700d0
 	:vsop-interval 100
 	:x-series-set *vsop-series-set-mercury-x*
 	:y-series-set *vsop-series-set-mercury-y*
@@ -75,8 +84,8 @@
 
 (setf *venus* (make-instance 'vsop-planet
 	:name "Venus"
-	:mass 5.9742d24
-	:radius 6.3781d6
+	:mass 4.8685d24
+	:radius 6051800d0
 	:vsop-interval 101
 	:x-series-set *vsop-series-set-venus-x*
 	:y-series-set *vsop-series-set-venus-y*
@@ -93,8 +102,8 @@
 
 (setf *mars* (make-instance 'vsop-planet
 	:name "Mars"
-	:mass 5.9742d24
-	:radius 6.3781d6
+	:mass 6.4185d23
+	:radius 3386200d0
 	:vsop-interval 103
 	:x-series-set *vsop-series-set-mars-x*
 	:y-series-set *vsop-series-set-mars-y*
@@ -102,8 +111,8 @@
 
 (setf *jupiter* (make-instance 'vsop-planet
 	:name "Jupiter"
-	:mass 5.9742d24
-	:radius 6.3781d6
+	:mass 1.8986d27
+	:radius 69000000d0
 	:vsop-interval 104
 	:x-series-set *vsop-series-set-jupiter-x*
 	:y-series-set *vsop-series-set-jupiter-y*
@@ -111,8 +120,8 @@
 
 (setf *saturn* (make-instance 'vsop-planet
 	:name "Saturn"
-	:mass 5.9742d24
-	:radius 6.3781d6
+	:mass 5.6846d26
+	:radius 58000000d0
 	:vsop-interval 105
 	:x-series-set *vsop-series-set-saturn-x*
 	:y-series-set *vsop-series-set-saturn-y*
@@ -120,8 +129,8 @@
 
 (setf *uranus* (make-instance 'vsop-planet
 	:name "Uranus"
-	:mass 5.9742d24
-	:radius 6.3781d6
+	:mass 8.6810d25
+	:radius 25200000d0
 	:vsop-interval 106
 	:x-series-set *vsop-series-set-uranus-x*
 	:y-series-set *vsop-series-set-uranus-y*
@@ -129,8 +138,8 @@
 
 (setf *neptune* (make-instance 'vsop-planet
 	:name "Neptune"
-	:mass 5.9742d24
-	:radius 6.3781d6
+	:mass 1.0243d26
+	:radius 24500000d0
 	:vsop-interval 107
 	:x-series-set *vsop-series-set-neptune-x*
 	:y-series-set *vsop-series-set-neptune-y*
@@ -139,7 +148,7 @@
 (setf *tp1* (make-instance 'vessel
 	:name "Teapot"
 	:mass 1d0
-	:pos (make-vector-3 1.4518590493763995d11 -3.4205701569802784d10 (+ 64000000d0 -2.2211526053121796d9))
+	:pos (make-vector-3 1.4572625236939914d11 -3.5401098170742485d10 (+ 64000000d0 -2.221160603393515d9))
 	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
 	:radius 2d0
 	:max-torque (make-vector-3 1d0 1d0 1d0)
@@ -147,13 +156,13 @@
 (setf *tp2* (make-instance 'vessel
 	:name "Teapot-2"
 	:mass 1d0
-	:pos (make-vector-3 1.4518590493763995d11 (+ 10d0 -3.4205701569802784d10) (+ 64000000d0 -2.2211526053121796d9))
+	:pos (make-vector-3 1.4572625236939914d11 (+ 10d0 -3.5401098170742485d10) (+ 64000000d0 -2.221160603393515d9))
 	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
 	:radius 2d0
 	:max-torque (make-vector-3 1d0 1d0 1d0)
 	:vel (make-vector-3 0.0d0 29783.0d0 0d0)))
 
-(defvar *all-objs* (list *tp1* *tp2* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
+(defvar *all-objs* (list *tp1* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
 
 (defvar *all-mfds*
 	(list
@@ -179,6 +188,10 @@
 			:color (make-color 0 0 1 0.8)
 			:origin *tp1*
 			:target *tp2*)
+		(make-instance 'relative-hud
+			:color (make-color 1 0.5 1 0.8)
+			:origin *tp1*
+			:target *sun*)
 		(make-instance 'relative-hud
 			:color (make-color 1 0.5 0 0.8)
 			:origin *tp1*

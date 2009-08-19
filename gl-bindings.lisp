@@ -149,6 +149,10 @@
 		(x ffi:double-float)
 		(y ffi:double-float)
 		(z ffi:double-float))
+	(gl-lightfv
+		(light ffi:uint)
+		(pname ffi:uint)
+		(params  (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
 	(gl-get-doublev
 		(pname ffi:uint)
 		(params  (ffi:c-ptr (ffi:c-array ffi:double-float 16)) :out)))
@@ -226,6 +230,7 @@
 	*gl-depth-test*
 	*gl-lighting*
 	*gl-light0*
+	*gl-position*
 	*gl-lines*
 	*gl-line-loop*
 	*gl-quads*
