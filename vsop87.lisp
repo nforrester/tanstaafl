@@ -51,7 +51,14 @@
 		(defvar ,(read-from-string (format nil "*vsop-series-set-~a-y*" planet)) (getf vsop87-plist :y))
 		(defvar ,(read-from-string (format nil "*vsop-series-set-~a-z*" planet)) (getf vsop87-plist :z))))
 
+(build-vsop87-for-planet "mercury")
+(build-vsop87-for-planet "venus")
 (build-vsop87-for-planet "earth")
+(build-vsop87-for-planet "mars")
+(build-vsop87-for-planet "jupiter")
+(build-vsop87-for-planet "saturn")
+(build-vsop87-for-planet "uranus")
+(build-vsop87-for-planet "neptune")
 
 (defun evaluate-series (series julian-millenium)
 	(*
