@@ -143,6 +143,12 @@
 				(expt x 2)
 				(expt y 2)) 0.5)))
 
+(defgeneric distance (v1 v2)
+	(:documentation "distance between 2 things (like the tips of two vectors)"))
+
+(defmethod distance ((v1 vector-3) (v2 vector-3))
+	(magnitude (sub v1 v2)))
+
 (defgeneric normalize (unnormalized)
 	(:documentation "Normalize something, like a vector, or a quaternion"))
 

@@ -1,14 +1,24 @@
 (defvar *focused-object* nil)
-(defvar *last-modelview-matrix* nil)
-(defvar *last-projection-matrix* nil)
+(defvar *current-modelview-matrix* nil)
+(defvar *current-projection-matrix* nil)
+(defvar *projection-matrix-for-object* (make-hash-table))
+
+;;; Each depth interval is a list of objects that overlap in depth.
+;;; The point is to get the maximum resolution out of the depth buffer.
+;;; The best case scenario is that no objects overlap in depth,
+;;; and we can use a seperate depth interval for each one.
+(defclass depth-interval ()
+	((close-limit
+		:initarg :close-limit)
+	(far-limit
+		:initarg :far-limit)
+	(objects
+		:initarg :objects)))
 
 (let ((screen-size (make-vector-2 100 100))) ; These functions should share screen-size. I like closures.
 	(defun display ()
 		(with-slots (x y) screen-size
-			(gl-viewport 0 0 x y) ; Draw the main scene
-			(gl-matrix-mode *gl-projection*)
-			(gl-load-identity)
-			(glu-perspective 40 (/ x y) 1 100000000))
+			(gl-viewport 0 0 x y)) ; Draw the main scene
 
 		(gl-matrix-mode *gl-modelview*)
 		(gl-load-identity)
@@ -24,14 +34,50 @@
 		; further away have lower precision
 		(gl-rotate-quaternion-reverse (slot-value *focused-object* 'ang-pos))
 
-		(setf *last-modelview-matrix* (gl-get-doublev *gl-modelview-matrix*))
-		(setf *last-projection-matrix* (gl-get-doublev *gl-projection-matrix*))
+		(setf *current-modelview-matrix* (gl-get-doublev *gl-modelview-matrix*))
+		(setf *current-projection-matricies* ())
 
 		(gl-clear (logior
 			*gl-color-buffer-bit*
 			*gl-depth-buffer-bit*))
-		(loop for obj in *all-objs* do
-			(draw obj))
+
+		;; Sort the objects by distance from the viewer, and arrange them into depth intervals for drawing.
+		(setf *all-objs* (sort *all-objs* #'(lambda (obj1 obj2) (> (distance *focused-object* obj1) (distance *focused-object* obj2)))))
+
+		(let ((depth-intervals ()))
+			(loop for prev-obj = obj for obj in *all-objs* do
+				(if
+					(or
+						(null (first depth-intervals))
+						(>
+							(- (distance *focused-object* prev-obj) (slot-value prev-obj 'radius))
+							(+ (distance *focused-object*      obj) (slot-value      obj 'radius))))
+					(setf depth-intervals (append depth-intervals (list (make-instance 'depth-interval
+						:close-limit (- (distance *focused-object* obj) (slot-value obj 'radius))
+						:far-limit   (+ (distance *focused-object* obj) (slot-value obj 'radius))
+						:objects     (list obj)))))
+					(progn
+						(setf (slot-value (car (last depth-intervals)) 'close-limit)
+							(min
+								(slot-value (car (last depth-intervals)) 'close-limit)
+								(- (distance *focused-object* obj) (slot-value obj 'radius))))
+						(setf (slot-value (car (last depth-intervals)) 'far-limit)
+							(max
+								(slot-value (car (last depth-intervals)) 'far-limit)
+								(+ (distance *focused-object* obj) (slot-value obj 'radius))))
+						(setf (slot-value (car (last depth-intervals)) 'objects)
+							(append (slot-value (car (last depth-intervals)) 'objects) (list obj))))))
+			(loop for interval in depth-intervals do
+				(with-slots (x y) screen-size
+					(gl-matrix-mode *gl-projection*)
+					(gl-load-identity)
+					(glu-perspective 40 (/ x y) (max .1 (slot-value interval 'close-limit)) (slot-value interval 'far-limit))
+					(setf *current-projection-matrix* (gl-get-doublev *gl-projection-matrix*))
+					(gl-matrix-mode *gl-modelview*)
+					(gl-clear *gl-depth-buffer-bit*))
+				(loop for obj in (slot-value interval 'objects) do
+					(setf (gethash obj *projection-matrix-for-object*) *current-projection-matrix*)
+					(draw obj))))
 
 		(gl-disable *gl-lighting*)
 		(gl-disable *gl-light0*)

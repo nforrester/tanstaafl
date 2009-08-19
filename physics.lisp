@@ -45,6 +45,11 @@
 		:initform 1
 		:documentation "The radius of the space object, used for determining whether objects overlap in depth, and thus need to be in the same depth layer for drawing. spherical-bodies also use this as their literal radius.")))
 
+(defmethod distance ((o1 space-object) (o2 space-object))
+	(distance
+		(slot-value o1 'pos)
+		(slot-value o2 'pos)))
+
 (defun compute-inertia-tensor (x y z)
 	(make-matrix-3-3
 		x 0 0
