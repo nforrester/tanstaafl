@@ -168,7 +168,11 @@
 	(gl-lightfv
 		(light ffi:uint)
 		(pname ffi:uint)
-		(params  (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
+		(param  (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
+	(gl-materialfv
+		(face ffi:uint)
+		(pname ffi:uint)
+		(param  (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
 	(gl-get-doublev
 		(pname ffi:uint)
 		(params  (ffi:c-ptr (ffi:c-array ffi:double-float 16)) :out)))
@@ -257,6 +261,11 @@
 	*gl-front*
 	*gl-back*
 	*gl-front-and-back*
+	*gl-ambient*
+	*gl-diffuse*
+	*gl-specular*
+	*gl-emission*
+	*gl-ambient-and-diffuse*
 	*glut-down*
 	*glut-up*)
 
@@ -349,3 +358,7 @@
 				(elt *char-set* *char-non-print*))
 				(setf line-length -1))))
 	(gl-enable *gl-depth-test*))
+
+(defun gl-material-color (face pname color)
+	(with-slots (red green blue alpha) color
+		(gl-materialfv face pname (vector (coerce red 'single-float) (coerce green 'single-float) (coerce blue 'single-float) (coerce alpha 'single-float)))))

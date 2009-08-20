@@ -138,6 +138,47 @@
 	(defun mouse-motion-up (x y)
 		))
 
+(defclass color ()
+	((red
+		:initarg :red
+		:initform 1)
+	(green
+		:initarg :green
+		:initform 1)
+	(blue
+		:initarg :blue
+		:initform 1)
+	(alpha
+		:initarg :alpha
+		:initform 1)))
+
+(defun make-color (red green blue alpha)
+	(make-instance 'color :red red :green green :blue blue :alpha alpha))
+
+(defclass material ()
+	((ambient
+		:initarg :ambient
+		:initform (make-color 0.2 0.2 0.2 1.0))
+	(diffuse
+		:initarg :diffuse
+		:initform (make-color 0.8 0.8 0.8 1.0))
+	(specular
+		:initarg :specular
+		:initform (make-color 0.0 0.0 0.0 1.0))
+	(emission
+		:initarg :emission
+		:initform (make-color 0.0 0.0 0.0 1.0))))
+
+(defgeneric set-material (face material)
+	(:documentation "Set the specified material for the specified face."))
+
+(defmethod set-material (face (material material))
+	(with-slots (ambient diffuse specular emission) material
+		(gl-material-color face *gl-ambient* ambient)
+		(gl-material-color face *gl-diffuse* diffuse)
+		(gl-material-color face *gl-specular* specular)
+		(gl-material-color face *gl-emission* emission)))
+
 (defgeneric draw (obj)
 	(:documentation "Render something."))
 
@@ -152,9 +193,11 @@
 	(call-next-method)
 	(gl-pop-matrix))
 
-(defmethod draw ((obj space-object))
-	(gl-rotated 90 0 1 0)
-	(glut-solid-teapot (/ (slot-value obj 'radius) 2)))
+(let ((default-material (make-instance 'material)))
+	(defmethod draw ((obj space-object))
+		(gl-rotated 90 0 1 0)
+		(set-material *gl-front-and-back* default-material)
+		(glut-solid-teapot (/ (slot-value obj 'radius) 2))))
 
 (defclass box-2d ()
 	((anchor-point
@@ -176,23 +219,6 @@
 
 (defgeneric compute-sw-corner (object screen-size)
 	(:documentation "Compute the lower left corner of object, and return a vector-2 in pixels."))
-
-(defclass color ()
-	((red
-		:initarg :red
-		:initform 1)
-	(green
-		:initarg :green
-		:initform 1)
-	(blue
-		:initarg :blue
-		:initform 1)
-	(alpha
-		:initarg :alpha
-		:initform 1)))
-
-(defun make-color (red green blue alpha)
-	(make-instance 'color :red red :green green :blue blue :alpha alpha))
 
 (defvar *depressed-keys* ())
 

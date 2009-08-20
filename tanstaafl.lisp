@@ -80,10 +80,10 @@
 
 (defvar *epoch-time* 0d0)
 
-(setf *sun* (make-instance 'vsop-planet
+(setf *sun* (make-instance 'vsop-star
 	:name "Sun"
 	:mass 1.9891d30
-	:radius 6.96d8
+	:radius 695500000d0
 	:vsop-interval 149
 	:x-series-set *vsop-series-set-sun-x*
 	:y-series-set *vsop-series-set-sun-y*

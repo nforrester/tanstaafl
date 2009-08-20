@@ -102,4 +102,16 @@
 	(with-slots (pos vsop-pos) obj
 		(setf pos vsop-pos)))
 
-(defclass vsop-planet (spherical-body vsop-body) ())
+(defclass planet (spherical-body) ())
+(defclass vsop-planet (planet vsop-body) ())
+
+(let ((planet-material (make-instance 'material :ambient (make-color 0.01 0.08 0 1) :diffuse (make-color 0.1 0.8 0 1))))
+	(defmethod draw :before ((obj planet))
+		(set-material *gl-front-and-back* planet-material)))
+
+(defclass star (spherical-body) ())
+(defclass vsop-star (star vsop-body) ())
+
+(let ((star-material (make-instance 'material :emission (make-color 1 1 1 1))))
+	(defmethod draw :before ((obj star))
+		(set-material *gl-front-and-back* star-material)))
