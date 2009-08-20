@@ -23,4 +23,6 @@ glx-utils
 mesa-libGLU # or some other implementation
 mesa-libGL  # of OpenGL
 
-A more informative README is in the works.
+For more information, see the wiki at:
+
+http://wiki.github.com/nforrester/tanstaafl
