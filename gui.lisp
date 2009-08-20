@@ -194,7 +194,7 @@
 (glut-init-window-size 1000 1000)
 (glut-init 0 "")
 (glut-init-display-mode (logior *glut-double* *glut-rgb* *glut-depth*))
-(glut-create-window "YINO")
+(glut-create-window "TANSTAAFL")
 
 (gl-clear-color 0 0 0 0)
 (gl-shade-model *gl-smooth*)

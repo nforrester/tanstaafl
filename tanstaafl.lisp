@@ -1,4 +1,4 @@
-; YINO = YINO it's not orbiter
+; TANSTAAFL = There Ain't No Such Thing As A Free Lunch
 ; By Neil Forrester
 
 (setf custom:*floating-point-contagion-ansi* t)
