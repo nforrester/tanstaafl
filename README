@@ -4,4 +4,10 @@ There Ain't No Such Thing As A Free Lunch when you're flying in space.
 
 Tanstaafl will ultimately be a free space flight simulator, written in Common Lisp.
 
+At the moment, I'm making no attempts at cross-platform compatibility at all.
+My first priority is to make it work. I'm using CLISP, and I have no intention of
+switching or trying to support another CL implementation at the moment, though
+nobody knows what the future will bring. Obviously, anybody else is welcome to help
+with that (and anything else).
+
 A more informative README is in the works.
