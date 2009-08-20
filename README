@@ -12,4 +12,15 @@ switching or trying to support another CL implementation at the moment, though
 nobody knows what the future will bring. Obviously, anybody else is welcome to help
 with that (and anything else).
 
+I'm developing tanstaafl on a system running Fedora 11.
+This is as complete a list of dependencies as I can think of
+(with dependencies of the listed packages included implicitly):
+X11
+clisp
+gcc
+freeglut
+glx-utils
+mesa-libGLU # or some other implementation
+mesa-libGL  # of OpenGL
+
 A more informative README is in the works.
