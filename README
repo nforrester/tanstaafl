@@ -3,6 +3,8 @@ TANSTAAFL!
 There Ain't No Such Thing As A Free Lunch when you're flying in space.
 
 Tanstaafl will ultimately be a free space flight simulator, written in Common Lisp.
+Tanstaafl is modeled on Orbiter. It exists mainly because Orbiter is closed source,
+and is Windows only (neither of which make me happy).
 
 At the moment, I'm making no attempts at cross-platform compatibility at all.
 My first priority is to make it work. I'm using CLISP, and I have no intention of
