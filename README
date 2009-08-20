@@ -6,6 +6,13 @@ Tanstaafl will ultimately be a free space flight simulator, written in Common Li
 Tanstaafl is modeled on Orbiter. It exists mainly because Orbiter is closed source,
 and is Windows only (neither of which make me happy).
 
+Something to be aware of before you begin:
+
+At the moment, Tanstaafl has no way to know where your OpenGL libraries (libGL.so
+for example) are. You need to edit gl-bindings.lisp and hard code the paths to these
+libraries. Otherwise bad things will happen (I think segmentation faults). This will
+be fixed in the future.
+
 At the moment, I'm making no attempts at cross-platform compatibility at all.
 My first priority is to make it work. I'm using CLISP, and I have no intention of
 switching or trying to support another CL implementation at the moment, though
