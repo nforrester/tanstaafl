@@ -31,6 +31,12 @@
 	(objects
 		:initarg :objects)))
 
+;;; Computes the distance from *focused-object* to object along the negative z-axis of *focused-object*
+(defun depth-from-screen (object)
+;	(distance *focused-object* object))
+	(let ((view-vector (rotate (make-vector-3 0d0 0d0 -1d0) (slot-value *focused-object* 'ang-pos))))
+		(dot view-vector (sub (slot-value object 'pos) (slot-value *focused-object* 'pos)))))
+
 (let ((screen-size (make-vector-2 100 100))) ; These functions should share screen-size. I like closures.
 	(defun display ()
 		(with-slots (x y) screen-size
@@ -43,11 +49,11 @@
 		(gl-enable *gl-light0*)
 		(gl-enable *gl-cull-face*)
 
-		; What I'm really achieving with this call is making everything look as though it was
-		; from the viewpoint of the selected object. That's why it rotates everything backwards.
-		; The translation component is handled seperately (in an around method on draw) to give
-		; the full precision of floats close to the camera, and let parts of the scene that are
-		; further away have lower precision
+		;; What I'm really achieving with this call is making everything look as though it was
+		;; from the viewpoint of the selected object. That's why it rotates everything backwards.
+		;; The translation component is handled seperately (in an around method on draw) to give
+		;; the full precision of floats close to the camera, and let parts of the scene that are
+		;; further away have lower precision
 		(gl-rotate-quaternion-reverse (slot-value *focused-object* 'ang-pos))
 
 		(gl-push-matrix)
@@ -62,43 +68,47 @@
 			*gl-color-buffer-bit*
 			*gl-depth-buffer-bit*))
 
-		;; Sort the objects by distance from the viewer, and arrange them into depth intervals for drawing.
-		(setf *all-objs* (sort *all-objs* #'(lambda (obj1 obj2) (> (distance *focused-object* obj1) (distance *focused-object* obj2)))))
+		;; Sort the objects by depth from the screen (distance from the viewer along the viewer's negative z-axis),
+		;; such that objects that are far in front of you come first and objects far behind are last,
+		;; and arrange them into depth intervals for drawing.
+		(setf *all-objs* (sort *all-objs* #'(lambda (obj1 obj2) (> (depth-from-screen obj1) (depth-from-screen obj2)))))
 
 		(let ((depth-intervals ()))
 			(loop for prev-obj = obj for obj in *all-objs* do
-				(if
-					(or
-						(null (first depth-intervals))
-						(>
-							(- (distance *focused-object* prev-obj) (slot-value prev-obj 'radius))
-							(+ (distance *focused-object*      obj) (slot-value      obj 'radius))))
-					(setf depth-intervals (append depth-intervals (list (make-instance 'depth-interval
-						:close-limit (- (distance *focused-object* obj) (slot-value obj 'radius))
-						:far-limit   (+ (distance *focused-object* obj) (slot-value obj 'radius))
-						:objects     (list obj)))))
-					(progn
-						(setf (slot-value (car (last depth-intervals)) 'close-limit)
-							(min
-								(slot-value (car (last depth-intervals)) 'close-limit)
-								(- (distance *focused-object* obj) (slot-value obj 'radius))))
-						(setf (slot-value (car (last depth-intervals)) 'far-limit)
-							(max
-								(slot-value (car (last depth-intervals)) 'far-limit)
-								(+ (distance *focused-object* obj) (slot-value obj 'radius))))
-						(setf (slot-value (car (last depth-intervals)) 'objects)
-							(append (slot-value (car (last depth-intervals)) 'objects) (list obj))))))
-			(loop for interval in depth-intervals do
-				(with-slots (x y) screen-size
-					(gl-matrix-mode *gl-projection*)
-					(gl-load-identity)
-					(glu-perspective 40 (/ x y) (max .1 (slot-value interval 'close-limit)) (slot-value interval 'far-limit))
-					(setf *current-projection-matrix* (gl-get-doublev *gl-projection-matrix*))
-					(gl-matrix-mode *gl-modelview*)
-					(gl-clear *gl-depth-buffer-bit*))
-				(loop for obj in (slot-value interval 'objects) do
-					(setf (gethash obj *projection-matrix-for-object*) *current-projection-matrix*)
-					(draw obj))))
+				(let ((depth (depth-from-screen obj)))
+					(if
+						(or
+							(null (first depth-intervals))
+							(>
+								(- (depth-from-screen prev-obj) (slot-value prev-obj 'radius))
+								(+ depth (slot-value      obj 'radius))))
+						(setf depth-intervals (append depth-intervals (list (make-instance 'depth-interval
+							:close-limit (- depth (slot-value obj 'radius))
+							:far-limit   (+ depth (slot-value obj 'radius))
+							:objects     (list obj)))))
+						(progn
+							(setf (slot-value (car (last depth-intervals)) 'close-limit)
+								(min
+									(slot-value (car (last depth-intervals)) 'close-limit)
+									(- depth (slot-value obj 'radius))))
+							(setf (slot-value (car (last depth-intervals)) 'far-limit)
+								(max
+									(slot-value (car (last depth-intervals)) 'far-limit)
+									(+ depth (slot-value obj 'radius))))
+							(setf (slot-value (car (last depth-intervals)) 'objects)
+								(append (slot-value (car (last depth-intervals)) 'objects) (list obj)))))))
+			(let ((ultimate-close-clipping-plane .1) (closest-far-clipping-plane .11))
+				(loop for interval in depth-intervals do
+					(with-slots (x y) screen-size
+						(gl-matrix-mode *gl-projection*)
+						(gl-load-identity)
+						(glu-perspective 40 (/ x y) (max ultimate-close-clipping-plane (slot-value interval 'close-limit)) (max closest-far-clipping-plane (slot-value interval 'far-limit)))
+						(setf *current-projection-matrix* (gl-get-doublev *gl-projection-matrix*))
+						(gl-matrix-mode *gl-modelview*)
+						(gl-clear *gl-depth-buffer-bit*))
+					(loop for obj in (slot-value interval 'objects) do
+						(setf (gethash obj *projection-matrix-for-object*) *current-projection-matrix*)
+						(draw obj)))))
 
 		(gl-disable *gl-lighting*)
 		(gl-disable *gl-light0*)
