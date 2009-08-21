@@ -40,6 +40,7 @@
 
 (load "thruster.lisp")
 (load "vessel.lisp")
+(load "autopilot.lisp")
 
 (load "vsop87.lisp")
 (load "astronomical-bodies.lisp")

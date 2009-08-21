@@ -36,7 +36,11 @@
 			:rcs-lin-aft        (make-instance 'thruster-group)
 			:main               (make-instance 'thruster-group)
 			:retro              (make-instance 'thruster-group))
-		:documentation "A plist of thruster groups.")))
+		:documentation "A plist of thruster groups.")
+	(active-autopilot-modes
+		:initarg :active-autopilot-modes
+		:initform ()
+		:documentation "A list of running autopilot modes. Each element in the list is a function that takes one argument (the length of the timestep) and returns t or nil, meaning it's work is finished (and it should be removed from the list) or not, respectively. You probably want to construct each function with lambdas.")))
 
 (defgeneric handle-key-presses (vessel)
 	(:documentation "use check-depressed-keys to identify keys that are depressed, and take appropriate action."))
@@ -72,7 +76,16 @@
 			((check-depressed-keys #\+)
 				(command (getf thruster-groups :main) 1))
 			((check-depressed-keys #\-)
-				(command (getf thruster-groups :retro) 1)))))
+				(command (getf thruster-groups :retro) 1))
+			((check-depressed-keys #\5)
+				(with-slots (active-autopilot-modes) vessel
+					(setf active-autopilot-modes (append
+						;; an autopilot mode that tries to set rotation rate to less than a small amount
+						(list (let ((zero-ang-vel (make-vector-3 0 0 0)))
+							#'(lambda (dt) (if (> .01 (magnitude (slot-value vessel 'ang-vel)))
+								t
+								(progn (hold-rotation-autopilot vessel dt zero-ang-vel) nil)))))
+						active-autopilot-modes)))))))
 
 (defun make-simple-thruster-setup (vessel)
 	(with-slots (thruster-groups) vessel
@@ -122,7 +135,14 @@
 		(if (oddp i) ; only the thruster groups, this is a plist.
 			(burn thruster-group))))
 
+(defgeneric call-autopilots (vessel dt)
+	(:documentation "Calls the list of running autopilot modes, and removes modes if needed."))
+
+(defmethod call-autopilots ((vessel vessel) dt)
+	(mapcan #'(lambda (func) (if (funcall func dt) nil (list func))) (slot-value vessel 'active-autopilot-modes)))
+
 (defmethod compute-forces ((obj vessel) dt)
 	(call-next-method)
 	(handle-key-presses obj)
+	(call-autopilots obj dt)
 	(burn obj))

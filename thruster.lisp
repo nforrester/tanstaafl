@@ -14,6 +14,12 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;;; READ BEFORE EDITING:
+;;;; Please make sure that all generic functions that operate on the
+;;;; class thruster also operate on thruster-group, so that thrusters
+;;;; and thruster groups can be combined in interesting ways (groups
+;;;; of groups, and other exotica).
+
 (defclass thruster ()
 	((vessel
 		:initarg :vessel
@@ -47,6 +53,24 @@
 		(add-force-off-center vessel (mult power-level max-thrust) pos :frame :local)
 		(setf power-level 0)))
 
+(defgeneric compute-max-force (vessel thruster)
+	(:documentation "Compute the maximum force that can be exerted on vessel by thruster."))
+
+(defmethod compute-max-force ((target-vessel space-object) (thruster thruster))
+	(with-slots (vessel max-thrust) thruster
+		(if (eq target-vessel vessel)
+			max-thrust
+			0)))
+
+(defgeneric compute-max-torque (vessel thruster)
+	(:documentation "Compute the maximum torque that can be exerted on vessel by thruster."))
+
+(defmethod compute-max-torque ((target-vessel space-object) (thruster thruster))
+	(with-slots (vessel max-thrust pos) thruster
+		(if (eq target-vessel vessel)
+			(cross pos max-thrust)
+			0)))
+
 (defclass thruster-group ()
 	((thrusters
 		:initarg :thrusters
@@ -60,3 +84,15 @@
 (defmethod burn ((thruster-group thruster-group))
 	(dolist (thruster (slot-value thruster-group 'thrusters))
 		(burn thruster)))
+
+(defmethod compute-max-force ((target-vessel space-object) (thruster-group thruster-group))
+	(let ((force (make-vector-3 0 0 0)))
+		(dolist (thruster (slot-value thruster-group 'thrusters))
+			(setf force (add force (compute-max-force target-vessel thruster))))
+		force))
+
+(defmethod compute-max-torque ((target-vessel space-object) (thruster-group thruster-group))
+	(let ((torque (make-vector-3 0 0 0)))
+		(dolist (thruster (slot-value thruster-group 'thrusters))
+			(setf torque (add torque (compute-max-torque target-vessel thruster))))
+		torque))
