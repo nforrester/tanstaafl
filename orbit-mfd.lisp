@@ -36,12 +36,12 @@
 					(compute-elements major-body minor-body ref-plane-normal ref-direction)))
 				(half-scene-width (loop for elements in all-elements maximizing
 					(with-slots (inclination eccentricity) elements
-						(* (cos inclination) (if (> 1 eccentricity)
+						(* (cos inclination) (if (< eccentricity 1)
 							(apoapsis-radius elements)
 							(* 1.5 (periapsis-radius elements)))))))
 				(half-scene-depth (loop for elements in all-elements maximizing
 					(with-slots (inclination eccentricity) elements
-						(* (sin inclination) (if (> 1 eccentricity)
+						(* (sin inclination) (if (< eccentricity 1)
 							(apoapsis-radius elements)
 							(* 1.5 (periapsis-radius elements))))))))
 			(gl-matrix-mode *gl-projection*)
