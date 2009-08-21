@@ -179,7 +179,8 @@
 				(progn
 					(setf x 0)
 					(setf y 0)
-					(setf z 0))))))
+					(setf z 0)))))
+	vec)
 
 (defclass quaternion ()
 	((w :initarg :w :initform 1)

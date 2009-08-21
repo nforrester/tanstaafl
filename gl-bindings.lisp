@@ -105,8 +105,8 @@
 
 ; And finally we define the bindings:
 
-;(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
-(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
+(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
+;(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
 	(gl-clear-color (r ffi:double-float) (g ffi:double-float) (b ffi:double-float) (a ffi:double-float))
 	(gl-shade-model (model ffi:uint))
 	(gl-enable (option ffi:uint))
@@ -124,6 +124,13 @@
 	(gl-pop-matrix)
 	(gl-begin (mode ffi:uint))
 	(gl-end)
+	(gl-ortho
+		(left         ffi:double-float)
+		(right        ffi:double-float)
+		(bottom       ffi:double-float)
+		(top          ffi:double-float)
+		(near         ffi:double-float)
+		(far          ffi:double-float))
 	(gl-blend-func (srcfactor ffi:uint) (dstfactor ffi:uint))
 	(gl-bitmap
 		(width  ffi:int)
@@ -253,6 +260,7 @@
 	*gl-position*
 	*gl-lines*
 	*gl-line-loop*
+	*gl-line-strip*
 	*gl-quads*
 	*gl-blend*
 	*gl-src-alpha*
@@ -280,6 +288,10 @@
 (defun gl-translate-vector-3 (vec)
 	(with-slots (x y z) vec
 		(gl-translated x y z)))
+
+(defun gl-rotate-angle-axis (angle axis)
+	(with-slots (x y z) (normalize axis)
+		(gl-rotated (* angle *degrees-per-radian*) x y z)))
 
 (defun gl-rotate-quaternion (quat)
 	(with-slots (w x y z) quat

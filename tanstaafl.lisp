@@ -23,6 +23,7 @@
 
 (load "math.lisp")
 (load "physics.lisp")
+(load "elements.lisp")
 
 (load "char-set.lisp")
 (load "gl-bindings.lisp")
@@ -34,6 +35,7 @@
 (load "hud-layer.lisp")
 
 (load "test-mfd.lisp")
+(load "orbit-mfd.lisp")
 (load "relative-hud.lisp")
 
 (load "vessel.lisp")
@@ -182,11 +184,12 @@
 
 (defvar *all-mfds*
 	(list
-		(make-instance 'test-mfd
-			:anchor-point (make-vector-2 .2 .2)
+		(make-instance 'orbit-mfd
+			:anchor-point (make-vector-2 .5 .5)
 			:pos (make-vector-2 .5 .5)
 			:max-size (make-vector-2 .3 .3)
-			:color (make-color 1 0 0 0.3))))
+			:major-body *sun*
+			:minor-bodies (list *mercury* *venus* *earth* *mars*))))
 
 (defvar *all-buttons*
 	(list

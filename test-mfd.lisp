@@ -19,7 +19,7 @@
 		:initarg :color
 		:initform (make-color 1 1 1 1))))
 
-(defmethod draw-2d (mfd screen-size)
+(defmethod draw-2d ((mfd test-mfd) screen-size)
 	(gl-matrix-mode *gl-projection*)
 	(gl-load-identity)
 	(glu-ortho2-d 0 1 0 1)

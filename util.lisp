@@ -29,3 +29,7 @@
 		(dolist (str strings)
 			(setf target (concatenate 'string target str)))
 		target))
+
+(defun label-print (label value)
+	(print (list label value))
+	value)
