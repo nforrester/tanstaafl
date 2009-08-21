@@ -170,7 +170,7 @@
 	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
 	:radius 2d0
 	:max-torque (make-vector-3 1d0 1d0 1d0)
-	:vel (make-vector-3 0.0d0 29783.0d0 0d0)))
+	:vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
 (setf *tp2* (make-instance 'vessel
 	:name "Teapot-2"
 	:mass 1d0
@@ -178,7 +178,7 @@
 	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
 	:radius 2d0
 	:max-torque (make-vector-3 1d0 1d0 1d0)
-	:vel (make-vector-3 0.0d0 29783.0d0 0d0)))
+	:vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
 
 (defvar *all-objs* (list *tp1* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
 
@@ -187,9 +187,13 @@
 		(make-instance 'orbit-mfd
 			:anchor-point (make-vector-2 .5 .5)
 			:pos (make-vector-2 .5 .5)
-			:max-size (make-vector-2 .3 .3)
-			:major-body *sun*
-			:minor-bodies (list *mercury* *venus* *earth* *mars*))))
+			:max-size (make-vector-2 1 1)
+		;	:major-body *sun*
+		;	:minor-bodies (list *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))))
+		;	:major-body *earth*
+		;	:minor-bodies (list *tp1*))))
+			:major-body *earth*
+			:minor-bodies (list *tp1* *tp2*))))
 
 (defvar *all-buttons*
 	(list

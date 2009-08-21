@@ -105,8 +105,8 @@
 
 ; And finally we define the bindings:
 
-(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
-;(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
+;(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
+(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
 	(gl-clear-color (r ffi:double-float) (g ffi:double-float) (b ffi:double-float) (a ffi:double-float))
 	(gl-shade-model (model ffi:uint))
 	(gl-enable (option ffi:uint))

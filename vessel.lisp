@@ -22,7 +22,7 @@
 	(thruster-groups
 		:initarg :thruster-groups
 		:initform (list
-			:rcs-pitch-up      (make-instance 'thruster-group)
+			:rcs-pitch-up       (make-instance 'thruster-group)
 			:rcs-pitch-down     (make-instance 'thruster-group)
 			:rcs-yaw-starboard  (make-instance 'thruster-group)
 			:rcs-yaw-port       (make-instance 'thruster-group)
@@ -34,8 +34,8 @@
 			:rcs-lin-port       (make-instance 'thruster-group)
 			:rcs-lin-fore       (make-instance 'thruster-group)
 			:rcs-lin-aft        (make-instance 'thruster-group)
-			:main           (make-instance 'thruster-group)
-			:retro          (make-instance 'thruster-group))
+			:main               (make-instance 'thruster-group)
+			:retro              (make-instance 'thruster-group))
 		:documentation "A plist of thruster groups.")))
 
 (defgeneric handle-key-presses (vessel)
@@ -98,8 +98,8 @@
 				(port-fore      (make-instance 'thruster :max-thrust (make-vector-3 0 0 -1) :pos (make-vector-3 -.5 0 0) :vessel vessel))
 				(port-aft       (make-instance 'thruster :max-thrust (make-vector-3 0 0  1) :pos (make-vector-3 -.5 0 0) :vessel vessel))
 
-				(main (make-instance 'thruster :max-thrust (make-vector-3 0 0 5) :pos (make-vector-3 0 0 -.5) :vessel vessel))
-				(retro (make-instance 'thruster :max-thrust (make-vector-3 0 0 -5) :pos (make-vector-3 0 0 .5) :vessel vessel)))
+				(main (make-instance 'thruster :max-thrust (make-vector-3 0 0 50) :pos (make-vector-3 0 0 -.5) :vessel vessel))
+				(retro (make-instance 'thruster :max-thrust (make-vector-3 0 0 -50) :pos (make-vector-3 0 0 .5) :vessel vessel)))
 			(setf (slot-value (getf thruster-groups :rcs-pitch-up)       'thrusters) (list fore-up aft-down))
 			(setf (slot-value (getf thruster-groups :rcs-pitch-down)     'thrusters) (list fore-down aft-up))
 			(setf (slot-value (getf thruster-groups :rcs-yaw-starboard)  'thrusters) (list fore-starboard aft-port))

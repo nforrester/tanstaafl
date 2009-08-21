@@ -36,20 +36,17 @@
 					(compute-elements major-body minor-body ref-plane-normal ref-direction)))
 				(half-scene-width (loop for elements in all-elements maximizing
 					(with-slots (inclination eccentricity) elements
-						(* (cos inclination) (if (< eccentricity 1)
+						(print (list (slot-value (slot-value elements 'minor-body) 'name) inclination (if (< eccentricity 1) (apoapsis-radius elements) (* 1.5 (periapsis-radius elements))) eccentricity))
+						(if (< eccentricity 1)
 							(apoapsis-radius elements)
 							(* 1.5 (periapsis-radius elements)))))))
-				(half-scene-depth (loop for elements in all-elements maximizing
-					(with-slots (inclination eccentricity) elements
-						(* (sin inclination) (if (< eccentricity 1)
-							(apoapsis-radius elements)
-							(* 1.5 (periapsis-radius elements))))))))
+			(print (list half-scene-width))
 			(gl-matrix-mode *gl-projection*)
 			(gl-load-identity)
 			(gl-ortho
 				(* -1 half-scene-width) half-scene-width
 				(* -1 half-scene-width) half-scene-width
-				half-scene-depth (* -1 half-scene-depth))
+				half-scene-width (* -1 half-scene-width))
 			(gl-matrix-mode *gl-modelview*)
 			(gl-load-identity)
 			(gl-clear *gl-depth-buffer-bit*)
@@ -67,7 +64,7 @@
 					(gl-rotate-angle-axis argument-of-periapsis (make-vector-3 0 0 1))
 					(gl-begin-end *gl-line-loop*
 						(loop
-								for theta from 0 to (* 2 pi) by (/ (* 2 pi) 50)
+								for theta from 0 to (* 2 pi) by (/ (* 2 pi) 150)
 								for r = (/ (* semi-major-axis (- 1 (expt eccentricity 2))) (- 1 (* eccentricity (cos theta))))
 								do
 							(gl-vertex3d (* r (sin theta)) (* r (cos theta)) 0))))))))
