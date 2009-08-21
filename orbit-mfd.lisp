@@ -59,12 +59,14 @@
 						longitude-of-ascending-node
 						argument-of-periapsis
 						true-anomaly) elements
-					(gl-rotate-angle-axis longitude-of-ascending-node (make-vector-3 0 0 1))
-					(gl-rotate-angle-axis inclination (make-vector-3 1 0 0))
+					(gl-push-matrix)
 					(gl-rotate-angle-axis argument-of-periapsis (make-vector-3 0 0 1))
+					(gl-rotate-angle-axis inclination (make-vector-3 1 0 0))
+					(gl-rotate-angle-axis longitude-of-ascending-node (make-vector-3 0 0 1))
 					(gl-begin-end *gl-line-loop*
 						(loop
 								for theta from 0 to (* 2 pi) by (/ (* 2 pi) 150)
 								for r = (/ (* semi-major-axis (- 1 (expt eccentricity 2))) (- 1 (* eccentricity (cos theta))))
 								do
-							(gl-vertex3d (* r (sin theta)) (* r (cos theta)) 0))))))))
+							(gl-vertex3d (* r (sin theta)) (* r (cos theta)) 0)))
+					(gl-pop-matrix))))))

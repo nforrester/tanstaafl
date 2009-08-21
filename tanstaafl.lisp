@@ -166,7 +166,7 @@
 (setf *tp1* (make-instance 'vessel
 	:name "Teapot"
 	:mass 1d0
-	:pos (make-vector-3 1.4572625236939914d11 -3.5401098170742485d10 (+ 64000000d0 -2.221160603393515d9))
+	:pos (make-vector-3 (+ 64000000d0 1.4572625236939914d11) -3.5401098170742485d10 -2.221160603393515d9)
 	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
 	:radius 2d0
 	:max-torque (make-vector-3 1d0 1d0 1d0)
@@ -174,7 +174,7 @@
 (setf *tp2* (make-instance 'vessel
 	:name "Teapot-2"
 	:mass 1d0
-	:pos (make-vector-3 1.4572625236939914d11 (+ 10d0 -3.5401098170742485d10) (+ 64000000d0 -2.221160603393515d9))
+	:pos (make-vector-3 (+ 64000000d0 1.4572625236939914d11) (+ 10d0 -3.5401098170742485d10) -2.221160603393515d9)
 	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
 	:radius 2d0
 	:max-torque (make-vector-3 1d0 1d0 1d0)
