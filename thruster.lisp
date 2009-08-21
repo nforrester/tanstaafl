@@ -26,14 +26,26 @@
 	(pos
 		:initarg :pos
 		:initform (list 0.0 0.0 0.0)
-		:documentation "The position of the thruster relative to the vessel (vector-3).")))
+		:documentation "The position of the thruster relative to the vessel (vector-3).")
+	(power-level
+		:initarg :power-level
+		:initform 0
+		:documentation "The power level of the thruster, between 0 and 1. The total of all the commanded values.")))
 
-(defgeneric burn (thruster power-level)
-	(:documentation "Burn the thruster at the specified power level (between 0 and 1, unless you want to play games)."))
+(defgeneric command (thruster power-level)
+	(:documentation "Command the thruster to burn at the specified power level (between 0 and 1, unless you want to play games) during the next timestep that the burn function is executed (usually every timestep). The power level is added to the power levels specified by all previous command on the thruster since the last call to burn. The power level is then clamped between 0 and 1."))
 
-(defmethod burn ((thruster thruster) power-level)
-	(with-slots (vessel max-thrust pos) thruster
-		(add-force-off-center vessel (mult power-level max-thrust) pos :frame :local)))
+(defmethod command ((thruster thruster) commanded-level)
+	(with-slots (power-level) thruster
+		(setf power-level (clamp 0 1 (+ power-level commanded-level)))))
+
+(defgeneric burn (thruster)
+	(:documentation "Burn the thruster at power-level for the timestep, and reset power-level to 0 (to ensure that a command isn't executed twice, effectively)."))
+
+(defmethod burn ((thruster thruster))
+	(with-slots (vessel max-thrust pos power-level) thruster
+		(add-force-off-center vessel (mult power-level max-thrust) pos :frame :local)
+		(setf power-level 0)))
 
 (defclass thruster-group ()
 	((thrusters
@@ -41,6 +53,10 @@
 		:initform ()
 		:documentation "A list of the thrusters in the group.")))
 
-(defmethod burn ((thruster-group thruster-group) power-level)
+(defmethod command ((thruster-group thruster-group) power-level)
 	(dolist (thruster (slot-value thruster-group 'thrusters))
-		(burn thruster power-level)))
+		(command thruster power-level)))
+
+(defmethod burn ((thruster-group thruster-group))
+	(dolist (thruster (slot-value thruster-group 'thrusters))
+		(burn thruster)))

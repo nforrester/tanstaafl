@@ -33,3 +33,9 @@
 (defun label-print (label value)
 	(print (list label value))
 	value)
+
+(defun clamp (minimum maximum value)
+	(cond
+		((<= minimum value maximum) value)
+		((< value minimum) minimum)
+		((< maximum value) maximum)))

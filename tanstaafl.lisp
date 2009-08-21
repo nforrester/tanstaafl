@@ -38,8 +38,8 @@
 (load "orbit-mfd.lisp")
 (load "relative-hud.lisp")
 
-(load "vessel.lisp")
 (load "thruster.lisp")
+(load "vessel.lisp")
 
 (load "vsop87.lisp")
 (load "astronomical-bodies.lisp")
