@@ -54,7 +54,7 @@
 		;; The translation component is handled seperately (in an around method on draw) to give
 		;; the full precision of floats close to the camera, and let parts of the scene that are
 		;; further away have lower precision
-		(gl-rotate-quaternion-reverse (slot-value *focused-object* 'ang-pos))
+		(gl-rotate-quaternion (inverse (slot-value *focused-object* 'ang-pos)))
 
 		(gl-push-matrix)
 		(gl-translate-vector-3 (sub (slot-value *sun* 'pos) (slot-value *focused-object* 'pos)))

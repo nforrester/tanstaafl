@@ -245,7 +245,8 @@
 					(setf w 1)
 					(setf x 0)
 					(setf y 0)
-					(setf z 0))))))
+					(setf z 0)))))
+	quat)
 
 (defgeneric inverse (thing)
 	(:documentation "compute the inverse of something"))

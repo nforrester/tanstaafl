@@ -303,16 +303,6 @@
 					(/ y len)
 					(/ z len))))))
 
-(defun gl-rotate-quaternion-reverse (quat)
-	(with-slots (w x y z) quat
-		(let ((len (magnitude (make-vector-3 x y z))))
-			(if (/= 0 len) ; compute angle-axis form (in degrees, because that's what OpenGL uses *shudder*)
-				(gl-rotated
-					(* -1 2 (acos w) *degrees-per-radian*)
-					(/ x len)
-					(/ y len)
-					(/ z len))))))
-
 (defmacro gl-begin-end (mode &rest forms)
 	`(progn
 		(gl-begin ,mode)
