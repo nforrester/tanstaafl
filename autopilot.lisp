@@ -20,13 +20,9 @@
 (defmethod hold-rotation-autopilot ((vessel vessel) dt (target-ang-vel vector-3))
 	(with-slots (ang-vel ang-pos thruster-groups) vessel
 		(with-slots (x y z) (rotate ang-vel (inverse ang-pos)) ; Angular velocity in the local frame of reference.
-			(loop
-					for thruster-key in (list
-						:rcs-pitch-up
-						:rcs-pitch-down
-						:rcs-yaw-starboard
-						:rcs-yaw-port
-						:rcs-roll-starboard
-						:rcs-roll-port)
-					for thruster = (getf thruster-groups thruster-key) do
-				(command thruster (clamp 0 1 (/ x (slot-value (mult dt (compute-max-torque vessel thruster)) 'x))))))))
+			(macrolet ((command-loop (axis thruster-list)
+					`(loop for thruster-key in ,thruster-list for thruster = (getf thruster-groups thruster-key) do
+						(command thruster (clamp 0 1 (/ (* -1 ,(eval axis)) (slot-value (mult dt (compute-max-torque vessel thruster)) ,axis)))))))
+				(command-loop 'x (list :rcs-pitch-up :rcs-pitch-down))
+				(command-loop 'y (list :rcs-yaw-starboard :rcs-yaw-port))
+				(command-loop 'z (list :rcs-roll-starboard :rcs-roll-port))))))
