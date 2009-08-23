@@ -22,7 +22,7 @@
 		(with-slots (x y z) (rotate ang-vel (inverse ang-pos)) ; Angular velocity in the local frame of reference.
 			(macrolet ((command-loop (axis thruster-list)
 					`(loop for thruster-key in ,thruster-list for thruster = (getf thruster-groups thruster-key) do
-						(command thruster (clamp 0 1 (/ (* -1 ,(eval axis)) (slot-value (mult dt (compute-max-torque vessel thruster)) ,axis)))))))
+						(command thruster (clamp 0 1 (/ (* -1 0.8 ,(eval axis)) (slot-value (mult dt (compute-max-torque vessel thruster)) ,axis)))))))
 				(command-loop 'x (list :rcs-pitch-up :rcs-pitch-down))
 				(command-loop 'y (list :rcs-yaw-starboard :rcs-yaw-port))
 				(command-loop 'z (list :rcs-roll-starboard :rcs-roll-port))))))
