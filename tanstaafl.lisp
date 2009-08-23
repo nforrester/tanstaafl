@@ -40,6 +40,7 @@
 
 (load "thruster.lisp")
 (load "vessel.lisp")
+(load "autopilot.lisp")
 
 (load "vsop87.lisp")
 (load "astronomical-bodies.lisp")
@@ -86,7 +87,7 @@
 	:name "Sun"
 	:mass 1.9891d30
 	:radius 695500000d0
-	:vsop-interval 149
+	:vsop-interval 1049
 	:x-series-set *vsop-series-set-sun-x*
 	:y-series-set *vsop-series-set-sun-y*
 	:z-series-set *vsop-series-set-sun-z*))
@@ -95,7 +96,7 @@
 	:name "Mercury"
 	:mass 3.3022d23
 	:radius 2439700d0
-	:vsop-interval 100
+	:vsop-interval 1000
 	:x-series-set *vsop-series-set-mercury-x*
 	:y-series-set *vsop-series-set-mercury-y*
 	:z-series-set *vsop-series-set-mercury-z*))
@@ -104,7 +105,7 @@
 	:name "Venus"
 	:mass 4.8685d24
 	:radius 6051800d0
-	:vsop-interval 101
+	:vsop-interval 1001
 	:x-series-set *vsop-series-set-venus-x*
 	:y-series-set *vsop-series-set-venus-y*
 	:z-series-set *vsop-series-set-venus-z*))
@@ -113,7 +114,7 @@
 	:name "Earth"
 	:mass 5.9742d24
 	:radius 6.3781d6
-	:vsop-interval 102
+	:vsop-interval 1002
 	:x-series-set *vsop-series-set-earth-x*
 	:y-series-set *vsop-series-set-earth-y*
 	:z-series-set *vsop-series-set-earth-z*))
@@ -122,7 +123,7 @@
 	:name "Mars"
 	:mass 6.4185d23
 	:radius 3386200d0
-	:vsop-interval 103
+	:vsop-interval 1003
 	:x-series-set *vsop-series-set-mars-x*
 	:y-series-set *vsop-series-set-mars-y*
 	:z-series-set *vsop-series-set-mars-z*))
@@ -131,7 +132,7 @@
 	:name "Jupiter"
 	:mass 1.8986d27
 	:radius 69000000d0
-	:vsop-interval 104
+	:vsop-interval 1004
 	:x-series-set *vsop-series-set-jupiter-x*
 	:y-series-set *vsop-series-set-jupiter-y*
 	:z-series-set *vsop-series-set-jupiter-z*))
@@ -140,7 +141,7 @@
 	:name "Saturn"
 	:mass 5.6846d26
 	:radius 58000000d0
-	:vsop-interval 105
+	:vsop-interval 1005
 	:x-series-set *vsop-series-set-saturn-x*
 	:y-series-set *vsop-series-set-saturn-y*
 	:z-series-set *vsop-series-set-saturn-z*))
@@ -149,7 +150,7 @@
 	:name "Uranus"
 	:mass 8.6810d25
 	:radius 25200000d0
-	:vsop-interval 106
+	:vsop-interval 1006
 	:x-series-set *vsop-series-set-uranus-x*
 	:y-series-set *vsop-series-set-uranus-y*
 	:z-series-set *vsop-series-set-uranus-z*))
@@ -158,7 +159,7 @@
 	:name "Neptune"
 	:mass 1.0243d26
 	:radius 24500000d0
-	:vsop-interval 107
+	:vsop-interval 1007
 	:x-series-set *vsop-series-set-neptune-x*
 	:y-series-set *vsop-series-set-neptune-y*
 	:z-series-set *vsop-series-set-neptune-z*))
@@ -181,6 +182,7 @@
 	:vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
 
 (defvar *all-objs* (list *tp1* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
+;(defvar *all-objs* (list *tp1* *tp2* *earth*))
 
 (defvar *all-mfds*
 	(list

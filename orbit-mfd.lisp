@@ -36,11 +36,9 @@
 					(compute-elements major-body minor-body ref-plane-normal ref-direction)))
 				(half-scene-width (loop for elements in all-elements maximizing
 					(with-slots (inclination eccentricity) elements
-						(print (list (slot-value (slot-value elements 'minor-body) 'name) inclination (if (< eccentricity 1) (apoapsis-radius elements) (* 1.5 (periapsis-radius elements))) eccentricity))
 						(if (< eccentricity 1)
 							(apoapsis-radius elements)
 							(* 1.5 (periapsis-radius elements)))))))
-			(print (list half-scene-width))
 			(gl-matrix-mode *gl-projection*)
 			(gl-load-identity)
 			(gl-ortho

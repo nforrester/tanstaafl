@@ -243,7 +243,7 @@
 	(setf *depressed-keys* (delete key *depressed-keys*)))
 
 (glut-init-window-position 0 0)
-(glut-init-window-size 680 680)
+(glut-init-window-size 1000 1000)
 (glut-init 0 "")
 (glut-init-display-mode (logior *glut-double* *glut-rgb* *glut-depth*))
 (glut-create-window "TANSTAAFL")

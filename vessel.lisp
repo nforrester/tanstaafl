@@ -36,7 +36,11 @@
 			:rcs-lin-aft        (make-instance 'thruster-group)
 			:main               (make-instance 'thruster-group)
 			:retro              (make-instance 'thruster-group))
-		:documentation "A plist of thruster groups.")))
+		:documentation "A plist of thruster groups.")
+	(active-autopilot-modes
+		:initarg :active-autopilot-modes
+		:initform ()
+		:documentation "A list of running autopilot modes. Each element in the list is a cons cell. (car list-element) is a symbol idendifying the autopilot function. (cdr list-element) is a function that takes one argument (the length of the timestep) and returns t or nil, meaning it's work is finished (and it should be removed from the list) or not, respectively. You probably want to construct each function with lambdas.")))
 
 (defgeneric handle-key-presses (vessel)
 	(:documentation "use check-depressed-keys to identify keys that are depressed, and take appropriate action."))
@@ -72,7 +76,23 @@
 			((check-depressed-keys #\+)
 				(command (getf thruster-groups :main) 1))
 			((check-depressed-keys #\-)
-				(command (getf thruster-groups :retro) 1)))))
+				(command (getf thruster-groups :retro) 1))
+			((check-depressed-keys #\5)
+				(with-slots (active-autopilot-modes) vessel
+					;; This is an autopilot mode that tries to set rotation rate to less than a small amount
+					;; The reason it's stored as a closure around this function is that if the lambda expression
+					;; was here, each instantiation wouldn't be eq to the next, which is necessary for having the
+					;; 5 key toggle the autopilot on and off.
+					(if (< 0 (loop for mode in active-autopilot-modes counting (eq 'kill-rotation (car mode))))
+						(setf active-autopilot-modes
+							(mapcan #'(lambda (mode) (if (eq 'kill-rotation (car mode)) nil (list mode))) active-autopilot-modes))
+						(setf active-autopilot-modes (append
+							(list (let ((zero-ang-vel (make-vector-3 0 0 0)))
+								(cons 'kill-rotation #'(lambda (dt) (print (list dt (magnitude (slot-value vessel 'ang-vel))))
+										(if (> .01 (magnitude (slot-value vessel 'ang-vel)))
+											t
+											(progn (hold-rotation-autopilot vessel dt zero-ang-vel) nil))))))
+							active-autopilot-modes))))))))
 
 (defun make-simple-thruster-setup (vessel)
 	(with-slots (thruster-groups) vessel
@@ -122,7 +142,17 @@
 		(if (oddp i) ; only the thruster groups, this is a plist.
 			(burn thruster-group))))
 
+(defgeneric call-autopilots (vessel dt)
+	(:documentation "Calls the list of running autopilot modes, and removes modes if needed."))
+
+(defmethod call-autopilots ((vessel vessel) dt)
+	(with-slots (active-autopilot-modes) vessel
+		(setf active-autopilot-modes (mapcan #'(lambda (mode return-value) (if return-value nil (list mode)))
+			active-autopilot-modes
+			(print (loop for autopilot-mode in active-autopilot-modes collecting (funcall (cdr autopilot-mode) dt)))))))
+
 (defmethod compute-forces ((obj vessel) dt)
 	(call-next-method)
 	(handle-key-presses obj)
+	(call-autopilots obj dt)
 	(burn obj))
