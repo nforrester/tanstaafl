@@ -49,7 +49,9 @@
 			(gl-load-identity)
 			(gl-clear *gl-depth-buffer-bit*)
 			(gl-color (make-color 0 1 0 .8))
-			(loop for elements in all-elements do
+			(loop
+					for minor-body in minor-bodies
+					for elements in all-elements do
 				(with-slots
 						(semi-major-axis
 						eccentricity
@@ -57,10 +59,26 @@
 						longitude-of-ascending-node
 						argument-of-periapsis
 						true-anomaly) elements
-					(gl-push-matrix)
-					(gl-rotate-angle-axis argument-of-periapsis (make-vector-3 0 0 1))
-					(gl-rotate-angle-axis inclination (make-vector-3 1 0 0))
+
+					(gl-push-matrix) ;; Draw a radial line indicating the position of the minor body.
+
+					;; align the world coordinate system with the orbital elements coordinate system (which the camera is using).
+					(let ((crossed (cross (make-vector-3 0 0 1) ref-plane-normal)))
+						(gl-rotate-angle-axis (asin (/ (magnitude crossed) (* 1 (magnitude ref-plane-normal)))) crossed))
+					(let*
+							((new-x-axis (normalize (cross ref-plane-normal (cross ref-direction ref-plane-normal))))
+							(crossed (cross (make-vector-3 1 0 0) new-x-axis)))
+						(gl-rotate-angle-axis (asin (/ (magnitude crossed) (* 1 (magnitude new-x-axis)))) crossed))
+
+					(gl-begin-end *gl-lines*
+						(gl-vertex3d 0 0 0)
+						(gl-vertex-vector-3 (sub (slot-value minor-body 'pos) (slot-value major-body 'pos))))
+					(gl-pop-matrix)
+
+					(gl-push-matrix) ;; Draw the ellipse
 					(gl-rotate-angle-axis longitude-of-ascending-node (make-vector-3 0 0 1))
+					(gl-rotate-angle-axis inclination (make-vector-3 1 0 0))
+					(gl-rotate-angle-axis argument-of-periapsis (make-vector-3 0 0 1))
 					(gl-begin-end *gl-line-loop*
 						(loop
 								for theta from 0 to (* 2 pi) by (/ (* 2 pi) 150)

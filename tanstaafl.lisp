@@ -254,6 +254,4 @@
 
 (make-simple-thruster-setup (first *all-objs*))
 
-(main-loop
-	*time-acceleration*
-	*all-objs*)
+(main-loop)

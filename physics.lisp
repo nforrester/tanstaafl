@@ -171,7 +171,6 @@
 		(integrate-ang-vel-to-ang-pos obj dt)))
 
 (defun print-timestep ()
-;	(format *error-output* "dt: ~a~%" (+ 0.0 (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration))))
 	(format *state-output-stream* "begin-timestep ~a~%" *epoch-time*)
 	(dolist (obj *all-objs*)
 		(format *state-output-stream* "begin-object~%")
@@ -195,12 +194,14 @@
 		(format *state-output-stream* "end-object~%"))
 	(format *state-output-stream* "end-timestep~%"))
 
-(defun main-loop (time-acceleration all-objs)
+(defun main-loop ()
 	(without-floating-point-underflow
 		(let ((current-time (get-internal-real-time)) prev-time)
 			(loop
 				(setf prev-time current-time)
 				(setf current-time (get-internal-real-time))
-				(timestep (/ (- current-time prev-time) (/ internal-time-units-per-second time-acceleration)))
+				(check-for-high-level-keyboard-commands)
+				(print *time-acceleration*)
+				(timestep (/ (- current-time prev-time) (/ internal-time-units-per-second *time-acceleration*)))
 				(glut-post-redisplay)
 				(glut-main-loop-event)))))

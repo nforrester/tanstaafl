@@ -242,6 +242,19 @@
 (defun remove-from-depressed-keys (key)
 	(setf *depressed-keys* (delete key *depressed-keys*)))
 
+(defmacro keyboard-handler (&rest key-mappings)
+	`(cond ,@(loop for key-mapping in key-mappings collecting
+		`((and
+			,@(loop for key in (first key-mapping) collecting
+				`(check-depressed-keys ,key)))
+			,@(rest key-mapping)))))
+
+(defun check-for-high-level-keyboard-commands ()
+	(keyboard-handler
+		((#\e) (setf *time-acceleration* 1))
+		((#\r) (setf *time-acceleration* (/ *time-acceleration* 10)))
+		((#\t) (setf *time-acceleration* (* *time-acceleration* 10)))))
+
 (glut-init-window-position 0 0)
 (glut-init-window-size 1000 1000)
 (glut-init 0 "")
