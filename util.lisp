@@ -39,3 +39,5 @@
 		((<= minimum value maximum) value)
 		((< value minimum) minimum)
 		((< maximum value) maximum)))
+
+(defmacro preval (&rest stuff) `(print ,stuff))

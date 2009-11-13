@@ -197,58 +197,58 @@
 			:major-body *earth*
 			:minor-bodies (list *tp1* *tp2*))))
 
-(defvar *all-buttons*
-	(list
-		(make-instance 'text-bg-button
-			:anchor-point (make-vector-2 0 1)
-			:text (format nil "Hello World!")
-			:pos (make-vector-2 .2 .9)
-			:background-color (make-color 0 1 0 0.5)
-			:text-color       (make-color 1 0 0 1)
-			:click-function #'(lambda () (print "click")))))
+(defvar *all-buttons* ())
 
-(defvar *all-hud-layers*
-	(list
-		(make-instance 'relative-hud
-			:color (make-color 0 0 1 0.8)
-			:origin *tp1*
-			:target *tp2*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 1 0.8)
-			:origin *tp1*
-			:target *sun*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 0 0.8)
-			:origin *tp1*
-			:target *mercury*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 0 0.8)
-			:origin *tp1*
-			:target *venus*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 0 0.8)
-			:origin *tp1*
-			:target *earth*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 0 0.8)
-			:origin *tp1*
-			:target *mars*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 0 0.8)
-			:origin *tp1*
-			:target *jupiter*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 0 0.8)
-			:origin *tp1*
-			:target *saturn*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 0 0.8)
-			:origin *tp1*
-			:target *uranus*)
-		(make-instance 'relative-hud
-			:color (make-color 1 0.5 0 0.8)
-			:origin *tp1*
-			:target *neptune*)))
+(make-instance 'text-bg-button
+	:anchor-point (make-vector-2 0 1)
+	:text (format nil "Hello World!")
+	:pos (make-vector-2 .2 .9)
+	:background-color (make-color 0 1 0 0.5)
+	:text-color       (make-color 1 0 0 1)
+	:click-function #'(lambda () (print "click")))
+
+(defvar *all-hud-layers* ())
+
+(make-instance 'relative-hud
+	:color (make-color 0 0 1 0.8)
+	:origin *tp1*
+	:target *tp2*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 1 0.8)
+	:origin *tp1*
+	:target *sun*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 0 0.8)
+	:origin *tp1*
+	:target *mercury*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 0 0.8)
+	:origin *tp1*
+	:target *venus*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 0 0.8)
+	:origin *tp1*
+	:target *earth*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 0 0.8)
+	:origin *tp1*
+	:target *mars*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 0 0.8)
+	:origin *tp1*
+	:target *jupiter*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 0 0.8)
+	:origin *tp1*
+	:target *saturn*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 0 0.8)
+	:origin *tp1*
+	:target *uranus*)
+(make-instance 'relative-hud
+	:color (make-color 1 0.5 0 0.8)
+	:origin *tp1*
+	:target *neptune*)
 
 (setf *focused-object* (first *all-objs*))
 

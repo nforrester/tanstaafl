@@ -24,6 +24,9 @@
 		:initform nil
 		:documentation "The function called when the button is clicked")))
 
+(defmethod initialize-instance :after ((button button) &rest stuff)
+	(setf *all-buttons* (cons button *all-buttons*)))
+
 (defmethod compute-sw-corner ((button button) screen-size)
 	(with-slots (anchor-point pos size) button
 		(sub (mult pos screen-size) (mult anchor-point size))))
@@ -68,7 +71,8 @@
 		(gl-vertex2d 0 0)
 		(gl-vertex2d 0 1)
 		(gl-vertex2d 1 1)
-		(gl-vertex2d 1 0)))
+		(gl-vertex2d 1 0))
+	(call-next-method))
 
 (defclass text-button (button)
 	((text
@@ -101,7 +105,6 @@
 	(call-next-method))
 
 (defmethod draw-2d ((button text-button) screen-size)
-	(call-next-method)
 	(gl-matrix-mode *gl-projection*)
 	(gl-load-identity)
 	(with-slots (x y) (slot-value button 'size)
@@ -112,4 +115,4 @@
 		(with-slots ((char-x x) (char-y y)) *char-size*
 		(gl-place-string (slot-value button 'text) (make-vector-2 (* 0.5 char-x) (- y (* 1.25 char-y)))))))
 
-(defclass text-bg-button (text-button background-button) ())
+(defclass text-bg-button (background-button text-button) ())

@@ -17,18 +17,32 @@
 (defclass hud-layer ()
 	((color
 		:initarg :color
-		:initform (make-color 0 1 0 0.8))))
+		:initform (make-color 0 1 0 0.8))
+	(name
+		:initarg :name
+		:initform "HUD-LAYER")))
+
+(let ((x 0)) (defun hud-button-counter () (setf x (+ x 1))))
+
+(defvar *hud-button-grid* (make-instance 'box-2d-grid :anchor-point (make-vector-2 0 1) :pos (make-vector-2 0 1)))
+
+(defmethod initialize-instance :after ((hud-layer hud-layer) &rest stuff)
+	(setf *all-hud-layers* (cons hud-layer *all-hud-layers*))
+	(let*
+			((close-button (make-instance 'text-button :text (slot-value hud-layer 'name) :text-color (slot-value hud-layer 'color)))
+			(close-button-record (list close-button 0 (hud-button-counter))))
+		(setf (slot-value *hud-button-grid* 'boxes) (cons close-button-record  (slot-value *hud-button-grid* 'boxes)))
+		(setf (slot-value close-button 'click-function) (lambda ()
+			(setf (slot-value *hud-button-grid* 'boxes) (remove close-button-record (slot-value *hud-button-grid* 'boxes)))
+			(setf *all-hud-layers* (remove hud-layer *all-hud-layers*))
+			(setf *all-buttons* (remove close-button *all-buttons*))))))
 
 (defmethod draw-2d :around ((hud-layer hud-layer) screen-size)
 	(with-slots (x y) screen-size
 		(gl-viewport 0 0 x y)
 		(gl-matrix-mode *gl-projection*)
 		(gl-load-identity)
-		(glu-ortho2-d
-			0;(* -1 (/ x 2))
-			x;(*  1 (/ x 2))
-			0;(*  1 (/ y 2))
-			y));(* -1 (/ y 2))))
+		(glu-ortho2-d 0 x 0 y))
 	(gl-matrix-mode *gl-modelview*)
 	(gl-load-identity)
 	(gl-clear *gl-depth-buffer-bit*)

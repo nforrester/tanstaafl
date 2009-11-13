@@ -201,7 +201,6 @@
 				(setf prev-time current-time)
 				(setf current-time (get-internal-real-time))
 				(check-for-high-level-keyboard-commands)
-				(print *time-acceleration*)
 				(timestep (/ (- current-time prev-time) (/ internal-time-units-per-second *time-acceleration*)))
 				(glut-post-redisplay)
 				(glut-main-loop-event)))))

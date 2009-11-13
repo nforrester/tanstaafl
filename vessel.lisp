@@ -72,7 +72,7 @@
 							(mapcan #'(lambda (mode) (if (eq 'kill-rotation (car mode)) nil (list mode))) active-autopilot-modes))
 						(setf active-autopilot-modes (append
 							(list (let ((zero-ang-vel (make-vector-3 0 0 0)))
-								(cons 'kill-rotation #'(lambda (dt) (print (list dt (magnitude (slot-value vessel 'ang-vel))))
+								(cons 'kill-rotation #'(lambda (dt) (list dt (magnitude (slot-value vessel 'ang-vel)))
 										(if (> .01 (magnitude (slot-value vessel 'ang-vel)))
 											t
 											(progn (hold-rotation-autopilot vessel dt zero-ang-vel) nil))))))
@@ -133,7 +133,7 @@
 	(with-slots (active-autopilot-modes) vessel
 		(setf active-autopilot-modes (mapcan #'(lambda (mode return-value) (if return-value nil (list mode)))
 			active-autopilot-modes
-			(print (loop for autopilot-mode in active-autopilot-modes collecting (funcall (cdr autopilot-mode) dt)))))))
+			(loop for autopilot-mode in active-autopilot-modes collecting (funcall (cdr autopilot-mode) dt))))))
 
 (defmethod compute-forces ((obj vessel) dt)
 	(call-next-method)

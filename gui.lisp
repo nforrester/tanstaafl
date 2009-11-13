@@ -114,6 +114,9 @@
 		(gl-disable *gl-light0*)
 		(gl-disable *gl-cull-face*)
 
+		(loop for grid in *all-box-2d-grids* do
+			(draw-2d grid screen-size))
+
 		(loop for mfd in *all-mfds* do
 			(draw-2d mfd screen-size))
 
@@ -229,6 +232,76 @@
 
 (defgeneric compute-sw-corner (object screen-size)
 	(:documentation "Compute the lower left corner of object, and return a vector-2 in pixels."))
+
+(defclass box-2d-grid (box-2d) ; a grid of boxes, which is itself a box. It works sort of like a grid in a frame, in Tk.
+	((boxes
+		:initarg :boxes
+		:initform ()
+		:documentation "A list of lists of the form (box col row)")))
+
+(defvar *all-box-2d-grids* ())
+
+(defmethod initialize-instance :after ((grid box-2d-grid) &rest stuff)
+	(setf *all-box-2d-grids* (cons grid *all-box-2d-grids*)))
+
+(defmethod draw-2d ((grid box-2d-grid) screen-size)
+	(let ((cells (make-hash-table :test 'equal)))
+		(with-slots (boxes) grid
+			(if boxes (progn
+				(let ((max-col (loop for box in boxes maximize (second box)))
+						(min-col (loop for box in boxes minimize (second box)))
+						(max-row (loop for box in boxes maximize (third box)))
+						(min-row (loop for box in boxes minimize (third box))))
+					(loop for row from min-row to max-row do
+						(loop for col from min-col to max-col do
+							(setf (gethash (cons row col) cells) nil)))
+					(loop for box in boxes do
+						(setf (gethash (cons (third box) (second box)) cells) (first box)))
+					(let*
+							((row-heights (loop for row from min-row to max-row collect
+								(loop for col from min-col to max-col maximize
+									(if (gethash (cons row col) cells)
+										(slot-value (slot-value (gethash (cons row col) cells) 'size) 'y)
+										0))))
+							(col-widths (loop for col from min-col to max-col collect
+								(loop for row from min-row to max-row maximize
+									(if (gethash (cons row col) cells)
+										(slot-value (slot-value (gethash (cons row col) cells) 'size) 'x)
+										0))))
+							(grid-sw-corner (with-slots (pos anchor-point) grid
+								(sub (mult pos screen-size) (mult anchor-point (make-vector-2
+									(loop for width in col-widths sum width)
+									(loop for height in row-heights sum height)))))))
+
+						(with-slots (x y) screen-size
+							(gl-viewport 0 0 x y)
+							(gl-matrix-mode *gl-projection*)
+							(gl-load-identity)
+							(glu-ortho2-d 0 x 0 y))
+						(gl-matrix-mode *gl-modelview*)
+						(gl-load-identity)
+						(gl-clear *gl-depth-buffer-bit*)
+						(gl-color (make-color 1 0 0 1))
+						(gl-begin-end *gl-line-loop*
+							(gl-vertex-vector-2 (add grid-sw-corner (make-vector-2 0 0)))
+							(gl-vertex-vector-2 (add grid-sw-corner (make-vector-2 (loop for width in col-widths sum width) 0)))
+							(gl-vertex-vector-2 (add grid-sw-corner (make-vector-2 (loop for width in col-widths sum width) (loop for height in row-heights sum height))))
+							(gl-vertex-vector-2 (add grid-sw-corner (make-vector-2 0 (loop for height in row-heights sum height)))))
+
+						(loop
+							for col from min-col to max-col
+							for width in col-widths
+							for x = (+ (if x x (slot-value grid-sw-corner 'x)) width)
+							do
+							(loop
+								for row from min-row to max-row
+								for height in row-heights
+								for y = (+ (if y y (slot-value grid-sw-corner 'y)) height)
+								do
+								(if (gethash (cons row col) cells)
+									(with-slots (anchor-point pos) (gethash (cons row col) cells)
+										(setf anchor-point (make-vector-2 1 1))
+										(setf pos (make-vector-2 (/ x (slot-value screen-size 'x)) (/ y (slot-value screen-size 'y)))))))))))))))
 
 (defvar *depressed-keys* ())
 
