@@ -22,6 +22,11 @@
 		:initarg :target
 		:initform nil)))
 
+(defmethod initialize-instance :after ((hud relative-hud) &rest stuff)
+	(with-slots (name origin target buttons) hud
+		(setf name (preval format nil "~a REL TO ~a" (slot-value target 'name) (slot-value origin 'name)))
+		(setf (slot-value (second buttons) 'text) name)))
+
 (let ((hud-marker-size 40))
 	(defmethod draw-2d ((hud relative-hud) screen-size)
 		(with-slots (origin target) hud

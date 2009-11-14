@@ -288,25 +288,18 @@
 							(gl-vertex-vector-2 (add grid-sw-corner (make-vector-2 (loop for width in col-widths sum width) (loop for height in row-heights sum height))))
 							(gl-vertex-vector-2 (add grid-sw-corner (make-vector-2 0 (loop for height in row-heights sum height)))))
 
-						(print boxes)
-						(print cells)
-						(print col-widths)
-						(print (list min-col max-col))
-						(print row-heights)
-						(print (list min-row max-row))
-
 						(loop
 							for col from min-col to max-col
 							for width in col-widths
-							for x = (lpreval 'x + (if x x (slot-value grid-sw-corner 'x)) width)
+							for x = (+ (if x x (slot-value grid-sw-corner 'x)) width)
 							do
 							(loop
 								for row from min-row to max-row
 								for height in row-heights
-								for y = (lpreval 'y + (if y y (slot-value grid-sw-corner 'y)) height)
+								for y = (+ (if y y (slot-value grid-sw-corner 'y)) height)
 								do
 								(if (gethash (cons row col) cells)
-									(with-slots (anchor-point pos) (preval gethash (preval cons row col) cells)
+									(with-slots (anchor-point pos) (gethash (cons row col) cells)
 										(setf anchor-point (make-vector-2 1 1))
 										(setf pos (make-vector-2 (/ x (slot-value screen-size 'x)) (/ y (slot-value screen-size 'y)))))))))))))))
 

@@ -18,6 +18,7 @@
 	((color
 		:initarg :color
 		:initform (make-color 0 1 0 0.8))
+	(buttons)
 	(name
 		:initarg :name
 		:initform "HUD-LAYER")))
@@ -39,6 +40,7 @@
 			(move-up-record      (list move-up      2 row))
 			(move-down-record    (list move-down    3 row)))
 		(setf (slot-value *hud-button-grid* 'boxes) (list* close-button-record label-record move-up-record move-down-record (slot-value *hud-button-grid* 'boxes)))
+		(setf (slot-value hud-layer 'buttons) (list close-button label move-up move-down))
 		(setf (slot-value close-button 'click-function) (lambda ()
 			(setf (slot-value *hud-button-grid* 'boxes) (remove close-button-record (slot-value *hud-button-grid* 'boxes)))
 			(setf (slot-value *hud-button-grid* 'boxes) (remove label-record        (slot-value *hud-button-grid* 'boxes)))
