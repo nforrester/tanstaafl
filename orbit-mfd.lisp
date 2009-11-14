@@ -48,7 +48,17 @@
 			(gl-matrix-mode *gl-modelview*)
 			(gl-load-identity)
 			(gl-clear *gl-depth-buffer-bit*)
+			(gl-color (make-color .5 .5 .5 1))
+
+			(gl-begin-end *gl-line-loop* ;; Draw the circle representing the major body
+				(with-slots (radius) major-body
+					(loop
+							for theta from 0 to (* 2 pi) by (/ (* 2 pi) 150)
+							do
+						(gl-vertex3d (* radius (sin theta)) (* radius (cos theta)) 0))))
+
 			(gl-color (make-color 0 1 0 .8))
+
 			(loop
 					for minor-body in minor-bodies
 					for elements in all-elements do
@@ -65,7 +75,7 @@
 					(gl-rotate-angle-axis inclination (make-vector-3 1 0 0))
 					(gl-rotate-angle-axis argument-of-periapsis (make-vector-3 0 0 1))
 
-					(gl-begin-end *gl-line-loop* ;; Draw the ellipse
+					(gl-begin-end *gl-line-loop* ;; Draw the ellipse of the orbit
 						(loop
 								for theta from 0 to (* 2 pi) by (/ (* 2 pi) 150)
 								for r = (/ (* semi-major-axis (- 1 (expt eccentricity 2))) (- 1 (* eccentricity (cos theta))))
