@@ -41,3 +41,8 @@
 		((< maximum value) maximum)))
 
 (defmacro preval (&rest stuff) `(print ,stuff))
+
+(defmacro lpreval (label &rest stuff)
+	`(let ((x ,stuff))
+		(print (list ,label x))
+		x))
