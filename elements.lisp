@@ -101,8 +101,9 @@
 						(- (* 2 pi) upsilon))))))
 
 (defun orbital-period (elements)
-	(with-slots (semi-major-axis major-body) elements
-		(* 2 pi (sqrt (/ (expt semi-major-axis 3) (* *G* (slot-value major-body 'mass)))))))
+	(let ((period (with-slots (semi-major-axis major-body) elements
+			(* 2 pi (sqrt (/ (expt semi-major-axis 3) (* *G* (slot-value major-body 'mass))))))))
+		(if (realp period) period nil)))
 
 (defun periapsis-radius (elements)
 	(with-slots (semi-major-axis eccentricity) elements

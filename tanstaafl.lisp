@@ -186,10 +186,11 @@
 
 (defvar *all-mfds*
 	(list
+		(make-instance 'test-mfd :color (make-color .4 0 .4 .5) :pos (make-vector-2 1 1) :anchor-point (make-vector-2 1 1) :max-size (make-vector-2 .3 .3))
 		(make-instance 'orbit-mfd
 			:anchor-point (make-vector-2 .5 .5)
 			:pos (make-vector-2 .5 .5)
-			:max-size (make-vector-2 1 1)
+			:max-size (make-vector-2 .5 .5)
 		;	:major-body *sun*
 		;	:minor-bodies (list *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))))
 		;	:major-body *earth*

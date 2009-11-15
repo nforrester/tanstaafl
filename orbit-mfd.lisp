@@ -39,6 +39,37 @@
 						(if (< eccentricity 1)
 							(apoapsis-radius elements)
 							(* 1.5 (periapsis-radius elements)))))))
+
+			(gl-matrix-mode *gl-projection*)
+			(gl-load-identity)
+			(glu-ortho2-d 0 1 0 1)
+			(gl-matrix-mode *gl-modelview*)
+			(gl-load-identity)
+			(gl-clear *gl-depth-buffer-bit*)
+
+			(gl-color (make-color .5 .5 .5 1))
+			(gl-place-string (format nil "Major Body: ~a" (slot-value major-body 'name)) (make-vector-2 0 1) :anchor-point (make-vector-2 0 1))
+
+			(gl-color (make-color 0 1 0 .8))
+			(gl-place-string (format nil "Minor Body: ~a" (slot-value (first minor-bodies) 'name)) (make-vector-2 0 1) :anchor-point (make-vector-2 0 2))
+			(let ((elements (compute-elements major-body (first minor-bodies) ref-plane-normal ref-direction)))
+				(with-slots
+						(semi-major-axis
+						eccentricity
+						inclination
+						longitude-of-ascending-node
+						argument-of-periapsis
+						true-anomaly) elements
+					(gl-place-string (format nil "SMa ~a" semi-major-axis)              (make-vector-2 0 1) :anchor-point (make-vector-2 0  3))
+					(gl-place-string (format nil "Ecc ~a" eccentricity)                 (make-vector-2 0 1) :anchor-point (make-vector-2 0  4))
+					(gl-place-string (format nil "Inc ~a" inclination)                  (make-vector-2 0 1) :anchor-point (make-vector-2 0  5))
+					(gl-place-string (format nil "LAN ~a" longitude-of-ascending-node)  (make-vector-2 0 1) :anchor-point (make-vector-2 0  6))
+					(gl-place-string (format nil "AgP ~a" argument-of-periapsis)        (make-vector-2 0 1) :anchor-point (make-vector-2 0  7))
+					(gl-place-string (format nil "TrA ~a" true-anomaly)                 (make-vector-2 0 1) :anchor-point (make-vector-2 0  8))
+					(gl-place-string (format nil "T   ~a" (orbital-period elements))    (make-vector-2 0 1) :anchor-point (make-vector-2 0  9))
+					(gl-place-string (format nil "PeR ~a" (periapsis-radius elements))  (make-vector-2 0 1) :anchor-point (make-vector-2 0 10))
+					(gl-place-string (format nil "ApR ~a" (apoapsis-radius elements))   (make-vector-2 0 1) :anchor-point (make-vector-2 0 11))))
+
 			(gl-matrix-mode *gl-projection*)
 			(gl-load-identity)
 			(gl-ortho

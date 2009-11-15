@@ -343,10 +343,19 @@
 
 (gl-place-char-maker "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~")
 
-(defun gl-place-string (str pos)
+(defun gl-place-string (str pos &key (anchor-point (make-vector-2 0 0)))
 	(gl-disable *gl-depth-test*)
 	(with-slots (x y) pos
 		(gl-raster-pos2d x y))
+	(with-slots (x y) anchor-point
+		(gl-bitmap
+			(slot-value *char-size* 'x)
+			(slot-value *char-size* 'y)
+			0
+			0
+			(* -1 x (slot-value *char-size* 'x))
+			(* -1 y (slot-value *char-size* 'y))
+			(elt *char-set* *char-non-print*)))
 	(loop for line-length for i upto (- (length str) 1) do
 		(if (not (eq #\Newline (elt str i)))
 			(gl-place-char (elt str i))
