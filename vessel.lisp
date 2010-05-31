@@ -73,6 +73,7 @@
                      (setf active-autopilot-modes (append
                                                     (list (let ((zero-ang-vel (make-vector-3 0 0 0)))
                                                             (cons 'kill-rotation #'(lambda (dt); (list dt (magnitude (slot-value vessel 'ang-vel)))
+										     (print "kr")
                                                                                      (if (> .01 (magnitude (slot-value vessel 'ang-vel)))
                                                                                        t
                                                                                        (progn (hold-rotation-autopilot vessel dt zero-ang-vel) nil))))))
@@ -87,6 +88,7 @@
                            (mapcan #'(lambda (mode) (if (eq 'orbit-normal (car mode)) nil (list mode))) active-autopilot-modes))
                      (setf active-autopilot-modes (append
                                                     (list (cons 'orbit-normal #'(lambda (dt)
+										(print "on")
                                                                                 (let* ((major-body (first (reduce (lambda (a b)
                                                                                                                     (if (> (second a) (second b))
                                                                                                                       a
@@ -118,6 +120,7 @@
                            (mapcan #'(lambda (mode) (if (eq 'orbit-anti-normal (car mode)) nil (list mode))) active-autopilot-modes))
                      (setf active-autopilot-modes (append
                                                     (list (cons 'orbit-anti-normal #'(lambda (dt)
+										(print "oan")
                                                                                 (let* ((major-body (first (reduce (lambda (a b)
                                                                                                                     (if (> (second a) (second b))
                                                                                                                       a
@@ -149,6 +152,7 @@
                            (mapcan #'(lambda (mode) (if (eq 'prograde (car mode)) nil (list mode))) active-autopilot-modes))
                      (setf active-autopilot-modes (append
                                                     (list (cons 'prograde #'(lambda (dt)
+										(print "pr")
                                                                                 (let* ((major-body (first (reduce (lambda (a b)
                                                                                                                     (if (> (second a) (second b))
                                                                                                                       a
@@ -178,6 +182,7 @@
                            (mapcan #'(lambda (mode) (if (eq 'retrograde (car mode)) nil (list mode))) active-autopilot-modes))
                      (setf active-autopilot-modes (append
                                                     (list (cons 'retrograde #'(lambda (dt)
+										(print "rg")
                                                                                 (let* ((major-body (first (reduce (lambda (a b)
                                                                                                                     (if (> (second a) (second b))
                                                                                                                       a
