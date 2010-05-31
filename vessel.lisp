@@ -22,20 +22,20 @@
    (thruster-groups
      :initarg :thruster-groups
      :initform (list
-		 :rcs-pitch-up       (make-instance 'thruster-group)
-		 :rcs-pitch-down     (make-instance 'thruster-group)
-		 :rcs-yaw-starboard  (make-instance 'thruster-group)
-		 :rcs-yaw-port       (make-instance 'thruster-group)
-		 :rcs-roll-starboard (make-instance 'thruster-group)
-		 :rcs-roll-port      (make-instance 'thruster-group)
-		 :rcs-lin-up         (make-instance 'thruster-group)
-		 :rcs-lin-down       (make-instance 'thruster-group)
-		 :rcs-lin-starboard  (make-instance 'thruster-group)
-		 :rcs-lin-port       (make-instance 'thruster-group)
-		 :rcs-lin-fore       (make-instance 'thruster-group)
-		 :rcs-lin-aft        (make-instance 'thruster-group)
-		 :main               (make-instance 'thruster-group)
-		 :retro              (make-instance 'thruster-group))
+                 :rcs-pitch-up       (make-instance 'thruster-group)
+                 :rcs-pitch-down     (make-instance 'thruster-group)
+                 :rcs-yaw-starboard  (make-instance 'thruster-group)
+                 :rcs-yaw-port       (make-instance 'thruster-group)
+                 :rcs-roll-starboard (make-instance 'thruster-group)
+                 :rcs-roll-port      (make-instance 'thruster-group)
+                 :rcs-lin-up         (make-instance 'thruster-group)
+                 :rcs-lin-down       (make-instance 'thruster-group)
+                 :rcs-lin-starboard  (make-instance 'thruster-group)
+                 :rcs-lin-port       (make-instance 'thruster-group)
+                 :rcs-lin-fore       (make-instance 'thruster-group)
+                 :rcs-lin-aft        (make-instance 'thruster-group)
+                 :main               (make-instance 'thruster-group)
+                 :retro              (make-instance 'thruster-group))
      :documentation "A plist of thruster groups.")
    (active-autopilot-modes
      :initarg :active-autopilot-modes
@@ -63,26 +63,146 @@
       ((#\+)     (command (getf thruster-groups :main) 1))
       ((#\-)     (command (getf thruster-groups :retro) 1))
       ((#\5)     (with-slots (active-autopilot-modes) vessel
-		   ;; This is an autopilot mode that tries to set rotation rate to less than a small amount
-		   ;; The reason it's stored as a closure around this function is that if the lambda expression
-		   ;; was here, each instantiation wouldn't be eq to the next, which is necessary for having the
-		   ;; 5 key toggle the autopilot on and off.
-		   (if (< 0 (loop for mode in active-autopilot-modes counting (eq 'kill-rotation (car mode))))
-		     (setf active-autopilot-modes
-			   (mapcan #'(lambda (mode) (if (eq 'kill-rotation (car mode)) nil (list mode))) active-autopilot-modes))
-		     (setf active-autopilot-modes (append
-						    (list (let ((zero-ang-vel (make-vector-3 0 0 0)))
-							    (cons 'kill-rotation #'(lambda (dt) (list dt (magnitude (slot-value vessel 'ang-vel)))
-										     (if (> .01 (magnitude (slot-value vessel 'ang-vel)))
-										       t
-										       (progn (hold-rotation-autopilot vessel dt zero-ang-vel) nil))))))
-						    active-autopilot-modes))))))))
+                   ;; This is an autopilot mode that tries to set rotation rate to less than a small amount
+                   ;; The reason it's stored as a closure around this function is that if the lambda expression
+                   ;; was here, each instantiation wouldn't be eq to the next, which is necessary for having the
+                   ;; key toggle the autopilot on and off.
+                   (if (< 0 (loop for mode in active-autopilot-modes counting (eq 'kill-rotation (car mode))))
+                     (setf active-autopilot-modes
+                           (mapcan #'(lambda (mode) (if (eq 'kill-rotation (car mode)) nil (list mode))) active-autopilot-modes))
+                     (setf active-autopilot-modes (append
+                                                    (list (let ((zero-ang-vel (make-vector-3 0 0 0)))
+                                                            (cons 'kill-rotation #'(lambda (dt); (list dt (magnitude (slot-value vessel 'ang-vel)))
+                                                                                     (if (> .01 (magnitude (slot-value vessel 'ang-vel)))
+                                                                                       t
+                                                                                       (progn (hold-rotation-autopilot vessel dt zero-ang-vel) nil))))))
+                                                    active-autopilot-modes)))))
+      ((#\;)     (with-slots (active-autopilot-modes) vessel
+                   ;; This is an autopilot mode that tries to point the vessel in the orbit-normal direction relative to what's probably the major body.
+                   ;; The reason it's stored as a closure around this function is that if the lambda expression
+                   ;; was here, each instantiation wouldn't be eq to the next, which is necessary for having the
+                   ;; key toggle the autopilot on and off.
+                   (if (< 0 (loop for mode in active-autopilot-modes counting (eq 'orbit-normal (car mode))))
+                     (setf active-autopilot-modes
+                           (mapcan #'(lambda (mode) (if (eq 'orbit-normal (car mode)) nil (list mode))) active-autopilot-modes))
+                     (setf active-autopilot-modes (append
+                                                    (list (cons 'orbit-normal #'(lambda (dt)
+                                                                                (let* ((major-body (first (reduce (lambda (a b)
+                                                                                                                    (if (> (second a) (second b))
+                                                                                                                      a
+                                                                                                                      b))
+                                                                                                                  (mapcar (lambda (obj)
+                                                                                                                            (list obj
+																  (if (not (eq vessel obj))
+                                                                                                                                    (* *G*
+                                                                                                                                       (slot-value obj 'mass)
+                                                                                                                                       (expt (magnitude (sub (slot-value vessel 'pos)
+                                                                                                                                                             (slot-value obj 'pos)))
+                                                                                                                                             -3))
+																    0)))
+                                                                                                                          *all-objs*))))
+                                                                                       (target-vector (cross (sub (slot-value vessel 'pos)
+														  (slot-value major-body 'pos))
+													     (sub (slot-value vessel 'vel)
+                                                                                                                  (slot-value major-body 'vel)))))
+                                                                                  (hold-orientation-autopilot vessel dt target-vector)
+                                                                                  nil))))
+                                                    active-autopilot-modes)))))
+      ((#\')     (with-slots (active-autopilot-modes) vessel
+                   ;; This is an autopilot mode that tries to point the vessel in the orbit-anti-normal direction relative to what's probably the major body.
+                   ;; The reason it's stored as a closure around this function is that if the lambda expression
+                   ;; was here, each instantiation wouldn't be eq to the next, which is necessary for having the
+                   ;; key toggle the autopilot on and off.
+                   (if (< 0 (loop for mode in active-autopilot-modes counting (eq 'orbit-anti-normal (car mode))))
+                     (setf active-autopilot-modes
+                           (mapcan #'(lambda (mode) (if (eq 'orbit-anti-normal (car mode)) nil (list mode))) active-autopilot-modes))
+                     (setf active-autopilot-modes (append
+                                                    (list (cons 'orbit-anti-normal #'(lambda (dt)
+                                                                                (let* ((major-body (first (reduce (lambda (a b)
+                                                                                                                    (if (> (second a) (second b))
+                                                                                                                      a
+                                                                                                                      b))
+                                                                                                                  (mapcar (lambda (obj)
+                                                                                                                            (list obj
+																  (if (not (eq vessel obj))
+                                                                                                                                    (* *G*
+                                                                                                                                       (slot-value obj 'mass)
+                                                                                                                                       (expt (magnitude (sub (slot-value vessel 'pos)
+                                                                                                                                                             (slot-value obj 'pos)))
+                                                                                                                                             -3))
+																    0)))
+                                                                                                                          *all-objs*))))
+                                                                                       (target-vector (cross (sub (slot-value vessel 'pos)
+														  (slot-value major-body 'pos))
+													     (sub (slot-value major-body 'vel)
+                                                                                                                  (slot-value vessel 'vel)))))
+                                                                                  (hold-orientation-autopilot vessel dt target-vector)
+                                                                                  nil))))
+                                                    active-autopilot-modes)))))
+      ((#\[)     (with-slots (active-autopilot-modes) vessel
+                   ;; This is an autopilot mode that tries to point the vessel in the prograde direction relative to what's probably the major body.
+                   ;; The reason it's stored as a closure around this function is that if the lambda expression
+                   ;; was here, each instantiation wouldn't be eq to the next, which is necessary for having the
+                   ;; key toggle the autopilot on and off.
+                   (if (< 0 (loop for mode in active-autopilot-modes counting (eq 'prograde (car mode))))
+                     (setf active-autopilot-modes
+                           (mapcan #'(lambda (mode) (if (eq 'prograde (car mode)) nil (list mode))) active-autopilot-modes))
+                     (setf active-autopilot-modes (append
+                                                    (list (cons 'prograde #'(lambda (dt)
+                                                                                (let* ((major-body (first (reduce (lambda (a b)
+                                                                                                                    (if (> (second a) (second b))
+                                                                                                                      a
+                                                                                                                      b))
+                                                                                                                  (mapcar (lambda (obj)
+                                                                                                                            (list obj
+																  (if (not (eq vessel obj))
+                                                                                                                                    (* *G*
+                                                                                                                                       (slot-value obj 'mass)
+                                                                                                                                       (expt (magnitude (sub (slot-value vessel 'pos)
+                                                                                                                                                             (slot-value obj 'pos)))
+                                                                                                                                             -3))
+																    0)))
+                                                                                                                          *all-objs*))))
+                                                                                       (target-vector (sub (slot-value vessel 'vel)
+                                                                                                           (slot-value major-body 'vel))))
+                                                                                  (hold-orientation-autopilot vessel dt target-vector)
+                                                                                  nil))))
+                                                    active-autopilot-modes)))))
+      ((#\])     (with-slots (active-autopilot-modes) vessel
+                   ;; This is an autopilot mode that tries to point the vessel in the retrograde direction relative to what's probably the major body.
+                   ;; The reason it's stored as a closure around this function is that if the lambda expression
+                   ;; was here, each instantiation wouldn't be eq to the next, which is necessary for having the
+                   ;; key toggle the autopilot on and off.
+                   (if (< 0 (loop for mode in active-autopilot-modes counting (eq 'retrograde (car mode))))
+                     (setf active-autopilot-modes
+                           (mapcan #'(lambda (mode) (if (eq 'retrograde (car mode)) nil (list mode))) active-autopilot-modes))
+                     (setf active-autopilot-modes (append
+                                                    (list (cons 'retrograde #'(lambda (dt)
+                                                                                (let* ((major-body (first (reduce (lambda (a b)
+                                                                                                                    (if (> (second a) (second b))
+                                                                                                                      a
+                                                                                                                      b))
+                                                                                                                  (mapcar (lambda (obj)
+                                                                                                                            (list obj
+																  (if (not (eq vessel obj))
+                                                                                                                                    (* *G*
+                                                                                                                                       (slot-value obj 'mass)
+                                                                                                                                       (expt (magnitude (sub (slot-value vessel 'pos)
+                                                                                                                                                             (slot-value obj 'pos)))
+                                                                                                                                             -3))
+																    0)))
+                                                                                                                          *all-objs*))))
+                                                                                       (target-vector (sub (slot-value major-body 'vel)
+                                                                                                           (slot-value vessel 'vel))))
+                                                                                  (hold-orientation-autopilot vessel dt target-vector)
+                                                                                  nil))))
+                                                    active-autopilot-modes))))))))
 
 (defun make-simple-thruster-setup (vessel)
   (with-slots (thruster-groups) vessel
     (let
       ; all the RCS thrusters are named by position-direction
-      ((fore-up       (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
+      ((fore-up        (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
        (fore-down      (make-instance 'thruster :max-thrust (make-vector-3 0 -1 0) :pos (make-vector-3 0 0 -.5) :vessel vessel))
        (aft-up         (make-instance 'thruster :max-thrust (make-vector-3 0  1 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
        (aft-down       (make-instance 'thruster :max-thrust (make-vector-3 0 -1 0) :pos (make-vector-3 0 0  .5) :vessel vessel))
@@ -132,8 +252,8 @@
 (defmethod call-autopilots ((vessel vessel) dt)
   (with-slots (active-autopilot-modes) vessel
     (setf active-autopilot-modes (mapcan #'(lambda (mode return-value) (if return-value nil (list mode)))
-					 active-autopilot-modes
-					 (loop for autopilot-mode in active-autopilot-modes collecting (funcall (cdr autopilot-mode) dt))))))
+                                         active-autopilot-modes
+                                         (loop for autopilot-mode in active-autopilot-modes collecting (funcall (cdr autopilot-mode) dt))))))
 
 (defmethod compute-forces ((obj vessel) dt)
   (call-next-method)
