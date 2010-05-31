@@ -15,34 +15,34 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (defun split-string (chr str)
-	(loop	
-		for i = 0 then (1+ j)
-		as j = (position chr str :start i)
-		collect (subseq str i j)
-		while j))
+  (loop	
+    for i = 0 then (1+ j)
+    as j = (position chr str :start i)
+    collect (subseq str i j)
+    while j))
 
 (defun symbol-to-string (sym)
-	(format nil "~a" sym))
+  (format nil "~a" sym))
 
 (defun list-strings-to-string (strings)
-	(let ((target ""))
-		(dolist (str strings)
-			(setf target (concatenate 'string target str)))
-		target))
+  (let ((target ""))
+    (dolist (str strings)
+      (setf target (concatenate 'string target str)))
+    target))
 
 (defun label-print (label value)
-	(print (list label value))
-	value)
+  (print (list label value))
+  value)
 
 (defun clamp (minimum maximum value)
-	(cond
-		((<= minimum value maximum) value)
-		((< value minimum) minimum)
-		((< maximum value) maximum)))
+  (cond
+    ((<= minimum value maximum) value)
+    ((< value minimum) minimum)
+    ((< maximum value) maximum)))
 
 (defmacro preval (&rest stuff) `(print ,stuff))
 
 (defmacro lpreval (label &rest stuff)
-	`(let ((x ,stuff))
-		(print (list ,label x))
-		x))
+  `(let ((x ,stuff))
+     (print (list ,label x))
+     x))

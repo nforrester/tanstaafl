@@ -51,29 +51,29 @@
 (defvar *wait-for-command* nil)
 
 (defun process-command-line-args ()
-	(let (active-arg)
-		(dolist (a *args*)
-			(cond
-				((or (string= a "-i") (string= a "--input")) (setf active-arg :input))
-				((eq active-arg :input) (setf *command-input-stream* (open a)) (setf active-arg nil))
+  (let (active-arg)
+    (dolist (a *args*)
+      (cond
+	((or (string= a "-i") (string= a "--input")) (setf active-arg :input))
+	((eq active-arg :input) (setf *command-input-stream* (open a)) (setf active-arg nil))
 
-				((or (string= a "-o") (string= a "--output")) (setf active-arg :output))
-				((eq active-arg :output) (setf *state-output-stream* (open a :direction :output)) (setf active-arg nil))
+	((or (string= a "-o") (string= a "--output")) (setf active-arg :output))
+	((eq active-arg :output) (setf *state-output-stream* (open a :direction :output)) (setf active-arg nil))
 
-				((or (string= a "-t") (string= a "--time-acceleration")) (setf active-arg :time-acceleration))
-				((eq active-arg :time-acceleration) (setf *time-acceleration* (read-from-string a)) (setf active-arg nil))
+	((or (string= a "-t") (string= a "--time-acceleration")) (setf active-arg :time-acceleration))
+	((eq active-arg :time-acceleration) (setf *time-acceleration* (read-from-string a)) (setf active-arg nil))
 
-				((or (string= a "-w") (string= a "--wait-for-command")) (setf active-arg :wait-for-command))
-				((eq active-arg :wait-for-command) (setf *wait-for-command* a) (setf active-arg nil))
+	((or (string= a "-w") (string= a "--wait-for-command")) (setf active-arg :wait-for-command))
+	((eq active-arg :wait-for-command) (setf *wait-for-command* a) (setf active-arg nil))
 
-				(t (format *error-output* "Unrecognized command line option: ~a" a))))))
+	(t (format *error-output* "Unrecognized command line option: ~a" a))))))
 
 (defun wait-for-command-if-needed ()
-	(if (not (eq nil *wait-for-command*))
-		(loop
-			(if (equal *wait-for-command* (get-command))
-				(return)
-				(sleep .01)))))
+  (if (not (eq nil *wait-for-command*))
+    (loop
+      (if (equal *wait-for-command* (get-command))
+	(return)
+	(sleep .01)))))
 
 ; and here... we... go!
 
@@ -84,172 +84,172 @@
 (defvar *epoch-time* 0d0)
 
 (setf *sun* (make-instance 'vsop-star
-	:name "Sun"
-	:mass 1.9891d30
-	:radius 695500000d0
-	:vsop-interval 1049
-	:x-series-set *vsop-series-set-sun-x*
-	:y-series-set *vsop-series-set-sun-y*
-	:z-series-set *vsop-series-set-sun-z*))
+			   :name "Sun"
+			   :mass 1.9891d30
+			   :radius 695500000d0
+			   :vsop-interval 1049
+			   :x-series-set *vsop-series-set-sun-x*
+			   :y-series-set *vsop-series-set-sun-y*
+			   :z-series-set *vsop-series-set-sun-z*))
 
 (setf *mercury* (make-instance 'vsop-planet
-	:name "Mercury"
-	:mass 3.3022d23
-	:radius 2439700d0
-	:vsop-interval 1000
-	:x-series-set *vsop-series-set-mercury-x*
-	:y-series-set *vsop-series-set-mercury-y*
-	:z-series-set *vsop-series-set-mercury-z*))
+			       :name "Mercury"
+			       :mass 3.3022d23
+			       :radius 2439700d0
+			       :vsop-interval 1000
+			       :x-series-set *vsop-series-set-mercury-x*
+			       :y-series-set *vsop-series-set-mercury-y*
+			       :z-series-set *vsop-series-set-mercury-z*))
 
 (setf *venus* (make-instance 'vsop-planet
-	:name "Venus"
-	:mass 4.8685d24
-	:radius 6051800d0
-	:vsop-interval 1001
-	:x-series-set *vsop-series-set-venus-x*
-	:y-series-set *vsop-series-set-venus-y*
-	:z-series-set *vsop-series-set-venus-z*))
+			     :name "Venus"
+			     :mass 4.8685d24
+			     :radius 6051800d0
+			     :vsop-interval 1001
+			     :x-series-set *vsop-series-set-venus-x*
+			     :y-series-set *vsop-series-set-venus-y*
+			     :z-series-set *vsop-series-set-venus-z*))
 
 (setf *earth* (make-instance 'vsop-planet
-	:name "Earth"
-	:mass 5.9742d24
-	:radius 6.3781d6
-	:vsop-interval 1002
-	:x-series-set *vsop-series-set-earth-x*
-	:y-series-set *vsop-series-set-earth-y*
-	:z-series-set *vsop-series-set-earth-z*))
+			     :name "Earth"
+			     :mass 5.9742d24
+			     :radius 6.3781d6
+			     :vsop-interval 1002
+			     :x-series-set *vsop-series-set-earth-x*
+			     :y-series-set *vsop-series-set-earth-y*
+			     :z-series-set *vsop-series-set-earth-z*))
 
 (setf *mars* (make-instance 'vsop-planet
-	:name "Mars"
-	:mass 6.4185d23
-	:radius 3386200d0
-	:vsop-interval 1003
-	:x-series-set *vsop-series-set-mars-x*
-	:y-series-set *vsop-series-set-mars-y*
-	:z-series-set *vsop-series-set-mars-z*))
+			    :name "Mars"
+			    :mass 6.4185d23
+			    :radius 3386200d0
+			    :vsop-interval 1003
+			    :x-series-set *vsop-series-set-mars-x*
+			    :y-series-set *vsop-series-set-mars-y*
+			    :z-series-set *vsop-series-set-mars-z*))
 
 (setf *jupiter* (make-instance 'vsop-planet
-	:name "Jupiter"
-	:mass 1.8986d27
-	:radius 69000000d0
-	:vsop-interval 1004
-	:x-series-set *vsop-series-set-jupiter-x*
-	:y-series-set *vsop-series-set-jupiter-y*
-	:z-series-set *vsop-series-set-jupiter-z*))
+			       :name "Jupiter"
+			       :mass 1.8986d27
+			       :radius 69000000d0
+			       :vsop-interval 1004
+			       :x-series-set *vsop-series-set-jupiter-x*
+			       :y-series-set *vsop-series-set-jupiter-y*
+			       :z-series-set *vsop-series-set-jupiter-z*))
 
 (setf *saturn* (make-instance 'vsop-planet
-	:name "Saturn"
-	:mass 5.6846d26
-	:radius 58000000d0
-	:vsop-interval 1005
-	:x-series-set *vsop-series-set-saturn-x*
-	:y-series-set *vsop-series-set-saturn-y*
-	:z-series-set *vsop-series-set-saturn-z*))
+			      :name "Saturn"
+			      :mass 5.6846d26
+			      :radius 58000000d0
+			      :vsop-interval 1005
+			      :x-series-set *vsop-series-set-saturn-x*
+			      :y-series-set *vsop-series-set-saturn-y*
+			      :z-series-set *vsop-series-set-saturn-z*))
 
 (setf *uranus* (make-instance 'vsop-planet
-	:name "Uranus"
-	:mass 8.6810d25
-	:radius 25200000d0
-	:vsop-interval 1006
-	:x-series-set *vsop-series-set-uranus-x*
-	:y-series-set *vsop-series-set-uranus-y*
-	:z-series-set *vsop-series-set-uranus-z*))
+			      :name "Uranus"
+			      :mass 8.6810d25
+			      :radius 25200000d0
+			      :vsop-interval 1006
+			      :x-series-set *vsop-series-set-uranus-x*
+			      :y-series-set *vsop-series-set-uranus-y*
+			      :z-series-set *vsop-series-set-uranus-z*))
 
 (setf *neptune* (make-instance 'vsop-planet
-	:name "Neptune"
-	:mass 1.0243d26
-	:radius 24500000d0
-	:vsop-interval 1007
-	:x-series-set *vsop-series-set-neptune-x*
-	:y-series-set *vsop-series-set-neptune-y*
-	:z-series-set *vsop-series-set-neptune-z*))
+			       :name "Neptune"
+			       :mass 1.0243d26
+			       :radius 24500000d0
+			       :vsop-interval 1007
+			       :x-series-set *vsop-series-set-neptune-x*
+			       :y-series-set *vsop-series-set-neptune-y*
+			       :z-series-set *vsop-series-set-neptune-z*))
 
 (setf *tp1* (make-instance 'vessel
-	:name "Teapot"
-	:mass 1d0
-	:pos (make-vector-3 (+ 64000000d0 1.4572625236939914d11) -3.5401098170742485d10 -2.221160603393515d9)
-	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
-	:radius 2d0
-	:max-torque (make-vector-3 1d0 1d0 1d0)
-	:vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
+			   :name "Teapot"
+			   :mass 1d0
+			   :pos (make-vector-3 (+ 64000000d0 1.4572625236939914d11) -3.5401098170742485d10 -2.221160603393515d9)
+			   :inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
+			   :radius 2d0
+			   :max-torque (make-vector-3 1d0 1d0 1d0)
+			   :vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
 (setf *tp2* (make-instance 'vessel
-	:name "Teapot-2"
-	:mass 1d0
-	:pos (make-vector-3 (+ 64000000d0 1.4572625236939914d11) (+ 10d0 -3.5401098170742485d10) -2.221160603393515d9)
-	:inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
-	:radius 2d0
-	:max-torque (make-vector-3 1d0 1d0 1d0)
-	:vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
+			   :name "Teapot-2"
+			   :mass 1d0
+			   :pos (make-vector-3 (+ 64000000d0 1.4572625236939914d11) (+ 10d0 -3.5401098170742485d10) -2.221160603393515d9)
+			   :inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
+			   :radius 2d0
+			   :max-torque (make-vector-3 1d0 1d0 1d0)
+			   :vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
 
 (defvar *all-objs* (list *tp1* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
 ;(defvar *all-objs* (list *tp1* *tp2* *earth*))
 
 (defvar *all-mfds*
-	(list
-		(make-instance 'test-mfd :color (make-color .4 0 .4 .5) :pos (make-vector-2 1 1) :anchor-point (make-vector-2 1 1) :max-size (make-vector-2 .3 .3))
-		(make-instance 'orbit-mfd
-			:anchor-point (make-vector-2 .5 .5)
-			:pos (make-vector-2 .5 .5)
-			:max-size (make-vector-2 .5 .5)
+  (list
+    (make-instance 'test-mfd :color (make-color .4 0 .4 .5) :pos (make-vector-2 1 1) :anchor-point (make-vector-2 1 1) :max-size (make-vector-2 .3 .3))
+    (make-instance 'orbit-mfd
+		   :anchor-point (make-vector-2 .5 .5)
+		   :pos (make-vector-2 .5 .5)
+		   :max-size (make-vector-2 .5 .5)
 		;	:major-body *sun*
 		;	:minor-bodies (list *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))))
 		;	:major-body *earth*
 		;	:minor-bodies (list *tp1*))))
-			:major-body *earth*
-			:minor-bodies (list *tp1* *tp2*))))
+		   :major-body *earth*
+		   :minor-bodies (list *tp1* *tp2*))))
 
 (defvar *all-buttons* ())
 
 (make-instance 'text-bg-button
-	:anchor-point (make-vector-2 0 1)
-	:text (format nil "Hello World!")
-	:pos (make-vector-2 .2 .9)
-	:background-color (make-color 0 1 0 0.5)
-	:text-color       (make-color 1 0 0 1)
-	:click-function #'(lambda () (print "click")))
+	       :anchor-point (make-vector-2 0 1)
+	       :text (format nil "Hello World!")
+	       :pos (make-vector-2 .2 .9)
+	       :background-color (make-color 0 1 0 0.5)
+	       :text-color       (make-color 1 0 0 1)
+	       :click-function #'(lambda () (print "click")))
 
 (defvar *all-hud-layers* ())
 
 (make-instance 'relative-hud
-	:color (make-color 0 0 1 0.8)
-	:origin *tp1*
-	:target *tp2*)
+	       :color (make-color 0 0 1 0.8)
+	       :origin *tp1*
+	       :target *tp2*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 1 0.8)
-	:origin *tp1*
-	:target *sun*)
+	       :color (make-color 1 0.5 1 0.8)
+	       :origin *tp1*
+	       :target *sun*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 0 0.8)
-	:origin *tp1*
-	:target *mercury*)
+	       :color (make-color 1 0.5 0 0.8)
+	       :origin *tp1*
+	       :target *mercury*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 0 0.8)
-	:origin *tp1*
-	:target *venus*)
+	       :color (make-color 1 0.5 0 0.8)
+	       :origin *tp1*
+	       :target *venus*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 0 0.8)
-	:origin *tp1*
-	:target *earth*)
+	       :color (make-color 1 0.5 0 0.8)
+	       :origin *tp1*
+	       :target *earth*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 0 0.8)
-	:origin *tp1*
-	:target *mars*)
+	       :color (make-color 1 0.5 0 0.8)
+	       :origin *tp1*
+	       :target *mars*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 0 0.8)
-	:origin *tp1*
-	:target *jupiter*)
+	       :color (make-color 1 0.5 0 0.8)
+	       :origin *tp1*
+	       :target *jupiter*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 0 0.8)
-	:origin *tp1*
-	:target *saturn*)
+	       :color (make-color 1 0.5 0 0.8)
+	       :origin *tp1*
+	       :target *saturn*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 0 0.8)
-	:origin *tp1*
-	:target *uranus*)
+	       :color (make-color 1 0.5 0 0.8)
+	       :origin *tp1*
+	       :target *uranus*)
 (make-instance 'relative-hud
-	:color (make-color 1 0.5 0 0.8)
-	:origin *tp1*
-	:target *neptune*)
+	       :color (make-color 1 0.5 0 0.8)
+	       :origin *tp1*
+	       :target *neptune*)
 
 (setf *focused-object* (first *all-objs*))
 

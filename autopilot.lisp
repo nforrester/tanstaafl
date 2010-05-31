@@ -15,14 +15,14 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (defgeneric hold-rotation-autopilot (vessel dt target-ang-vel)
-	(:documentation "Manipulates the rotation rcs thrusters of vessel for dt, in an attempt to keep it's rotational velocity equal to rotation-rate (in the local frame of reference)."))
+  (:documentation "Manipulates the rotation rcs thrusters of vessel for dt, in an attempt to keep it's rotational velocity equal to rotation-rate (in the local frame of reference)."))
 
 (defmethod hold-rotation-autopilot ((vessel vessel) dt (target-ang-vel vector-3))
-	(with-slots (ang-vel ang-pos thruster-groups) vessel
-		(with-slots (x y z) (rotate (sub ang-vel target-ang-vel) (inverse ang-pos)) ; Angular velocity in the local frame of reference.
-			(macrolet ((command-loop (axis thruster-list)
-					`(loop for thruster-key in ,thruster-list for thruster = (getf thruster-groups thruster-key) do
-						(command thruster (clamp 0 1 (/ (* -1 0.8 ,(eval axis)) (slot-value (mult dt (compute-max-torque vessel thruster)) ,axis)))))))
-				(command-loop 'x (list :rcs-pitch-up :rcs-pitch-down))
-				(command-loop 'y (list :rcs-yaw-starboard :rcs-yaw-port))
-				(command-loop 'z (list :rcs-roll-starboard :rcs-roll-port))))))
+  (with-slots (ang-vel ang-pos thruster-groups) vessel
+    (with-slots (x y z) (rotate (sub ang-vel target-ang-vel) (inverse ang-pos)) ; Angular velocity in the local frame of reference.
+      (macrolet ((command-loop (axis thruster-list)
+                               `(loop for thruster-key in ,thruster-list for thruster = (getf thruster-groups thruster-key) do
+                                      (command thruster (clamp 0 1 (/ (* -1 0.8 ,(eval axis)) (slot-value (mult dt (compute-max-torque vessel thruster)) ,axis)))))))
+        (command-loop 'x (list :rcs-pitch-up :rcs-pitch-down))
+        (command-loop 'y (list :rcs-yaw-starboard :rcs-yaw-port))
+        (command-loop 'z (list :rcs-roll-starboard :rcs-roll-port))))))
