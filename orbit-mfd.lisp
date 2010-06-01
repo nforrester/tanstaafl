@@ -99,9 +99,9 @@
             true-anomaly) elements
 
           (gl-push-matrix)
-          (gl-rotate-angle-axis longitude-of-ascending-node (make-vector-3 0 0 1))
-          (gl-rotate-angle-axis inclination (make-vector-3 1 0 0))
           (gl-rotate-angle-axis argument-of-periapsis (make-vector-3 0 0 1))
+          (gl-rotate-angle-axis inclination (make-vector-3 1 0 0))
+          (gl-rotate-angle-axis longitude-of-ascending-node (make-vector-3 0 0 1))
 
           (gl-begin-end *gl-line-loop* ;; Draw the ellipse of the orbit
                         (loop
