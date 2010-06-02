@@ -60,7 +60,7 @@
       ((#\1)     (command (getf thruster-groups :rcs-yaw-port) 1))
       ((#\3 #\/) (command (getf thruster-groups :rcs-lin-starboard) 1))
       ((#\3)     (command (getf thruster-groups :rcs-yaw-starboard) 1))
-      ((#\=)     (command (getf thruster-groups :main) 1))
+      ((#\+)     (command (getf thruster-groups :main) 1))
       ((#\-)     (command (getf thruster-groups :retro) 1))
       ((#\5)     (with-slots (active-autopilot-modes) vessel
                    ;; This is an autopilot mode that tries to set rotation rate to less than a small amount

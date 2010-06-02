@@ -116,3 +116,45 @@
       (gl-place-string (slot-value button 'text) (make-vector-2 (* 0.5 char-x) (- y (* 1.25 char-y)))))))
 
 (defclass text-bg-button (background-button text-button) ())
+
+(setf *drag-button-class* (defclass drag-button (button)
+                            ((dragging
+                               :initform nil)
+                             (drag-offset
+                               :initform (make-vector-2 0 0))
+                             (drag-function
+                               :initarg :drag-function
+                               :initform nil
+                               :documentation "The function called when the button is dragged. The button's new position, and the screen size are the arguments."))))
+
+(defmethod check-and-handle-click ((button drag-button) mouse-button state click-pos screen-size)
+  (with-slots (size dragging drag-offset) button
+    (let ((sw-corner (compute-sw-corner button screen-size)))
+      (with-slots (x y) sw-corner
+        (with-slots ((click-x x) (click-y y)) click-pos
+          (with-slots ((width x) (height y)) size
+            (when (and
+                    (< x click-x (+ x  width))
+                    (< y click-y (+ y height))
+                    (= 0 mouse-button)
+                    (= *glut-down* state))
+              (setf drag-offset (mult (pixels-to-fractional-matrix screen-size)
+                                           (sub (add sw-corner
+					             (mult size (slot-value button 'anchor-point)))
+						click-pos)))
+              (setf dragging t))
+            (when (and
+                    (= 0 mouse-button)
+                    (= *glut-up* state))
+              (setf dragging nil)))))))
+  (call-next-method))
+
+(defmethod check-and-handle-drag ((button drag-button) drag-pos screen-size)
+  (with-slots (pos dragging drag-offset drag-function) button
+    (when dragging
+      (setf pos (add drag-offset (mult (pixels-to-fractional-matrix screen-size)
+                                       drag-pos)))
+      (when drag-function
+        (funcall drag-function pos)))))
+
+(defclass text-drag-button (drag-button text-button) ())

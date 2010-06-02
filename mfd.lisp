@@ -18,7 +18,17 @@
   ((max-size
      :initarg :max-size
      :initform (make-vector-2 .4 .4)
-     :documentation "The maximum size of the MFD, expressed as a fraction of the screen width. The MFD will be square, with sides as long as the shorter of the two specified values.")))
+     :documentation "The maximum size of the MFD, expressed as a fraction of the screen width. The MFD will be square, with sides as long as the shorter of the two specified values.")
+   (move-button)))
+
+(defmethod initialize-instance :after ((mfd mfd) &rest stuff)
+  (setf (slot-value mfd 'move-button) (make-instance 'text-drag-button
+                                                     :anchor-point   (make-vector-2 1 1)
+                                                     :text           "O"
+                                                     :text-color     (make-color 0 0 1 .8)
+                                                     :drag-function  #'(lambda (drag-pos)
+                                                                         (setf (slot-value mfd 'anchor-point) (make-vector-2 0 1))
+                                                                         (setf (slot-value mfd 'pos) drag-pos)))))
 
 (defgeneric compute-size (mfd screen-size))
 
@@ -36,5 +46,8 @@
 (defmethod draw-2d :around ((mfd mfd) screen-size)
   (let ((size (compute-size mfd screen-size)) (sw-corner (compute-sw-corner mfd screen-size)))
     (with-slots (x y) sw-corner
+      (setf (slot-value (slot-value mfd 'move-button) 'pos)
+            (mult (pixels-to-fractional-matrix screen-size)
+                  (make-vector-2 x (+ y size))))
       (gl-viewport x y size size)))
   (call-next-method))

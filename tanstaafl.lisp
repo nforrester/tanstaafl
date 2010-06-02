@@ -184,6 +184,16 @@
 (defvar *all-objs* (list *tp1* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
 ;(defvar *all-objs* (list *tp1* *tp2* *earth*))
 
+(defvar *all-buttons* ())
+
+(make-instance 'text-bg-button
+	       :anchor-point (make-vector-2 0 1)
+	       :text (format nil "Hello World!")
+	       :pos (make-vector-2 .2 .9)
+	       :background-color (make-color 0 1 0 0.5)
+	       :text-color       (make-color 1 0 0 1)
+	       :click-function #'(lambda () (print "click")))
+
 (defvar *all-mfds*
   (list
     (make-instance 'test-mfd :color (make-color .4 0 .4 .5) :pos (make-vector-2 1 1) :anchor-point (make-vector-2 1 1) :max-size (make-vector-2 .3 .3))
@@ -197,16 +207,6 @@
 		;	:minor-bodies (list *tp1*))))
 		   :major-body *earth*
 		   :minor-bodies (list *tp1* *tp2*))))
-
-(defvar *all-buttons* ())
-
-(make-instance 'text-bg-button
-	       :anchor-point (make-vector-2 0 1)
-	       :text (format nil "Hello World!")
-	       :pos (make-vector-2 .2 .9)
-	       :background-color (make-color 0 1 0 0.5)
-	       :text-color       (make-color 1 0 0 1)
-	       :click-function #'(lambda () (print "click")))
 
 (defvar *all-hud-layers* ())
 
