@@ -105,8 +105,8 @@
 
 ; And finally we define the bindings:
 
-;(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
-(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
+(gl-style-callouts-single-library "/usr/lib64/nvidia/libGL.so.1"
+;(gl-style-callouts-single-library "/usr/lib64/libGL.so.1"
 				  (gl-clear-color (r ffi:double-float) (g ffi:double-float) (b ffi:double-float) (a ffi:double-float))
 				  (gl-shade-model (model ffi:uint))
 				  (gl-enable (option ffi:uint))
@@ -216,7 +216,7 @@
 				    (win-y (ffi:c-ptr ffi:double-float) :out)
 				    (win-z (ffi:c-ptr ffi:double-float) :out)))
 
-(gl-style-callouts-single-library "/usr/lib64/libglut.so"
+(gl-style-callouts-single-library "/usr/lib64/libglut.so.3"
 				  (glut-display-func        (func (ffi:c-function)))
 				  (glut-reshape-func        (func (ffi:c-function (:arguments (width ffi:int) (height ffi:int)))))
 				  (glut-keyboard-func       (func (ffi:c-function (:arguments (key ffi:character) (x ffi:int) (y ffi:int)))))

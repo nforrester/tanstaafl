@@ -32,18 +32,18 @@
                                                                          (setf (slot-value mfd 'pos) drag-pos))))
   (let (initial-drag-pos initial-max-size)
     (setf (slot-value mfd 'resize-button) (make-instance 'text-drag-button
-                                                       :anchor-point   (make-vector-2 0 0)
-                                                       :text           "+"
-                                                       :text-color     (make-color 0 0 1 .8)
-                                                       :click-function #'(lambda ()
-                                                                           (setf initial-max-size (slot-value mfd 'max-size))
-                                                                           (setf initial-drag-pos
-                                                                                 (slot-value (slot-value mfd 'resize-button) 'pos)))
-                                                       :drag-function  #'(lambda (drag-pos)
-                                                                           (setf (slot-value mfd 'max-size) (add initial-max-size
-                                                                                                                 (mult *reflect-y-matrix-2*
-                                                                                                                       (sub drag-pos
-                                                                                                                            initial-drag-pos)))))))))
+                                                         :anchor-point   (make-vector-2 0 0)
+                                                         :text           "+"
+                                                         :text-color     (make-color 0 0 1 .8)
+                                                         :click-function #'(lambda ()
+                                                                             (setf initial-max-size (slot-value mfd 'max-size))
+                                                                             (setf initial-drag-pos
+                                                                                   (slot-value (slot-value mfd 'resize-button) 'pos)))
+                                                         :drag-function  #'(lambda (drag-pos)
+                                                                             (setf (slot-value mfd 'max-size) (add initial-max-size
+                                                                                                                   (mult *reflect-y-matrix-2*
+                                                                                                                         (sub drag-pos
+                                                                                                                              initial-drag-pos)))))))))
 
 (defgeneric compute-size (mfd screen-size))
 
