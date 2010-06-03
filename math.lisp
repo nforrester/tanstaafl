@@ -395,6 +395,9 @@
                  :m11 m11 :m12 m12
                  :m21 m21 :m22 m22))
 
+(defvar *reflect-x-matrix-2* (make-matrix-2-2 -1 0 0 1))
+(defvar *reflect-y-matrix-2* (make-matrix-2-2 1 0 0 -1))
+
 (defmethod print-math (out-stream (mat matrix-2-2))
   (with-slots
     (m11 m12

@@ -19,16 +19,31 @@
      :initarg :max-size
      :initform (make-vector-2 .4 .4)
      :documentation "The maximum size of the MFD, expressed as a fraction of the screen width. The MFD will be square, with sides as long as the shorter of the two specified values.")
-   (move-button)))
+   (move-button)
+   (resize-button)))
 
 (defmethod initialize-instance :after ((mfd mfd) &rest stuff)
   (setf (slot-value mfd 'move-button) (make-instance 'text-drag-button
                                                      :anchor-point   (make-vector-2 1 1)
-                                                     :text           "O"
+                                                     :text           "#"
                                                      :text-color     (make-color 0 0 1 .8)
                                                      :drag-function  #'(lambda (drag-pos)
                                                                          (setf (slot-value mfd 'anchor-point) (make-vector-2 0 1))
-                                                                         (setf (slot-value mfd 'pos) drag-pos)))))
+                                                                         (setf (slot-value mfd 'pos) drag-pos))))
+  (let (initial-drag-pos initial-max-size)
+    (setf (slot-value mfd 'resize-button) (make-instance 'text-drag-button
+                                                       :anchor-point   (make-vector-2 0 0)
+                                                       :text           "+"
+                                                       :text-color     (make-color 0 0 1 .8)
+                                                       :click-function #'(lambda ()
+                                                                           (setf initial-max-size (slot-value mfd 'max-size))
+                                                                           (setf initial-drag-pos
+                                                                                 (slot-value (slot-value mfd 'resize-button) 'pos)))
+                                                       :drag-function  #'(lambda (drag-pos)
+                                                                           (setf (slot-value mfd 'max-size) (add initial-max-size
+                                                                                                                 (mult *reflect-y-matrix-2*
+                                                                                                                       (sub drag-pos
+                                                                                                                            initial-drag-pos)))))))))
 
 (defgeneric compute-size (mfd screen-size))
 
@@ -49,5 +64,8 @@
       (setf (slot-value (slot-value mfd 'move-button) 'pos)
             (mult (pixels-to-fractional-matrix screen-size)
                   (make-vector-2 x (+ y size))))
+      (setf (slot-value (slot-value mfd 'resize-button) 'pos)
+            (mult (pixels-to-fractional-matrix screen-size)
+                  (make-vector-2 (+ x size) y)))
       (gl-viewport x y size size)))
   (call-next-method))
