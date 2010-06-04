@@ -54,6 +54,9 @@
                   click-function)
               (progn (funcall click-function)))))))))
 
+(defmethod destroy ((button button))
+  (setf *all-buttons* (remove button *all-buttons*)))
+
 (defclass background-button (button)
   ((background-color
      :initarg :background-color

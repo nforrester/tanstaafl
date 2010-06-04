@@ -310,6 +310,9 @@
                               (setf anchor-point (make-vector-2 1 1))
                               (setf pos (make-vector-2 (/ x (slot-value screen-size 'x)) (/ y (slot-value screen-size 'y)))))))))))))))
 
+(defmethod destroy ((grid box-2d-grid))
+  (setf *all-box-2d-grids* (remove grid *all-box-2d-grids*)))
+
 (defvar *depressed-keys* ())
 
 (defun check-depressed-keys (str)
