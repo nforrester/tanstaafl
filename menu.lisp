@@ -18,7 +18,11 @@
   ((selection-function
      :initarg :selection-function
      :initform nil
-     :documentation "This function gets called when a selection is made, with the selection's corresponding value as the argument")))
+     :documentation "This function gets called when a selection is made, with the selection's corresponding value as the argument")
+   (cancel-option
+     :initarg :cancel-option
+     :initform t
+     :documentation "When cancel-option is t, an extra option is added to the bottom of the menu, to dismiss the menu without calling the selection function.")))
 
 (defmethod initialize-instance :after ((menu menu) &key items)
   (loop for item in items
@@ -32,10 +36,23 @@
                                                           (destroy menu)
                                                           (funcall selection-function value))
                                       :text (format nil "~a" text)
-                                      :background-color (make-color .8 .8 .8 .8))
+                                      :text-color (make-color .9 .9 .9 .8)
+                                      :background-color (make-color .2 .2 .2 .8))
                                     0
-                                    i)
-                              boxes))))))
+                                    (* -1 i))
+                              boxes)))))
+  (with-slots (boxes cancel-option) menu
+    (when cancel-option
+      (setf boxes (cons (list (make-instance
+                                'text-bg-button
+                                :click-function #'(lambda ()
+                                                    (destroy menu))
+                                :text "Cancel"
+                                :text-color (make-color .9 0 0 .8)
+                                :background-color (make-color .2 .2 .2 .8))
+                              0
+                              (* -1 (length items)))
+                        boxes)))))
 
 (defmethod destroy ((menu menu))
   (loop for box in (slot-value menu 'boxes) do
