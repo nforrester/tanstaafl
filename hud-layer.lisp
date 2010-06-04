@@ -42,15 +42,15 @@
     (setf (slot-value *hud-button-grid* 'boxes) (list* close-button-record label-record move-up-record move-down-record (slot-value *hud-button-grid* 'boxes)))
     (setf (slot-value hud-layer 'buttons) (list close-button label move-up move-down))
     (setf (slot-value close-button 'click-function) (lambda ()
-						      (setf (slot-value *hud-button-grid* 'boxes) (remove close-button-record (slot-value *hud-button-grid* 'boxes)))
-						      (setf (slot-value *hud-button-grid* 'boxes) (remove label-record        (slot-value *hud-button-grid* 'boxes)))
-						      (setf (slot-value *hud-button-grid* 'boxes) (remove move-up-record      (slot-value *hud-button-grid* 'boxes)))
-						      (setf (slot-value *hud-button-grid* 'boxes) (remove move-down-record    (slot-value *hud-button-grid* 'boxes)))
-						      (setf *all-hud-layers* (remove hud-layer *all-hud-layers*))
-						      (setf *all-buttons* (remove close-button *all-buttons*))
-						      (setf *all-buttons* (remove label        *all-buttons*))
-						      (setf *all-buttons* (remove move-up      *all-buttons*))
-						      (setf *all-buttons* (remove move-down    *all-buttons*))))))
+                                                      (setf (slot-value *hud-button-grid* 'boxes) (remove close-button-record (slot-value *hud-button-grid* 'boxes)))
+                                                      (setf (slot-value *hud-button-grid* 'boxes) (remove label-record        (slot-value *hud-button-grid* 'boxes)))
+                                                      (setf (slot-value *hud-button-grid* 'boxes) (remove move-up-record      (slot-value *hud-button-grid* 'boxes)))
+                                                      (setf (slot-value *hud-button-grid* 'boxes) (remove move-down-record    (slot-value *hud-button-grid* 'boxes)))
+                                                      (setf *all-hud-layers* (remove hud-layer *all-hud-layers*))
+                                                      (setf *all-buttons* (remove close-button *all-buttons*))
+                                                      (setf *all-buttons* (remove label        *all-buttons*))
+                                                      (setf *all-buttons* (remove move-up      *all-buttons*))
+                                                      (setf *all-buttons* (remove move-down    *all-buttons*))))))
 
 (defmethod draw-2d :around ((hud-layer hud-layer) screen-size)
   (with-slots (x y) screen-size
@@ -64,8 +64,6 @@
   (gl-color (slot-value hud-layer 'color))
   (call-next-method))
 
-;;; Multiple return values. First is a vector-2 of window coordinates,
-;;; second is t or nil, indicating whether the
-;;; projected point is in front of or behind the camera.
+;;; Return value is a vector-2 of window coordinates.
 (defun project-position-to-hud (pos model-matrix proj-matrix screen-size)
   (glu-project-vector-3-2 (sub pos (slot-value *focused-object* 'pos)) model-matrix proj-matrix screen-size))

@@ -319,9 +319,7 @@
   (with-slots (red green blue alpha) color
     (gl-color4f red green blue alpha)))
 
-;;; Multiple return values. First is a vector-2 of window coordinates,
-;;; second is t or nil, indicating whether the
-;;; projected point is in front of or behind the camera.
+;;; Return values is a vector-2 of window coordinates.
 (defun glu-project-vector-3-2 (pos model-matrix proj-matrix screen-size)
   (with-slots (x y z) pos
     (with-slots ((screen-width x) (screen-height y)) screen-size
@@ -331,7 +329,7 @@
 	  model-matrix
 	  proj-matrix
 	  (vector 0 0 screen-width screen-height))
-	(values (make-vector-2 win-x win-y) (> 1 win-z))))))
+	(make-vector-2 win-x win-y)))))
 
 (defmacro gl-place-char-maker (str)
   `(defun gl-place-char (c)

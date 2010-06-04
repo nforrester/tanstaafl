@@ -30,7 +30,9 @@
 (let ((hud-marker-size 40))
   (defmethod draw-2d ((hud relative-hud) screen-size)
     (with-slots (origin target) hud
-      (multiple-value-bind (pos visible) (project-position-to-hud (slot-value target 'pos) *current-modelview-matrix* (gethash target *projection-matrix-for-object*) screen-size)
+      (let* ((p (slot-value target 'pos))
+             (pos (project-position-to-hud p *current-modelview-matrix* (gethash target *projection-matrix-for-object*) screen-size))
+             (visible (> 0 (dot (sub p (slot-value origin 'pos)) (rotate (make-vector-3 0 0 1) (slot-value origin 'ang-pos))))))
         (gl-place-string
           (format nil "~aP ~a" (if visible "+" "-") (slot-value target 'name))
           (add pos (make-vector-2 (* -1 hud-marker-size) (+ 10 hud-marker-size))))
@@ -46,7 +48,9 @@
           (gl-begin-end *gl-lines*
                         (gl-vertex-vector-2 (add pos (make-vector-2 (* -1 hud-marker-size) 0)))
                         (gl-vertex-vector-2 (add pos (make-vector-2       hud-marker-size  0))))))
-      (multiple-value-bind (pos visible) (project-position-to-hud (add (slot-value origin 'pos) (sub (slot-value target 'vel) (slot-value origin 'vel))) *current-modelview-matrix* (gethash target *projection-matrix-for-object*) screen-size)
+      (let* ((p (add (slot-value origin 'pos) (sub (slot-value target 'vel) (slot-value origin 'vel))))
+             (pos (project-position-to-hud p *current-modelview-matrix* (gethash target *projection-matrix-for-object*) screen-size))
+             (visible (> 0 (dot (sub p (slot-value origin 'pos)) (rotate (make-vector-3 0 0 1) (slot-value origin 'ang-pos))))))
         (gl-place-string
           (format nil "~aV ~a" (if visible "+" "-") (slot-value target 'name))
           (add pos (make-vector-2 (* -1 hud-marker-size) (+ 10 hud-marker-size))))
@@ -64,7 +68,9 @@
                         (gl-vertex-vector-2 (add pos (make-vector-2         0                (*  0.5 hud-marker-size))))
                         (gl-vertex-vector-2 (add pos (make-vector-2 (*  0.5 hud-marker-size)         0)))
                         (gl-vertex-vector-2 (add pos (make-vector-2         0                (* -0.5 hud-marker-size)))))))
-      (multiple-value-bind (pos visible) (project-position-to-hud (add (slot-value origin 'pos) (cross (sub (slot-value target 'pos) (slot-value origin 'pos)) (sub (slot-value target 'vel) (slot-value origin 'vel)))) *current-modelview-matrix* (gethash target *projection-matrix-for-object*) screen-size)
+      (let* ((p (add (slot-value origin 'pos) (cross (sub (slot-value target 'pos) (slot-value origin 'pos)) (sub (slot-value target 'vel) (slot-value origin 'vel)))))
+             (pos (project-position-to-hud p *current-modelview-matrix* (gethash target *projection-matrix-for-object*) screen-size))
+             (visible (> 0 (dot (sub p (slot-value origin 'pos)) (rotate (make-vector-3 0 0 1) (slot-value origin 'ang-pos))))))
         (gl-place-string
           (format nil "~aN ~a" (if visible "+" "-") (slot-value target 'name))
           (add pos (make-vector-2 (* -1 hud-marker-size) (+ 10 hud-marker-size))))
