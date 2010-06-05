@@ -185,8 +185,6 @@
 (defvar *all-objs* (list *tp1* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
 ;(defvar *all-objs* (list *tp1* *tp2* *earth*))
 
-(defvar *all-buttons* ())
-
 (make-instance 'menu
                :anchor-point (make-vector-2 1 1)
                :pos (make-vector-2 0.5 0.5)
@@ -202,19 +200,17 @@
                :text-color       (make-color 1 0 0 1)
                :click-function #'(lambda () (print "click")))
 
-(defvar *all-mfds*
-  (list
-    (make-instance 'test-mfd :color (make-color .4 0 .4 .5) :pos (make-vector-2 1 1) :anchor-point (make-vector-2 1 1) :max-size (make-vector-2 .3 .3))
-    (make-instance 'orbit-mfd
-                   :anchor-point (make-vector-2 .5 .5)
-                   :pos (make-vector-2 .5 .5)
-                   :max-size (make-vector-2 .5 .5)
-                ;       :major-body *sun*
-                ;       :minor-bodies (list *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))))
-                ;       :major-body *earth*
-                ;       :minor-bodies (list *tp1*))))
-                   :major-body *earth*
-                   :minor-bodies (list *tp1* *tp2*))))
+(make-instance 'test-mfd :color (make-color .4 0 .4 .5) :pos (make-vector-2 .4 .4) :anchor-point (make-vector-2 0 1) :max-size (make-vector-2 .3 .3))
+(make-instance 'orbit-mfd
+               :anchor-point (make-vector-2 .5 .5)
+               :pos (make-vector-2 .5 .5)
+               :max-size (make-vector-2 .5 .5)
+            ;       :major-body *sun*
+            ;       :minor-bodies (list *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))))
+            ;       :major-body *earth*
+            ;       :minor-bodies (list *tp1*))))
+               :major-body *earth*
+               :minor-bodies (list *tp1* *tp2*))
 
 (defvar *all-hud-layers* ())
 

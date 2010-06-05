@@ -14,17 +14,22 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+(defvar *all-mfds* ())
+
 (defclass mfd (box-2d)
   ((max-size
      :initarg :max-size
      :initform (make-vector-2 .4 .4)
      :documentation "The maximum size of the MFD, expressed as a fraction of the screen width. The MFD will be square, with sides as long as the shorter of the two specified values.")
    (move-button)
-   (resize-button)))
+   (resize-button)
+   (close-button)
+   (mode-button)))
 
 (defmethod initialize-instance :after ((mfd mfd) &rest stuff)
+  (setf *all-mfds* (cons mfd *all-mfds*))
   (setf (slot-value mfd 'move-button) (make-instance 'text-drag-button
-                                                     :anchor-point   (make-vector-2 1 1)
+                                                     :anchor-point   (make-vector-2 1 0)
                                                      :text           "#"
                                                      :text-color     (make-color 0 0 1 .8)
                                                      :drag-function  #'(lambda (drag-pos)
@@ -32,7 +37,7 @@
                                                                          (setf (slot-value mfd 'pos) drag-pos))))
   (let (initial-drag-pos initial-max-size)
     (setf (slot-value mfd 'resize-button) (make-instance 'text-drag-button
-                                                         :anchor-point   (make-vector-2 0 0)
+                                                         :anchor-point   (make-vector-2 0 1)
                                                          :text           "+"
                                                          :text-color     (make-color 0 0 1 .8)
                                                          :click-function #'(lambda ()
@@ -43,7 +48,19 @@
                                                                              (setf (slot-value mfd 'max-size) (add initial-max-size
                                                                                                                    (mult *reflect-y-matrix-2*
                                                                                                                          (sub drag-pos
-                                                                                                                              initial-drag-pos)))))))))
+                                                                                                                              initial-drag-pos))))))))
+  (setf (slot-value mfd 'close-button) (make-instance 'text-button
+                                                     :anchor-point   (make-vector-2 0 0)
+                                                     :text           "X"
+                                                     :text-color     (make-color .8 0 0 .8)
+                                                     :click-function  #'(lambda ()
+                                                                          (destroy mfd))))
+  (setf (slot-value mfd 'mode-button) (make-instance 'text-button
+                                                     :anchor-point   (make-vector-2 1 1)
+                                                     :text           "M"
+                                                     :text-color     (make-color 0 .8 0 .8)
+                                                     :click-function  #'(lambda ()
+                                                                          (print "HAHA MODE CHANGES AREN'T IMPLEMENTED YET SUCKER!!!")))))
 
 (defgeneric compute-size (mfd screen-size))
 
@@ -67,5 +84,17 @@
       (setf (slot-value (slot-value mfd 'resize-button) 'pos)
             (mult (pixels-to-fractional-matrix screen-size)
                   (make-vector-2 (+ x size) y)))
+      (setf (slot-value (slot-value mfd 'close-button) 'pos)
+            (mult (pixels-to-fractional-matrix screen-size)
+                  (make-vector-2 (+ x size) (+ y size))))
+      (setf (slot-value (slot-value mfd 'mode-button) 'pos)
+            (mult (pixels-to-fractional-matrix screen-size)
+                  (make-vector-2 x y)))
       (gl-viewport x y size size)))
   (call-next-method))
+
+(defmethod destroy ((mfd mfd))
+  (with-slots (move-button resize-button close-button mode-button) mfd
+    (loop for button in (list move-button resize-button close-button mode-button) do
+          (destroy button)))
+  (setf *all-mfds* (remove mfd *all-mfds*)))
