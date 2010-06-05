@@ -35,7 +35,7 @@
 
 (defmethod initialize-instance :after ((mfd orbit-mfd) &rest stuff)
   (setf (slot-value mfd 'dst-button) (make-instance 'text-bg-button
-                                                    :anchor-point (make-vector-2 1 0.5)
+                                                    :anchor-point (make-vector-2 1 0)
                                                     :text "DST"
                                                     :text-color (make-color .9 .9 .9 .8)
                                                     :background-color (make-color .1 .5 .1 .8)
@@ -136,8 +136,9 @@
                           (gl-vertex3d (* -1 r (sin true-anomaly)) (* r (cos true-anomaly)) 0)))
 
           (gl-pop-matrix)))))
+
   (with-slots (dst-button pos) mfd
     (setf (slot-value dst-button 'pos)
-          (add pos
-               (mult (pixels-to-fractional-matrix screen-size)
-                     (make-vector-2 0 (* -1 (compute-size mfd screen-size))))))))
+          (mult (pixels-to-fractional-matrix screen-size)
+                (add (compute-sw-corner mfd screen-size)
+                     (make-vector-2 0 (* 0 (compute-size mfd screen-size))))))))
