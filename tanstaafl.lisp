@@ -187,7 +187,9 @@
 
 (defvar *all-buttons* ())
 
-(make-instance 'menu :anchor-point (make-vector-2 0 1)
+(make-instance 'menu
+               :anchor-point (make-vector-2 1 1)
+               :pos (make-vector-2 0.5 0.5)
                :items (list (list 1 "f") (list 2 "s") (list 3 "t"))
                :selection-function #'(lambda (selection)
                                        (print selection)))

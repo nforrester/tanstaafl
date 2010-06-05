@@ -264,21 +264,21 @@
                                 (setf (gethash (cons row col) cells) nil)))
                     (loop for box in boxes do
                           (setf (gethash (cons (third box) (second box)) cells) (first box)))
-                    (let*
-                      ((row-heights (loop for row from min-row to max-row collect
-                                          (loop for col from min-col to max-col maximize
-                                                (if (gethash (cons row col) cells)
-                                                  (slot-value (slot-value (gethash (cons row col) cells) 'size) 'y)
-                                                  0))))
-                       (col-widths (loop for col from min-col to max-col collect
-                                         (loop for row from min-row to max-row maximize
-                                               (if (gethash (cons row col) cells)
-                                                 (slot-value (slot-value (gethash (cons row col) cells) 'size) 'x)
-                                                 0))))
-                       (grid-sw-corner (with-slots (pos anchor-point) grid
-                                         (sub (mult pos screen-size) (mult anchor-point (make-vector-2
-                                                                                          (loop for width in col-widths sum width)
-                                                                                          (loop for height in row-heights sum height)))))))
+                    (let* ((row-heights (loop for row from min-row to max-row collect
+                                              (loop for col from min-col to max-col maximize
+                                                    (if (gethash (cons row col) cells)
+                                                      (slot-value (slot-value (gethash (cons row col) cells) 'size) 'y)
+                                                      0))))
+                           (col-widths (loop for col from min-col to max-col collect
+                                             (loop for row from min-row to max-row maximize
+                                                   (if (gethash (cons row col) cells)
+                                                     (slot-value (slot-value (gethash (cons row col) cells) 'size) 'x)
+                                                     0))))
+                           (grid-sw-corner (with-slots (pos anchor-point) grid
+                                             (sub (mult pos screen-size)
+                                                  (mult anchor-point (make-vector-2
+                                                                       (loop for width in col-widths sum width)
+                                                                       (loop for height in row-heights sum height)))))))
 
                       (with-slots (x y) screen-size
                         (gl-viewport 0 0 x y)
