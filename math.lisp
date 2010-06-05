@@ -446,7 +446,7 @@
                m21 m22) mat
     (mult
       (/ 1 (determinant mat))
-      (make-matrix-3-3
+      (make-matrix-2-2
         m11 (* -1 m12)
         (* -1 m21) m22))))
 

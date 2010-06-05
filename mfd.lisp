@@ -24,7 +24,15 @@
    (move-button)
    (resize-button)
    (close-button)
-   (mode-button)))
+   (mode-button)
+   (left-buttons
+     :initform nil)
+   (right-buttons
+     :initform nil)
+   (top-buttons
+     :initform nil)
+   (bottom-buttons
+     :initform nil)))
 
 (defmethod initialize-instance :after ((mfd mfd) &rest stuff)
   (setf *all-mfds* (cons mfd *all-mfds*))
@@ -76,25 +84,38 @@
 
 ;;; I give unto thee a viewport. Do what you wish with it.
 (defmethod draw-2d :around ((mfd mfd) screen-size)
-  (let ((size (compute-size mfd screen-size)) (sw-corner (compute-sw-corner mfd screen-size)))
-    (with-slots (x y) sw-corner
-      (setf (slot-value (slot-value mfd 'move-button) 'pos)
-            (mult (pixels-to-fractional-matrix screen-size)
-                  (make-vector-2 x (+ y size))))
-      (setf (slot-value (slot-value mfd 'resize-button) 'pos)
-            (mult (pixels-to-fractional-matrix screen-size)
-                  (make-vector-2 (+ x size) y)))
-      (setf (slot-value (slot-value mfd 'close-button) 'pos)
-            (mult (pixels-to-fractional-matrix screen-size)
-                  (make-vector-2 (+ x size) (+ y size))))
-      (setf (slot-value (slot-value mfd 'mode-button) 'pos)
-            (mult (pixels-to-fractional-matrix screen-size)
-                  (make-vector-2 x y)))
-      (gl-viewport x y size size)))
+  (with-slots (move-button resize-button close-button mode-button left-buttons right-buttons top-buttons bottom-buttons) mfd
+    (let* ((size (compute-size mfd screen-size)) (sw-corner (compute-sw-corner mfd screen-size)) (buttons-per-side 8) (bps-1 (- buttons-per-side 1)))
+      (flet ((position-button (b p ap)
+               (setf (slot-value b 'anchor-point) ap)
+               (setf (slot-value b 'pos)
+                     (mult (pixels-to-fractional-matrix screen-size)
+                           (add (mult (inverse (pixels-to-fractional-matrix (make-vector-2 size size)))
+                                      p)
+                                sw-corner)))))
+        (position-button   move-button (make-vector-2 0 1) (make-vector-2 1 0))
+        (position-button resize-button (make-vector-2 1 0) (make-vector-2 0 1))
+        (position-button  close-button (make-vector-2 1 1) (make-vector-2 0 0))
+        (position-button   mode-button (make-vector-2 0 0) (make-vector-2 1 1))
+	(flet ((position-side-buttons (buttons side)
+                 (loop for button in buttons for i do
+	               (when (not (null button))
+                         (cond
+                           ((eq side 'l) (position-button button (make-vector-2 0 (- 1 (/ i bps-1))) (make-vector-2 1 (- 1 (/ i bps-1)))))
+                           ((eq side 'r) (position-button button (make-vector-2 1 (- 1 (/ i bps-1))) (make-vector-2 0 (- 1 (/ i bps-1)))))
+                           ((eq side 't) (position-button button (make-vector-2 (/ i bps-1) 1)       (make-vector-2 (/ i bps-1) 0)))
+                           ((eq side 'b) (position-button button (make-vector-2 (/ i bps-1) 0)       (make-vector-2 (/ i bps-1) 1))))))))
+          (position-side-buttons   left-buttons 'l)
+          (position-side-buttons  right-buttons 'r)
+          (position-side-buttons    top-buttons 't)
+          (position-side-buttons bottom-buttons 'b)))
+      (with-slots (x y) sw-corner
+        (gl-viewport x y size size))))
   (call-next-method))
 
 (defmethod destroy ((mfd mfd))
-  (with-slots (move-button resize-button close-button mode-button) mfd
-    (loop for button in (list move-button resize-button close-button mode-button) do
-          (destroy button)))
+  (with-slots (move-button resize-button close-button mode-button left-buttons right-buttons top-buttons bottom-buttons) mfd
+    (loop for button in (append (list move-button resize-button close-button mode-button) left-buttons right-buttons top-buttons bottom-buttons) do
+	  (when (not (null button))
+            (destroy button))))
   (setf *all-mfds* (remove mfd *all-mfds*)))
