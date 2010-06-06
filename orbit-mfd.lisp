@@ -172,12 +172,26 @@
             (gl-rotate-angle-axis inclination (make-vector-3 0 1 0))
             (gl-rotate-angle-axis argument-of-periapsis (make-vector-3 0 0 1))
 
-            (gl-begin-end *gl-line-loop* ;; Draw the ellipse of the orbit
-                          (loop
-                            for theta from 0 to (* 2 pi) by (/ (* 2 pi) 150)
-                            for r = (/ (* semi-major-axis (- 1 (expt eccentricity 2))) (+ 1 (* eccentricity (cos theta))))
-                            do
-                            (gl-vertex3d (* r (sin theta)) (* r (cos theta)) 0)))
+            ;; Draw the ellipse of the orbit
+            (let ((begun nil))
+              (loop
+                for theta from 0 to (* 2 pi) by (/ (* 2 pi) 150)
+                for r = (/ (* semi-major-axis (- 1 (expt eccentricity 2))) (+ 1 (* eccentricity (cos theta))))
+                do
+                (if (<= 0 r)
+                  (progn
+                    (when (not begun)
+                      (setf begun t)
+                      (gl-begin *gl-line-strip*))
+                    (when (< r (slot-value major-body 'radius))
+                      (print r))
+                    (gl-vertex3d (* r (sin theta)) (* r (cos theta)) 0))
+                  (progn
+                    (when begun
+                      (setf begun nil)
+                      (gl-end)))))
+              (when begun
+                (gl-end)))
 
             (gl-begin-end *gl-lines* ;; Draw a radial line indicating the position of the minor body.
                           (let ((r (/ (* semi-major-axis (- 1 (expt eccentricity 2))) (+ 1 (* eccentricity (cos true-anomaly))))))
