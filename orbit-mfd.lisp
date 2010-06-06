@@ -187,8 +187,6 @@
                     (when (not begun)
                       (setf begun t)
                       (gl-begin *gl-line-strip*))
-                    (when (< r (slot-value major-body 'radius))
-                      (print r))
                     (gl-vertex3d (* r (sin theta)) (* r (cos theta)) 0))
                   (progn
                     (when begun
