@@ -116,11 +116,13 @@
       nil)))
 
 (defun periapsis-time (elements)
-  (with-slots (major-body minor-body eccentricity) elements
-    (let* ((eccentric-anomaly (arccos (/ (- 1 (/ (magnitude (sub (slot-value major-body 'pos) (slot-value minor-body 'pos))) semi-major-axis)) eccentricity)))
+  (with-slots (major-body minor-body eccentricity semi-major-axis true-anomaly) elements
+    (let* ((eccentric-anomaly (acos (/ (- 1 (/ (magnitude (sub (slot-value major-body 'pos) (slot-value minor-body 'pos))) semi-major-axis)) eccentricity)))
            (mean-anomaly (- eccentric-anomaly (* eccentricity (sin eccentric-anomaly))))
            (period (* 2 pi (expt (/ (expt semi-major-axis 3) (* *G* (slot-value major-body 'mass))) 0.5)))
-           (time-since-periapsis (* mean-anomaly (/ period (* 2 pi)))))
+           (time-to-periapsis (* mean-anomaly (/ period (* 2 pi)))))
       (if (> 1 eccentricity)
-        (- period time-since-periapsis)
-        (* -1 time-since-periapsis)))))
+	(if (< pi true-anomaly)
+          time-to-periapsis
+          (- period time-to-periapsis))
+        (* -1 time-to-periapsis)))))
