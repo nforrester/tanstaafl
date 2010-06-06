@@ -65,44 +65,44 @@
      (e (magnitude e-vector))
      (i (acos (/ (dot h z-axis) (magnitude h)))))
     (make-instance 'orbital-elements
-		   :major-body major-body
-		   :minor-body minor-body
-		   :x-axis x-axis
-		   :z-axis z-axis
-		   :semi-major-axis (/ (* -1 mu) (* 2 (- (/ (expt (magnitude v) 2) 2) (/ mu (magnitude r)))))
-		   :eccentricity e
-		   :inclination i
-		   :longitude-of-ascending-node
-		   (if (= i 0)
-		     0 ; inclination is 0, so the expression below is undefined
-		     (let ((big-omega (acos (/ (dot n x-axis) (magnitude n)))))
-		       (if (< 0 (dot n y-axis))
-			 big-omega
-			 (- (* 2 pi) big-omega))))
-		   :argument-of-periapsis
-		   (let ((little-omega (cond
-					 ((= e 0) 0) ; eccentricity is 0, so both of the expressions below are undefined
-					 ((= i 0) (acos (/ (dot e-vector x-axis) (magnitude e-vector))))
-					 ; above, inclination is 0, so the expression below is undefined
-					 (t (acos (/ (dot n e-vector) (* (magnitude n) (magnitude e-vector))))))))
-		     (if (< 0 (dot e-vector z-axis))
-		       little-omega
-		       (- (* 2 pi) little-omega)))
-		   :true-anomaly
-		   (let
-		     ((upsilon (if (= e 0)
-				 (acos (/ (dot n r) (* (magnitude n) (magnitude r))))
-				 (acos (/ (dot e-vector r) (* (magnitude e-vector) (magnitude r))))))
-		      (exceptional-case (if (= e 0)
-					  (< 0 (dot n v))
-					  (> 0 (dot r v)))))
-		     (if (not exceptional-case)
-		       upsilon
-		       (- (* 2 pi) upsilon))))))
+                   :major-body major-body
+                   :minor-body minor-body
+                   :x-axis x-axis
+                   :z-axis z-axis
+                   :semi-major-axis (/ (* -1 mu) (* 2 (- (/ (expt (magnitude v) 2) 2) (/ mu (magnitude r)))))
+                   :eccentricity e
+                   :inclination i
+                   :longitude-of-ascending-node
+                   (if (= i 0)
+                     0 ; inclination is 0, so the expression below is undefined
+                     (let ((big-omega (acos (/ (dot n x-axis) (magnitude n)))))
+                       (if (< 0 (dot n y-axis))
+                         big-omega
+                         (- (* 2 pi) big-omega))))
+                   :argument-of-periapsis
+                   (let ((little-omega (cond
+                                         ((= e 0) 0) ; eccentricity is 0, so both of the expressions below are undefined
+                                         ((= i 0) (acos (/ (dot e-vector x-axis) (magnitude e-vector))))
+                                         ; above, inclination is 0, so the expression below is undefined
+                                         (t (acos (/ (dot n e-vector) (* (magnitude n) (magnitude e-vector))))))))
+                     (if (< 0 (dot e-vector z-axis))
+                       little-omega
+                       (- (* 2 pi) little-omega)))
+                   :true-anomaly
+                   (let
+                     ((upsilon (if (= e 0)
+                                 (acos (/ (dot n r) (* (magnitude n) (magnitude r))))
+                                 (acos (/ (dot e-vector r) (* (magnitude e-vector) (magnitude r))))))
+                      (exceptional-case (if (= e 0)
+                                          (< 0 (dot n v))
+                                          (> 0 (dot r v)))))
+                     (if (not exceptional-case)
+                       upsilon
+                       (- (* 2 pi) upsilon))))))
 
 (defun orbital-period (elements)
   (let ((period (with-slots (semi-major-axis major-body) elements
-		  (* 2 pi (sqrt (/ (expt semi-major-axis 3) (* *G* (slot-value major-body 'mass))))))))
+                  (* 2 pi (sqrt (/ (expt semi-major-axis 3) (* *G* (slot-value major-body 'mass))))))))
     (if (realp period) period nil)))
 
 (defun periapsis-radius (elements)
@@ -114,3 +114,13 @@
     (if (> 1 eccentricity)
       (* semi-major-axis (+ 1 eccentricity))
       nil)))
+
+(defun periapsis-time (elements)
+  (with-slots (major-body minor-body eccentricity) elements
+    (let* ((eccentric-anomaly (arccos (/ (- 1 (/ (magnitude (sub (slot-value major-body 'pos) (slot-value minor-body 'pos))) semi-major-axis)) eccentricity)))
+           (mean-anomaly (- eccentric-anomaly (* eccentricity (sin eccentric-anomaly))))
+           (period (* 2 pi (expt (/ (expt semi-major-axis 3) (* *G* (slot-value major-body 'mass))) 0.5)))
+           (time-since-periapsis (* mean-anomaly (/ period (* 2 pi)))))
+      (if (> 1 eccentricity)
+        (- period time-since-periapsis)
+        (* -1 time-since-periapsis)))))

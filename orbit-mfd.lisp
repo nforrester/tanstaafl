@@ -94,12 +94,13 @@
     (when (and (not (null minor-bodies)))
       (let* ((all-elements (loop for minor-body in minor-bodies collecting
                                  (compute-elements major-body minor-body ref-plane-normal ref-direction)))
-             (half-scene-width (loop for elements in all-elements maximizing
-                                     (with-slots (inclination eccentricity) elements
-                                       (if (< eccentricity 1)
-                                         (apoapsis-radius elements)
-                                         (* 1.25 (magnitude (sub (slot-value (slot-value elements 'major-body) 'pos)
-                                                                 (slot-value (slot-value elements 'minor-body) 'pos)))))))))
+             (half-scene-width (max (slot-value major-body 'radius)
+                                    (loop for elements in all-elements maximizing
+                                          (with-slots (inclination eccentricity) elements
+                                            (if (< eccentricity 1)
+                                              (apoapsis-radius elements)
+                                              (* 1.25 (magnitude (sub (slot-value (slot-value elements 'major-body) 'pos)
+                                                                      (slot-value (slot-value elements 'minor-body) 'pos))))))))))
         (gl-matrix-mode *gl-projection*)
         (gl-load-identity)
         (glu-ortho2-d 0 1 0 1)
@@ -113,7 +114,8 @@
         (gl-color (make-color 0 1 0 .8))
         (gl-place-string (format nil "Minor Body: ~a" (slot-value (first minor-bodies) 'name)) (make-vector-2 0 1) :anchor-point (make-vector-2 0 2))
         (let ((elements (compute-elements major-body (first minor-bodies) ref-plane-normal ref-direction)))
-          (with-slots (semi-major-axis
+          (with-slots (minor-body
+                       semi-major-axis
                        eccentricity
                        inclination
                        longitude-of-ascending-node
@@ -126,15 +128,17 @@
             (gl-place-string (format nil "AgP ~a" argument-of-periapsis)        (make-vector-2 0 1) :anchor-point (make-vector-2 0  7))
             (gl-place-string (format nil "TrA ~a" true-anomaly)                 (make-vector-2 0 1) :anchor-point (make-vector-2 0  8))
             (gl-place-string (format nil "T   ~a" (orbital-period elements))    (make-vector-2 0 1) :anchor-point (make-vector-2 0  9))
-            (let ((per (periapsis-radius elements)) (apr (apoapsis-radius elements)))
+            (let ((per (periapsis-radius elements)) (apr (apoapsis-radius elements)) (rad (magnitude (sub (slot-value major-body 'pos) (slot-value minor-body 'pos)))))
               (if (eq (slot-value mfd 'dst-mode) 'radius)
                 (progn
                   (gl-place-string (format nil "PeR ~a" per)  (make-vector-2 0 1) :anchor-point (make-vector-2 0 10))
-                  (gl-place-string (format nil "ApR ~a" apr)   (make-vector-2 0 1) :anchor-point (make-vector-2 0 11)))
+                  (gl-place-string (format nil "ApR ~a" apr)   (make-vector-2 0 1) :anchor-point (make-vector-2 0 11))
+                  (gl-place-string (format nil "Rad ~a" rad)   (make-vector-2 0 1) :anchor-point (make-vector-2 0 12)))
                 (progn
                   (gl-place-string (format nil "PeA ~a" (- per (slot-value major-body 'radius)))  (make-vector-2 0 1) :anchor-point (make-vector-2 0 10))
                   (gl-place-string (format nil "ApA ~a" (when (not (null apr))
-                                                        (- apr (slot-value major-body 'radius))))   (make-vector-2 0 1) :anchor-point (make-vector-2 0 11)))))))
+                                                        (- apr (slot-value major-body 'radius))))   (make-vector-2 0 1) :anchor-point (make-vector-2 0 11))
+                  (gl-place-string (format nil "Alt ~a" (- rad (slot-value major-body 'radius)))  (make-vector-2 0 1) :anchor-point (make-vector-2 0 12)))))))
 
         (gl-matrix-mode *gl-projection*)
         (gl-load-identity)
