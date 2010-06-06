@@ -172,6 +172,9 @@
 				    (x ffi:double-float)
 				    (y ffi:double-float)
 				    (z ffi:double-float))
+				  (gl-light-modelfv
+				    (pname ffi:uint)
+				    (param  (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
 				  (gl-lightfv
 				    (light ffi:uint)
 				    (pname ffi:uint)
@@ -255,8 +258,16 @@
 		 *glut-depth*
 		 *gl-smooth*
 		 *gl-depth-test*
+		 *gl-light-model-ambient*
 		 *gl-lighting*
 		 *gl-light0*
+		 *gl-light1*
+		 *gl-light2*
+		 *gl-light3*
+		 *gl-light4*
+		 *gl-light5*
+		 *gl-light6*
+		 *gl-light7*
 		 *gl-position*
 		 *gl-lines*
 		 *gl-line-loop*

@@ -48,6 +48,8 @@
     (gl-enable *gl-lighting*)
     (gl-enable *gl-light0*)
     (gl-enable *gl-cull-face*)
+    (gl-light-modelfv *gl-light-model-ambient* (vector 0e0 0e0 0e0 1e0))
+
 
     ;; What I'm really achieving with this call is making everything look as though it was
     ;; from the viewpoint of the selected object. That's why it rotates everything backwards.
@@ -59,6 +61,8 @@
     (gl-push-matrix)
     (gl-translate-vector-3 (sub (slot-value *sun* 'pos) (slot-value *focused-object* 'pos)))
     (gl-lightfv *gl-light0* *gl-position* (vector 0e0 0e0 0e0 1e0))
+    (gl-lightfv *gl-light0* *gl-ambient* (vector 0e0 0e0 0e0 0e0))
+    (gl-lightfv *gl-light0* *gl-diffuse* (vector 1e0 1e0 1e0 1e0))
     (gl-pop-matrix)
 
     (setf *current-modelview-matrix* (gl-get-doublev *gl-modelview-matrix*))

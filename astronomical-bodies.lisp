@@ -103,7 +103,8 @@
 (defclass planet (spherical-body) ())
 (defclass vsop-planet (planet vsop-body) ())
 
-(let ((planet-material (make-instance 'material :ambient (make-color 0.01 0.08 0 1) :diffuse (make-color 0.1 0.8 0 1))))
+(let ((planet-material (make-instance 'material :ambient (make-color 0 0 0 1) :diffuse (make-color 0.1 0.8 0 1))))
+;(let ((planet-material (make-instance 'material :ambient (make-color 0.01 0.08 0 1) :diffuse (make-color 0.1 0.8 0 1))))
   (defmethod draw :before ((obj planet))
     (set-material *gl-front-and-back* planet-material)))
 
