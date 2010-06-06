@@ -15,6 +15,20 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (defvar *all-mfds* ())
+(defvar *mfd-modes* ())
+
+(make-instance 'text-button
+               :anchor-point   (make-vector-2 1 0)
+               :pos            (make-vector-2 1 0)
+               :text           "New MFD"
+               :text-color     (make-color 0 .8 .8 1)
+               :click-function #'(lambda ()
+                                   (make-instance 'menu
+                                                  :anchor-point (make-vector-2 1 (/ -1 (+ 1 (length *mfd-modes*))))
+                                                  :pos          (make-vector-2 1 0)
+                                                  :items        *mfd-modes*
+                                                  :selection-function #'(lambda (mode)
+                                                                          (make-instance mode)))))
 
 (defclass mfd (box-2d)
   ((max-size
@@ -97,9 +111,9 @@
         (position-button resize-button (make-vector-2 1 0) (make-vector-2 0 1))
         (position-button  close-button (make-vector-2 1 1) (make-vector-2 0 0))
         (position-button   mode-button (make-vector-2 0 0) (make-vector-2 1 1))
-	(flet ((position-side-buttons (buttons side)
+        (flet ((position-side-buttons (buttons side)
                  (loop for button in buttons for i do
-	               (when (not (null button))
+                       (when (not (null button))
                          (cond
                            ((eq side 'l) (position-button button (make-vector-2 0 (- 1 (/ i bps-1))) (make-vector-2 1 (- 1 (/ i bps-1)))))
                            ((eq side 'r) (position-button button (make-vector-2 1 (- 1 (/ i bps-1))) (make-vector-2 0 (- 1 (/ i bps-1)))))
@@ -116,6 +130,6 @@
 (defmethod destroy ((mfd mfd))
   (with-slots (move-button resize-button close-button mode-button left-buttons right-buttons top-buttons bottom-buttons) mfd
     (loop for button in (append (list move-button resize-button close-button mode-button) left-buttons right-buttons top-buttons bottom-buttons) do
-	  (when (not (null button))
+          (when (not (null button))
             (destroy button))))
   (setf *all-mfds* (remove mfd *all-mfds*)))

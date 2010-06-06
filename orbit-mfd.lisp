@@ -14,6 +14,8 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+(setf *mfd-modes* (cons (list "Orbit" 'orbit-mfd) *mfd-modes*))
+
 (defclass orbit-mfd (mfd)
   ((major-body
      :initarg :major-body

@@ -14,10 +14,12 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+(setf *mfd-modes* (cons (list "Test" 'test-mfd) *mfd-modes*))
+
 (defclass test-mfd (mfd)
   ((color
      :initarg :color
-     :initform (make-color 1 1 1 1))))
+     :initform (make-color .5 0 .8 .3))))
 
 (defmethod draw-2d ((mfd test-mfd) screen-size)
   (gl-matrix-mode *gl-projection*)

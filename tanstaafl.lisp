@@ -31,8 +31,8 @@
 (load "gui.lisp")
 
 (load "menu.lisp")
-(load "mfd.lisp")
 (load "button.lisp")
+(load "mfd.lisp")
 (load "hud-layer.lisp")
 
 (load "test-mfd.lisp")
