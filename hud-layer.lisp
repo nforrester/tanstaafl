@@ -25,7 +25,20 @@
 
 (let ((x 0)) (defun hud-button-counter () (setf x (+ x 1))))
 
+(defvar *hud-modes* ())
+
 (defvar *hud-button-grid* (make-instance 'box-2d-grid :anchor-point (make-vector-2 0 1) :pos (make-vector-2 0 1)))
+(setf (slot-value *hud-button-grid* 'boxes) (list (list (make-instance 'text-button
+                                                                       :text "New HUD Layer"
+                                                                       :text-color (make-color 0 .8 .8 .8)
+                                                                       :click-function #'(lambda ()
+                                                                                           (make-instance 'menu
+                                                                                                          :anchor-point (make-vector-2 0 (+ 1 (/ (+ 1 (length *all-hud-layers*)) (+ 1 (length *hud-modes*)))))
+                                                                                                          :pos          (make-vector-2 0 1)
+                                                                                                          :items        *hud-modes*
+                                                                                                          :selection-function #'(lambda (mode)
+                                                                                                                                  (make-instance mode)))))
+                                                        1 0)))
 
 (defmethod initialize-instance :after ((hud-layer hud-layer) &rest stuff)
   (setf *all-hud-layers* (cons hud-layer *all-hud-layers*))
@@ -42,15 +55,7 @@
     (setf (slot-value *hud-button-grid* 'boxes) (list* close-button-record label-record move-up-record move-down-record (slot-value *hud-button-grid* 'boxes)))
     (setf (slot-value hud-layer 'buttons) (list close-button label move-up move-down))
     (setf (slot-value close-button 'click-function) (lambda ()
-                                                      (setf (slot-value *hud-button-grid* 'boxes) (remove close-button-record (slot-value *hud-button-grid* 'boxes)))
-                                                      (setf (slot-value *hud-button-grid* 'boxes) (remove label-record        (slot-value *hud-button-grid* 'boxes)))
-                                                      (setf (slot-value *hud-button-grid* 'boxes) (remove move-up-record      (slot-value *hud-button-grid* 'boxes)))
-                                                      (setf (slot-value *hud-button-grid* 'boxes) (remove move-down-record    (slot-value *hud-button-grid* 'boxes)))
-                                                      (setf *all-hud-layers* (remove hud-layer *all-hud-layers*))
-                                                      (setf *all-buttons* (remove close-button *all-buttons*))
-                                                      (setf *all-buttons* (remove label        *all-buttons*))
-                                                      (setf *all-buttons* (remove move-up      *all-buttons*))
-                                                      (setf *all-buttons* (remove move-down    *all-buttons*))))))
+						      (destroy hud-layer)))))
 
 (defmethod draw-2d :around ((hud-layer hud-layer) screen-size)
   (with-slots (x y) screen-size
@@ -67,3 +72,11 @@
 ;;; Return value is a vector-2 of window coordinates.
 (defun project-position-to-hud (pos model-matrix proj-matrix screen-size)
   (glu-project-vector-3-2 (sub pos (slot-value *focused-object* 'pos)) model-matrix proj-matrix screen-size))
+
+(defmethod destroy ((hud-layer hud-layer))
+  (with-slots (buttons) hud-layer
+    (setf (slot-value *hud-button-grid* 'boxes) (remove-if #'(lambda (box)
+							       (find (first box) buttons))
+							   (slot-value *hud-button-grid* 'boxes)))
+    (loop for button in buttons do (destroy button)))
+  (setf *all-hud-layers* (remove hud-layer *all-hud-layers*)))

@@ -21,7 +21,7 @@
                :anchor-point   (make-vector-2 1 0)
                :pos            (make-vector-2 1 0)
                :text           "New MFD"
-               :text-color     (make-color 0 .8 .8 1)
+               :text-color     (make-color 0 .8 .8 .8)
                :click-function #'(lambda ()
                                    (make-instance 'menu
                                                   :anchor-point (make-vector-2 1 (/ -1 (+ 1 (length *mfd-modes*))))

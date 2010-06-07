@@ -14,6 +14,8 @@
 ; You should have received a copy of the GNU General Public License
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+(setf *hud-modes* (cons (list "Relative HUD" 'relative-hud) *hud-modes*))
+
 (defclass relative-hud (hud-layer)
   ((origin
      :initarg :origin
@@ -24,8 +26,23 @@
 
 (defmethod initialize-instance :after ((hud relative-hud) &rest stuff)
   (with-slots (name origin target buttons) hud
-    (setf name (preval format nil "~a REL TO ~a" (slot-value target 'name) (slot-value origin 'name)))
-    (setf (slot-value (second buttons) 'text) name)))
+    (when (null origin)
+      (setf origin *focused-object*))
+    (if (null target)
+      (progn
+        (let ((objs (loop for object in (remove origin *all-objs*) collect (list (slot-value object 'name) object))))
+          (make-instance 'menu
+                         :anchor-point (make-vector-2 0 (+ 1 (/ (length *all-hud-layers*) (+ 1 (length objs)))))
+                         :pos          (make-vector-2 0 1)
+                         :items        objs
+                         :selection-function #'(lambda (target)
+                                                 (make-instance 'relative-hud
+                                                                :origin origin
+                                                                :target target))))
+        (destroy hud))
+      (progn
+        (setf name (preval format nil "~a REL TO ~a" (slot-value target 'name) (slot-value origin 'name)))
+        (setf (slot-value (second buttons) 'text) name)))))
 
 (let ((hud-marker-size 40))
   (defmethod draw-2d ((hud relative-hud) screen-size)
