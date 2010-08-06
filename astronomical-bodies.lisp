@@ -47,10 +47,10 @@
      :initform (make-vector-3)
      :initarg :vsop-vel
      :documentation "see above comment")
-   (vsop-interval
+   (vsop-base-interval
      :initform 10d0
-     :initarg :vsop-interval
-     :documentation "The interval for interpolation between vsop-reference-points")
+     :initarg :vsop-base-interval
+     :documentation "The interval for interpolation between vsop-reference-points, scaled linearly with time acceleration")
    (vsop-ref-1
      :initform (make-instance 'vsop-reference-point :epoch 0)
      :initarg :vsop-ref-1
@@ -73,7 +73,7 @@
 (defmethod compute-forces :around ((obj vsop-body) dt)
   (with-slots (vsop-pos
                vsop-vel
-               vsop-interval
+               vsop-base-interval
                vsop-ref-1
                vsop-ref-2
                pos
@@ -86,7 +86,7 @@
                                                            *epoch-time*
                                                            x-series-set
                                                            y-series-set
-                                                           z-series-set vsop-interval vsop-ref-1 vsop-ref-2))
+                                                           z-series-set vsop-base-interval vsop-ref-1 vsop-ref-2))
     (setf vsop-vel (mult (/ 1 dt) (sub vsop-pos pos)))
     (setf acc      (mult (/ 1 dt) (sub vsop-vel vel)))))
 
