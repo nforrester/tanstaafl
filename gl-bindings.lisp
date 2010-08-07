@@ -65,37 +65,44 @@
 ; glut-display-func
 ; with some sugar wrapped around them to make numbers and things work right
 ; without explicit coersion/casting.
-(defmacro gl-style-callout (name library &rest arguments)
-  (let ((name name) (library library) (arguments arguments) (internal-name (gensym)))
-    (let ((external-args (loop for i from 1 upto (list-length (mapcan #'(lambda (x) (if (eq :out (third x)) nil (list x))) arguments)) collecting (gensym))))
-      `(progn
-         (defun ,name ,external-args
-           (,internal-name
-             ,@(loop
-                 for external-arg in external-args
-                 for arg in arguments
-                 collecting
-                 (cond
-                   ((eq (second arg) 'ffi:int)
-                    `(round ,external-arg))
-                   ((eq (second arg) 'ffi:single-float)
-                    `(coerce ,external-arg 'single-float))
-                   ((eq (second arg) 'ffi:double-float)
-                    `(coerce ,external-arg 'double-float))
-                   (t
-                     external-arg)))))
-         (ffi:def-call-out ,internal-name
-                           (:library ,library)
-                           (:arguments ,@arguments)
-                           (:name
-                             ,(list-strings-to-string
-                                (loop
-                                  for word-in-name in (split-string #\- (symbol-to-string name))
-                                  for word-count from 0
-                                  collecting
-                                  (if (= 0 word-count)
-                                    (string-downcase word-in-name)
-                                    (string-capitalize word-in-name))))))))))
+; use the :real-name argument if the function is like glTexImage2D and has capital letters in funny places.
+(defmacro gl-style-callout (name library &rest args)
+  (let ((arguments (if (eq (first args) :real-name)
+                     (cddr args)
+                     args))
+        (real-name (if (eq (first args) :real-name)
+                     (second args)
+                     (list-strings-to-string
+                                  (loop
+                                    for word-in-name in (split-string #\- (symbol-to-string name))
+                                    for word-count from 0
+                                    collecting
+                                    (if (= 0 word-count)
+                                      (string-downcase word-in-name)
+                                      (string-capitalize word-in-name)))))))
+    (let ((name name) (library library) (arguments arguments) (internal-name (gensym)))
+      (let ((external-args (loop for i from 1 upto (list-length (mapcan #'(lambda (x) (if (eq :out (third x)) nil (list x))) arguments)) collecting (gensym))))
+        `(progn
+           (defun ,name ,external-args
+             (,internal-name
+               ,@(loop
+                   for external-arg in external-args
+                   for arg in arguments
+                   collecting
+                   (cond
+                     ((eq (second arg) 'ffi:int)
+                      `(round ,external-arg))
+                     ((eq (second arg) 'ffi:single-float)
+                      `(coerce ,external-arg 'single-float))
+                     ((eq (second arg) 'ffi:double-float)
+                      `(coerce ,external-arg 'double-float))
+                     (t
+                       external-arg)))))
+           (ffi:def-call-out ,internal-name
+                             (:library ,library)
+                             (:arguments ,@arguments)
+                             (:name
+                               ,real-name)))))))
 
 (defmacro gl-style-callouts-single-library (library &rest callouts)
   (let ((library library))
@@ -113,6 +120,7 @@
                                   (gl-disable (option ffi:uint))
                                   (gl-load-identity)
                                   (gl-matrix-mode (mode ffi:uint))
+				  (gl-flush)
                                   (gl-viewport
                                     (x1 ffi:int)
                                     (y1 ffi:int)
@@ -175,14 +183,55 @@
                                   (gl-lightfv
                                     (light ffi:uint)
                                     (pname ffi:uint)
-                                    (param  (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
+                                    (param (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
                                   (gl-materialfv
                                     (face ffi:uint)
                                     (pname ffi:uint)
-                                    (param  (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
+                                    (param (ffi:c-ptr (ffi:c-array ffi:single-float 4))))
                                   (gl-get-doublev
                                     (pname ffi:uint)
-                                    (params  (ffi:c-ptr (ffi:c-array ffi:double-float 16)) :out)))
+                                    (params (ffi:c-ptr (ffi:c-array ffi:double-float 16)) :out))
+                                  (gl-is-texture
+                                    (texture-name ffi:uint))
+                                  (gl-bind-texture
+                                    (target ffi:int)
+                                    (texture-name ffi:uint))
+                                  (gl-tex-parameteri
+                                    (target ffi:int)
+                                    (pname ffi:int)
+                                    (param ffi:int))
+                                  (gl-tex-envi
+                                    (target ffi:int)
+                                    (pname ffi:int)
+                                    (param ffi:int))
+                                  (gl-tex-envf
+                                    (target ffi:int)
+                                    (pname ffi:int)
+                                    (param ffi:int))
+				  (gl-tex-parameterf
+                                    (target ffi:int)
+                                    (pname ffi:int)
+                                    (param ffi:int))
+                                  (gl-tex-coord2d
+                                    (s-coord ffi:double-float)
+                                    (t-coord ffi:double-float))
+                                  (gl-gen-textures
+                                    (n ffi:int)
+                                    (textureNames (ffi:c-ptr ffi:int) :out))
+				  (gl-pixel-storei
+				    (pname ffi:uint)
+				    (param ffi:int))
+                                  (gl-tex-image-2d
+                                    :real-name "glTexImage2D"
+                                    (target ffi:uint)
+                                    (level ffi:int)
+                                    (internal-format ffi:int)
+                                    (width ffi:int)
+                                    (height ffi:int)
+                                    (border ffi:int)
+                                    (format ffi:uint)
+                                    (type ffi:uint)
+                                    (texels (ffi:c-ptr (ffi:c-array ffi:uchar 48)))))
 
 (gl-style-callouts-single-library "/usr/lib64/libGLU.so"
                                   (glu-ortho2-d
@@ -214,7 +263,16 @@
                                     (viewport     (ffi:c-array-ptr ffi:int))
                                     (win-x (ffi:c-ptr ffi:double-float) :out)
                                     (win-y (ffi:c-ptr ffi:double-float) :out)
-                                    (win-z (ffi:c-ptr ffi:double-float) :out)))
+                                    (win-z (ffi:c-ptr ffi:double-float) :out))
+				  (glu-build-2d-mipmaps
+                                    :real-name "gluBuild2DMipmaps"
+				    (target ffi:uint)
+				    (internal-format ffi:int)
+				    (width ffi:int)
+				    (height ffi:int)
+				    (format ffi:uint)
+				    (type ffi:uint)
+				    (data (ffi:c-ptr (ffi:c-array ffi:int 48)))))
 
 (gl-style-callouts-single-library "/usr/lib64/libglut.so.3"
                                   (glut-display-func        (func (ffi:c-function)))
@@ -275,7 +333,27 @@
                  *gl-emission*
                  *gl-ambient-and-diffuse*
                  *glut-down*
-                 *glut-up*)
+                 *glut-up*
+		 *gl-texture-2d*
+                 *gl-texture-env*
+		 *gl-texture-env-mode*
+		 *gl-modulate*
+		 *gl-replace*
+		 *gl-texture-min-filter*
+		 *gl-texture-mag-filter*
+		 *gl-linear-mipmap-nearest*
+		 *gl-linear*
+		 *gl-repeat*
+		 *gl-clamp*
+		 *gl-texture-wrap-s*
+		 *gl-texture-wrap-t*
+		 *gl-rgb*
+		 *gl-unsigned-byte*
+		 *gl-decal*
+		 *gl-flat*
+		 *gl-unpack-alignment*
+		 *gl-nearest*
+		 *glut-single*)
 
 (defun gl-vertex-vector-2 (vec)
   (with-slots (x y) vec
@@ -371,3 +449,18 @@
 (defun gl-material-color (face pname color)
   (with-slots (red green blue alpha) color
     (gl-materialfv face pname (vector (coerce red 'single-float) (coerce green 'single-float) (coerce blue 'single-float) (coerce alpha 'single-float)))))
+
+(defun load-texture (filename width height) ;; for now only supported width and height are 4x4
+  (let ((texture (gl-gen-textures 1))
+	(texels (make-array 48)))
+    (with-open-file (texture-file filename :element-type '(unsigned-byte 8))
+      (read-sequence texels texture-file))
+    (print texels)
+    (gl-bind-texture *gl-texture-2d* texture)
+    (gl-tex-envf *gl-texture-env* *gl-texture-env-mode* *gl-replace*)
+    (gl-tex-parameterf *gl-texture-2d* *gl-texture-min-filter* *gl-linear-mipmap-nearest*)
+    (gl-tex-parameterf *gl-texture-2d* *gl-texture-mag-filter* *gl-linear*)
+    (gl-tex-parameterf *gl-texture-2d* *gl-texture-wrap-s* *gl-repeat*)
+    (gl-tex-parameterf *gl-texture-2d* *gl-texture-wrap-t* *gl-repeat*)
+    (glu-build-2d-mipmaps *gl-texture-2d* 3 width height *gl-rgb* *gl-unsigned-byte* texels)
+    texture))

@@ -15,7 +15,7 @@
 ; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 (defun split-string (chr str)
-  (loop	
+  (loop
     for i = 0 then (1+ j)
     as j = (position chr str :start i)
     collect (subseq str i j)

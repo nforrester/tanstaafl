@@ -43,6 +43,8 @@
 (load "vessel.lisp")
 (load "autopilot.lisp")
 
+(load "tex-tester.lisp")
+
 (load "vsop87.lisp")
 (load "astronomical-bodies.lisp")
 
@@ -182,7 +184,16 @@
                            :max-torque (make-vector-3 1d0 1d0 1d0)
                            :vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
 
-(defvar *all-objs* (list *tp1* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
+(setf *tt* (make-instance 'tex-tester
+                           :name "Tex-Tester"
+                           :mass 1d0
+                           :pos (make-vector-3 (+ 10d0 64000000d0 1.4572625236939914d11) -3.5401098170742485d10 -2.221160603393515d9)
+                           :inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
+                           :radius 2d0
+                           :max-torque (make-vector-3 1d0 1d0 1d0)
+                           :vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
+
+(defvar *all-objs* (list *tp1* *tt* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
 ;(defvar *all-objs* (list *tp1* *tp2* *earth*))
 
 (make-instance 'menu
@@ -191,14 +202,6 @@
                :items (list (list 1 "f") (list 2 "s") (list 3 "t"))
                :selection-function #'(lambda (selection)
                                        (print selection)))
-
-(make-instance 'text-bg-button
-               :anchor-point (make-vector-2 0 1)
-               :text (format nil "Hello World!")
-               :pos (make-vector-2 .2 .9)
-               :background-color (make-color 0 1 0 0.5)
-               :text-color       (make-color 1 0 0 1)
-               :click-function #'(lambda () (print "click")))
 
 (make-instance 'test-mfd :color (make-color .4 0 .4 .5) :pos (make-vector-2 .4 .4) :anchor-point (make-vector-2 0 1) :max-size (make-vector-2 .3 .3))
 (make-instance 'orbit-mfd

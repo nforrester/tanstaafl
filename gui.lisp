@@ -49,6 +49,9 @@
     (gl-enable *gl-light0*)
     (gl-enable *gl-cull-face*)
 
+    (gl-enable *gl-texture-2d*)
+    (gl-tex-envf *gl-texture-env* *gl-texture-env-mode* *gl-decal*)
+
     ;; What I'm really achieving with this call is making everything look as though it was
     ;; from the viewpoint of the selected object. That's why it rotates everything backwards.
     ;; The translation component is handled seperately (in an around method on draw) to give
@@ -109,6 +112,8 @@
               (loop for obj in (slot-value interval 'objects) do
                     (setf (gethash obj *projection-matrix-for-object*) *current-projection-matrix*)
                     (draw obj)))))
+
+    (gl-disable *gl-texture-2d*)
 
     (gl-disable *gl-lighting*)
     (gl-disable *gl-light0*)
