@@ -19,7 +19,7 @@ switching or trying to support another CL implementation at the moment, though
 nobody knows what the future will bring. Obviously, anybody else is welcome to help
 with that (and anything else).
 
-I'm developing tanstaafl on a system running Fedora 11.
+I'm developing tanstaafl on a system running Fedora 13.
 This is as complete a list of dependencies as I can think of
 (with dependencies of the listed packages included implicitly):
 X11
