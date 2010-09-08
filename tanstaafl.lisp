@@ -204,7 +204,7 @@
                            :max-torque (make-vector-3 1d0 1d0 1d0)
                            :vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
 
-(defvar *all-objs* (list *tea-torch-1* *tp1* *tt* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
+(defvar *all-objs* (list *tp1* *tea-torch-1* *tt* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
 ;(defvar *all-objs* (list *tp1* *tp2* *earth*))
 
 (make-instance 'menu
