@@ -169,6 +169,15 @@
                                :y-series-set *vsop-series-set-neptune-y*
                                :z-series-set *vsop-series-set-neptune-z*))
 
+(setf *tea-torch-1* (make-instance 'tea-torch
+                           :name "Tea-Torch"
+                           :mass 1d0
+                           :pos (make-vector-3 1d14 0d0 0d0)
+                           :inertia-tensor (compute-inertia-tensor 1d0 1d0 1d0)
+                           :radius 2d0
+                           :max-torque (make-vector-3 1d0 1d0 1d0)
+                           :vel (make-vector-3 0d0 0d0 0d0)))
+
 (setf *tp1* (make-instance 'teapot
                            :name "Teapot"
                            :mass 1d0
@@ -195,7 +204,7 @@
                            :max-torque (make-vector-3 1d0 1d0 1d0)
                            :vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
 
-(defvar *all-objs* (list *tp1* *tt* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
+(defvar *all-objs* (list *tea-torch-1* *tp1* *tt* *tp2* *sun* *mercury* *venus* *earth* *mars* *jupiter* *saturn* *uranus* *neptune*))
 ;(defvar *all-objs* (list *tp1* *tp2* *earth*))
 
 (make-instance 'menu
