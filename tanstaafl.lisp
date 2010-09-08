@@ -44,6 +44,8 @@
 (load "autopilot.lisp")
 
 (load "tex-tester.lisp")
+(load "teapot.lisp")
+(load "tea-torch.lisp")
 
 (load "vsop87.lisp")
 (load "astronomical-bodies.lisp")
@@ -167,7 +169,7 @@
                                :y-series-set *vsop-series-set-neptune-y*
                                :z-series-set *vsop-series-set-neptune-z*))
 
-(setf *tp1* (make-instance 'vessel
+(setf *tp1* (make-instance 'teapot
                            :name "Teapot"
                            :mass 1d0
                            :pos (make-vector-3 (+ 64000000d0 1.4572625236939914d11) -3.5401098170742485d10 -2.221160603393515d9)
@@ -175,7 +177,7 @@
                            :radius 2d0
                            :max-torque (make-vector-3 1d0 1d0 1d0)
                            :vel (make-vector-3 4000.0d0 29783.0d0 0d0)))
-(setf *tp2* (make-instance 'vessel
+(setf *tp2* (make-instance 'teapot
                            :name "Teapot-2"
                            :mass 1d0
                            :pos (make-vector-3 (+ 64000000d0 1.4572625236939914d11) (+ 10d0 -3.5401098170742485d10) -2.221160603393515d9)
@@ -259,7 +261,5 @@
                :target *neptune*)
 
 (setf *focused-object* (first *all-objs*))
-
-(make-simple-thruster-setup (first *all-objs*))
 
 (main-loop)
